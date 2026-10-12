@@ -28,7 +28,7 @@ dev = ["pytest>=7", "httpx>=0.27"]
 Homepage = "https://github.com/RidhuanDEV/png-to-svg-vectorize"
 
 [project.scripts]
-png2svg = "pngsvg.__main__:main"
+png2svg = "pngsvg.cli:main"
 pngsvg-app = "pngsvg_app.desktop:main"
 
 [build-system]

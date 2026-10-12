@@ -14,6 +14,8 @@ First release of the desktop app for Windows and macOS.
 - Fix: when the darkest pixels are a colored dark area (a purple flag, deep water) rather than lines, the outline
   color is taken from line pixels.
 - `bench/run.py --preset/--only`.
+- Fix: `python -m pngsvg` with several files and worker processes failed on Windows/macOS (the worker function
+  lived in `__main__`); the CLI now lives in `pngsvg.cli`.
 
 ## 0.5.0 — 2026-10-12 — desktop app and installers
 
