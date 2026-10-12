@@ -53,7 +53,7 @@ export function presetDefaults(name: string): Overrides | undefined {
 
 export const selectedJob = (): Job | undefined => store.jobs.find((j) => j.id === store.selected);
 
-function report(e: unknown): void {
+export function report(e: unknown): void {
   store.notice = e instanceof ApiError ? `${e.status}: ${e.message}` : String(e);
   setTimeout(() => (store.notice = ''), 6000);
 }

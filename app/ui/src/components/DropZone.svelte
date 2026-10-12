@@ -1,14 +1,18 @@
 <script lang="ts">
   import { t } from '../lib/i18n.svelte';
   import { openNative } from '../lib/platform';
-  import { addFiles, adoptJobs } from '../lib/store.svelte';
+  import { addFiles, adoptJobs, report, store } from '../lib/store.svelte';
 
   let input: HTMLInputElement;
 
   async function open() {
-    const ids = await openNative();
-    if (ids === null) input.click();
-    else await adoptJobs(ids);
+    const res = await openNative(store.settings.preset, store.settings.overrides);
+    if (res === null) {
+      input.click();
+      return;
+    }
+    if (res.errors.length) report(res.errors.join('; '));
+    await adoptJobs(res.ids);
   }
 </script>
 

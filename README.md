@@ -21,8 +21,9 @@ input.png ──► outline separation ──► fill layer (regions + gradients
                                                                           <g id="outline">
 ```
 
-> **Status:** v0.4 — command line, Python library and a local web UI (`png2svg serve`). A desktop app for
-> **Windows and macOS** is planned for v1.0 (see [docs/PLAN.md](docs/PLAN.md)).
+> **Status:** v0.5 — command line, Python library, local web UI (`png2svg serve`) and a desktop app for
+> **Windows and macOS** (installers built by GitHub Actions; v1.0 release in progress, see
+> [docs/PLAN.md](docs/PLAN.md)).
 
 ## Install
 
@@ -129,6 +130,21 @@ from the link, foreign `Host` headers are refused, uploads are limited to 50 MB 
 UI development: `python -m pngsvg_app --port 8765 --token dev --no-browser`, then `npm run dev` in `app/ui` and
 open `http://localhost:5173/#t=dev`.
 
+## Desktop app
+
+Installers are produced by the `Release` workflow: `PNG-to-SVG-Vectorize-Setup-x.y.z.exe` (Windows 10/11 x64,
+per-user, no admin rights) plus a portable zip, and `PNG-to-SVG-Vectorize-x.y.z-arm64.dmg` / `-x64.dmg` (macOS 12+).
+The builds are **not code-signed** (free, open source): Windows SmartScreen shows "Windows protected your PC" → *More
+info* → *Run anyway*; on macOS open the app once with right-click → *Open* (or System Settings → Privacy & Security →
+*Open Anyway*).
+
+The app is the same UI in a native window (WebView2 / WKWebView) with native open/save dialogs. Everything runs on
+the computer; the local service only listens on `127.0.0.1` with a per-session token.
+
+From source: `pip install -e ".[desktop]"`, build the UI (see above), then `pngsvg-app`. Build the bundle with
+`pip install -r packaging/requirements-build.txt && pyinstaller --noconfirm packaging/pngsvg.spec`;
+`"dist/PNG to SVG Vectorize/PNG to SVG Vectorize.exe" --smoke` checks it (vectorizes one image, exit code 0).
+
 ## Quality check
 
 `--report` renders the SVG with headless Chrome/Edge and prints similarity (100 − mean abs error %, and % of
@@ -155,7 +171,7 @@ cd app/ui && npm run check && npm run e2e   # UI type check + Playwright end-to-
 
 See [docs/PLAN.md](docs/PLAN.md). Done: own curve fitting and shared boundaries (v0.2), radial
 gradients, parallel processing and presets (v0.3) — see [docs/bench.md](docs/bench.md) — and a local web UI
-(v0.4). Next: the desktop app and installers for Windows and macOS.
+(v0.4), desktop app + installers (v0.5). Next: v1.0 (user guide, wider benchmark set, release).
 
 ## License
 

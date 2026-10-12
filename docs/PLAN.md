@@ -113,7 +113,7 @@ png-to-svg-vectorize/
 | **M2** — Mesin kualitas (E1, E2) (✅ 2026-10-12, v0.2) | Fitting kurva Schneider + planar map | Target segmen −50%, ukuran −40%, kemiripan tidak turun > 0,3 — tercapai: set Turion segmen −69%, ukuran −58%, kemiripan +0,08 (lihat `docs/bench.md`) |
 | **M3** — Mesin lanjutan (E3, E4, E5) (✅ 2026-10-12, v0.3) | Radial gradient, paralel, preset; bonus: tepi sub-piksel, deteksi tinta adaptif | ≤ 8 detik/gambar; preset logo/ikon bagus di set uji — tercapai (median 7,2 s; preset `logo` sama/lebih baik dari `cartoon` di 4 gambar logo/ikon, jumlah wilayah tepat) |
 | **M4** — Service + UI (web mode) (✅ 2026-10-12, v0.4) | FastAPI + UI Svelte lengkap §4, jalan di browser lokal (`png2svg serve`); E6 skor kemiripan di UI (canvas) | Tes API + tes e2e Playwright hijau |
-| **M5** — Desktop & paket | pywebview, dialog native, PyInstaller, installer Win/mac, `release.yml` | Installer terpasang & berjalan di Windows 11 dan macOS (arm64 + Intel), tes asap di CI |
+| **M5** — Desktop & paket (✅ 2026-10-12, v0.5) | pywebview, dialog native, PyInstaller, installer Win/mac, `release.yml` | Installer terpasang & berjalan di Windows 11 dan macOS (arm64 + Intel), tes asap di CI — build + tes asap hijau di CI (Win x64, mac arm64, mac Intel `macos-15-intel`); exe lokal Windows terbuka & melayani UI; uji pasang di perangkat nyata masuk checklist M6 |
 | **M6** — Rilis v1.0 | Panduan pengguna EN/ID, tangkapan layar, catatan rilis, (opsional) tanda tangan kode | Tag `v1.0.0`, artefak di GitHub Releases |
 
 Setiap tahap: tes otomatis hijau, angka `bench/` dicatat (tidak boleh turun tanpa alasan), dokumen diperbarui.

@@ -1,10 +1,10 @@
 // Web mode saves through browser downloads; the desktop app (pywebview) exposes native dialogs via
 // window.pywebview.api. File paths never travel over HTTP: Python reads/writes them itself.
 
-import { api } from './api';
+import { api, type Overrides } from './api';
 
 interface DesktopApi {
-  open_files(): Promise<string[]>;
+  open_files(preset: string, overrides: Partial<Overrides>): Promise<{ ids: string[]; errors: string[] }>;
   save_svg(id: string): Promise<boolean>;
   save_all(ids: string[]): Promise<number>;
 }
@@ -33,9 +33,13 @@ export function svgName(name: string): string {
   return `${stem || 'image'}.svg`;
 }
 
-/** Desktop: native multi-file dialog, returns created job ids. Web: null (the page uses an <input type=file>). */
-export async function openNative(): Promise<string[] | null> {
-  return isDesktop() ? window.pywebview!.api.open_files() : null;
+/** Desktop: native multi-file dialog, returns created job ids and per-file errors. Web: null (the page uses
+ * an <input type=file>). */
+export async function openNative(
+  preset: string,
+  overrides: Partial<Overrides>,
+): Promise<{ ids: string[]; errors: string[] } | null> {
+  return isDesktop() ? window.pywebview!.api.open_files(preset, JSON.parse(JSON.stringify(overrides))) : null;
 }
 
 export async function saveSvg(id: string, name: string, svg: string): Promise<void> {
