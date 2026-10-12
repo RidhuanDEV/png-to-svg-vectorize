@@ -1,0 +1,40 @@
+[project]
+name = "png-to-svg-vectorize"
+version = "0.1.0"
+description = "Turn raster cartoon illustrations into editable, library-free SVG: gradient fills and crisp outlines."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Ridhuan Rangga Kusuma" }]
+requires-python = ">=3.10"
+dependencies = [
+  "numpy>=1.24",
+  "scipy>=1.10",
+  "Pillow>=10.0",
+  "vtracer>=0.6.11",
+]
+keywords = ["svg", "vectorize", "vectorization", "image-trace", "png", "illustration", "cartoon"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Operating System :: OS Independent",
+  "Topic :: Multimedia :: Graphics :: Graphics Conversion",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[project.urls]
+Homepage = "https://github.com/RidhuanDEV/png-to-svg-vectorize"
+
+[project.scripts]
+png2svg = "pngsvg.__main__:main"
+
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
