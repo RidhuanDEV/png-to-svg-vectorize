@@ -115,11 +115,11 @@ def main(argv=None) -> int:
     if not files:
         print(f'no images in {a.images} (run bench/synthetic.py first)')
         return 2
+    base = json.loads(a.baseline.read_text(encoding='utf-8')) if a.baseline else None   # fail fast on a bad path
     rows = run(files)
     res_dir = ROOT / 'bench' / 'results'
     res_dir.mkdir(parents=True, exist_ok=True)
     (res_dir / f'{a.name}.json').write_text(json.dumps(rows, indent=1), encoding='utf-8')
-    base = json.loads(a.baseline.read_text(encoding='utf-8')) if a.baseline else None
     md = table(rows, base)
     (res_dir / f'{a.name}.md').write_text(md + '\n', encoding='utf-8')
     print('\n' + md)

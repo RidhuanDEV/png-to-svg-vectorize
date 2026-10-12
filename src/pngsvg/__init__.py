@@ -7,4 +7,4 @@ from .outline import OutlineParams
 from .regions import RegionParams
 
 __all__ = ['vectorize', 'Options', 'Result', 'OutlineParams', 'RegionParams']
-__version__ = '0.1.0'
+__version__ = '0.2.0'

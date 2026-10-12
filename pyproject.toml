@@ -1,6 +1,6 @@
 [project]
 name = "png-to-svg-vectorize"
-version = "0.1.0"
+version = "0.2.0"
 description = "Turn raster cartoon illustrations into editable, library-free SVG: gradient fills and crisp outlines."
 readme = "README.md"
 license = "MIT"
@@ -11,7 +11,6 @@ dependencies = [
   "numpy>=1.24",
   "scipy>=1.10",
   "Pillow>=10.0",
-  "vtracer>=0.6.11",
 ]
 keywords = ["svg", "vectorize", "vectorization", "image-trace", "png", "illustration", "cartoon"]
 classifiers = [

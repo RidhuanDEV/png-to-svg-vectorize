@@ -8,7 +8,7 @@ from PIL import Image, ImageDraw
 
 from pngsvg import Options, vectorize
 from pngsvg.compare import find_browser, render, similarity
-from pngsvg.trace import compact_path
+from pngsvg.pathdata import compact_path
 
 _NUM = re.compile(r'[MmLlCcQqZz]|-?(?:\d+\.?\d*|\.\d+)')
 

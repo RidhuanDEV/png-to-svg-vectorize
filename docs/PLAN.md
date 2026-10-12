@@ -34,7 +34,7 @@ Web app (versi berikutnya) = FastAPI yang sama di server + UI yang sama di brows
 
 | Lapisan | Folder | Teknologi | Tanggung jawab |
 |---|---|---|---|
-| Mesin | `src/pngsvg/` | Python 3.10+, numpy, scipy, Pillow, vtracer | PNG → SVG, tanpa I/O jaringan; API `vectorize(image, Options)` |
+| Mesin | `src/pngsvg/` | Python 3.10+, numpy, scipy, Pillow (vtracer dilepas di M2) | PNG → SVG, tanpa I/O jaringan; API `vectorize(image, Options)` |
 | Service | `src/pngsvg_app/server.py` | FastAPI + uvicorn | Endpoint: `POST /api/jobs` (unggah + opsi), `GET /api/jobs/{id}` (progres, hasil), `GET /api/jobs/{id}/svg`, `GET /api/presets`; antrean job di thread pool |
 | UI | `app/ui/` | Svelte 5 + Vite + TypeScript | Seret-lepas, antrean, pratinjau, pengaturan, ekspor |
 | Shell desktop | `src/pngsvg_app/desktop.py` | pywebview | Jendela native, dialog buka/simpan file native, menjalankan service |
@@ -58,8 +58,8 @@ Web app (versi berikutnya) = FastAPI yang sama di server + UI yang sama di brows
 
 | ID | Pekerjaan | Hasil yang diharapkan |
 |---|---|---|
-| E1 | **Fitting kurva sendiri** (algoritma Schneider: Bezier kubik dengan toleransi galat, deteksi sudut dari sudut belok) menggantikan spline pendek vtracer; vtracer hanya untuk kontur mentah (atau ganti dengan marching squares sendiri) | Segmen −50% atau lebih, kurva lebih mulus, sudut tajam tetap tajam |
-| E2 | **Peta batas bersama (planar map)**: label wilayah → graf batas; setiap batas antar dua wilayah dilacak & di-fit sekali, dipakai kedua wilayah (tanpa tumpang-tindih 2 px) | File −30–50%, tanpa celah/seam, tepi antar-warna konsisten |
+| E1 | **Fitting kurva sendiri** (algoritma Schneider: Bezier kubik dengan toleransi galat, deteksi sudut dari sudut belok) menggantikan spline pendek vtracer; vtracer hanya untuk kontur mentah (atau ganti dengan marching squares sendiri) | Segmen −50% atau lebih, kurva lebih mulus, sudut tajam tetap tajam — ✅ M2 (`curves.py`; toleransi per titik, longgar di bawah outline) |
+| E2 | **Peta batas bersama (planar map)**: label wilayah → graf batas; setiap batas antar dua wilayah dilacak & di-fit sekali, dipakai kedua wilayah (tanpa tumpang-tindih 2 px) | File −30–50%, tanpa celah/seam, tepi antar-warna konsisten — ✅ M2 (`planar.py`; vtracer tidak dipakai lagi) |
 | E3 | **Radial gradient**: deteksi wilayah berbentuk blob dengan pusat terang/gelap (rona pipi, bola) → `radialGradient` | Rona pipi & highlight bulat lebih mirip |
 | E4 | **Paralel**: fitting/tracing per wilayah di `ProcessPoolExecutor`; profil & optimasi titik panas (bincount, label) | ≤ 8 detik per gambar 1536×1024 |
 | E5 | **Preset**: `cartoon` (bawaan), `flat-illustration`, `logo/icon` (warna datar, sedikit wilayah), `poster` (foto → gaya poster) | Hasil baik tanpa mengatur parameter |
@@ -110,7 +110,7 @@ png-to-svg-vectorize/
 |---|---|---|
 | **M0** — Fondasi repo (✅ dimulai 2026-10-12) | Pindah kode ke `src/pngsvg`, CLI `png2svg`, README, lisensi MIT, CI tes Windows/macOS/Linux | CI hijau di 3 OS |
 | **M1** — Set uji & baseline (✅ 2026-10-12) | `bench/` + skrip; catat angka v0.1 (kemiripan, ukuran, segmen, waktu) | Tabel baseline di `docs/bench.md` |
-| **M2** — Mesin kualitas (E1, E2) | Fitting kurva Schneider + planar map | Target segmen −50%, ukuran −40%, kemiripan tidak turun > 0,3 |
+| **M2** — Mesin kualitas (E1, E2) (✅ 2026-10-12, v0.2) | Fitting kurva Schneider + planar map | Target segmen −50%, ukuran −40%, kemiripan tidak turun > 0,3 — tercapai: set Turion segmen −69%, ukuran −58%, kemiripan +0,08 (lihat `docs/bench.md`) |
 | **M3** — Mesin lanjutan (E3, E4, E5) | Radial gradient, paralel, preset | ≤ 8 detik/gambar; preset logo/ikon bagus di set uji |
 | **M4** — Service + UI (web mode) | FastAPI + UI Svelte lengkap §4, jalan di browser lokal (`png2svg serve`) | Tes API + tes e2e Playwright hijau |
 | **M5** — Desktop & paket | pywebview, dialog native, PyInstaller, installer Win/mac, `release.yml` | Installer terpasang & berjalan di Windows 11 dan macOS (arm64 + Intel), tes asap di CI |

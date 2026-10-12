@@ -2,7 +2,8 @@
 
 Run with `python bench/synthetic.py` once, then `python bench/run.py` (needs Chrome or Edge for the similarity
 render). Compare against the committed baseline with `python bench/run.py --baseline bench/baseline.json`
-(exit code 1 on regression: similarity −0.3 points or size +10 %).
+(exit code 1 on regression: similarity −0.3 points or size +10 %). `bench/baseline.json` always holds the latest
+accepted synthetic numbers (currently v0.2 / M2).
 
 - **Synthetic set** (`bench/synthetic.py`, 9 procedural images, license-free): face with soft blush, flat logo,
   outlined icon, radial-gradient sphere, faint concentric rings, stripes + dots, thin lines, gradient background,
@@ -11,6 +12,56 @@ render). Compare against the committed baseline with `python bench/run.py --base
   published; numbers reported for reference.
 
 Machine: Windows 11 laptop, Python 3.13, single process.
+
+## v0.2 — M2: shared boundaries + Bezier fitting (2026-10-12)
+
+Changes: planar map (every boundary between two regions is traced once and shared, no overlap), own cubic
+Bezier fitting (Schneider) with corner detection, looser tolerance for fill boundaries hidden under the outline
+layer, anti-aliasing sliver/speckle merging, size-aware gradient merging, vtracer dropped. Deltas are against v0.1.
+
+| Set | Similarity (median) | Size (median) | Segments (median) | Time (median) |
+|---|---|---|---|---|
+| Synthetic | 99.47 → 99.45 % | 96 KB → 8.5 KB (−91 %) | 4 882 → 329 (−93 %) | 7.8 → 2.9 s |
+| Private (Turion) | 98.57 → 98.65 % | 449 KB → 188 KB (−58 %) | 20 973 → 6 547 (−69 %) | 18.3 → 10.1 s |
+
+M2 targets (segments −50 %, size −40 %, similarity drop ≤ 0.3) are met on both sets. Visual check at 3× zoom:
+smoother curves than v0.1 (no stair-steps), no seams, blush/mouth details kept, fewer stray specks.
+
+### Synthetic set (v0.2, delta vs v0.1)
+
+| Image | Similarity | Within 24 | Size (bytes) | Segments | Regions | Time (s) |
+|---|---|---|---|---|---|---|
+| face | 98.72% (+0.16) | 99.4% | 6705 (-93%) | 213 (-96%) | 12 | 3.5 (-62%) |
+| gradient-bg | 99.45% (-0.01) | 99.6% | 8675 (-86%) | 329 (-90%) | 4 | 3.8 (-58%) |
+| icon-outline | 99.85% (+0.03) | 99.8% | 5703 (-87%) | 229 (-89%) | 6 | 2.9 (-61%) |
+| leaves | 99.02% (+0.05) | 98.1% | 44677 (-71%) | 1542 (-80%) | 110 | 2.9 (-61%) |
+| logo-flat | 99.88% (+0.03) | 99.6% | 5186 (-89%) | 189 (-92%) | 11 | 2.7 (-66%) |
+| rings | 99.37% (+0.00) | 99.7% | 35181 (-87%) | 1463 (-90%) | 22 | 3.0 (-70%) |
+| sphere | 99.68% (+0.06) | 99.7% | 14195 (-90%) | 546 (-93%) | 19 | 1.7 (-71%) |
+| stripes | 99.47% (-0.02) | 98.9% | 22565 (-83%) | 804 (-88%) | 101 | 3.0 (-62%) |
+| thin-lines | 97.64% (-0.02) | 97.5% | 8109 (-79%) | 269 (-86%) | 46 | 2.0 (-63%) |
+| **median** | 99.45% | 99.6% | 8675 | 329 | 19 | 2.9 |
+
+### Private set (v0.2, delta vs v0.1)
+
+| Image | Similarity | Within 24 | Size (bytes) | Segments | Regions | Time (s) |
+|---|---|---|---|---|---|---|
+| acuan-gagal | 99.17% (+0.07) | 98.8% | 136312 (-66%) | 5179 (-72%) | 132 | 10.2 (-44%) |
+| acuan-sukses | 99.02% (+0.07) | 98.9% | 98151 (-74%) | 3548 (-80%) | 132 | 9.1 (-50%) |
+| promo-gizi | 98.56% (+0.02) | 96.0% | 229269 (-54%) | 7764 (-65%) | 475 | 10.2 (-48%) |
+| promo-kendaraan | 98.39% (+0.05) | 95.9% | 214862 (-53%) | 7521 (-64%) | 288 | 10.1 (-47%) |
+| promo-kesehatan | 98.50% (+0.10) | 96.0% | 376546 (-49%) | 12575 (-63%) | 897 | 13.8 (-50%) |
+| promo-keuangan | 98.64% (+0.07) | 96.0% | 206698 (-57%) | 7256 (-67%) | 289 | 10.6 (-47%) |
+| promo-offline | 98.65% (+0.14) | 96.5% | 218471 (-55%) | 7773 (-65%) | 272 | 10.2 (-46%) |
+| promo-olahraga | 98.58% (+0.04) | 96.2% | 176572 (-58%) | 6129 (-68%) | 209 | 9.8 (-40%) |
+| promo-peluncuran | 98.77% (+0.06) | 96.4% | 192396 (-58%) | 6547 (-69%) | 296 | 13.4 (-25%) |
+| promo-pendidikan | 98.48% (+0.09) | 95.5% | 220060 (-58%) | 7590 (-69%) | 333 | 10.0 (-46%) |
+| promo-pengingat | 98.62% (+0.05) | 96.5% | 138622 (-65%) | 5038 (-73%) | 166 | 8.9 (-44%) |
+| promo-pola-hidup | 98.80% (+0.13) | 97.2% | 164820 (-57%) | 5867 (-67%) | 266 | 8.7 (-45%) |
+| promo-premium | 98.81% (+0.09) | 97.7% | 230554 (-62%) | 8292 (-71%) | 325 | 11.1 (-50%) |
+| promo-rumah | 98.93% (+0.06) | 97.2% | 161341 (-57%) | 5673 (-67%) | 212 | 9.3 (-45%) |
+| promo-sambutan | 98.92% (-0.03) | 97.5% | 131454 (-63%) | 4776 (-71%) | 164 | 9.2 (-38%) |
+| **median** | 98.65% | 96.5% | 192396 | 6547 | 272 | 10.1 |
 
 ## v0.1 baseline (2026-10-12)
 

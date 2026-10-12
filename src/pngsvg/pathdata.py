@@ -1,30 +1,9 @@
-"""Binary-mask tracing via vtracer (in memory) and path coordinate transforms."""
+"""SVG path data encoding: compact relative commands with minimal number syntax."""
 from __future__ import annotations
 
-import io
 import re
 
-import numpy as np
-import vtracer
-from PIL import Image
-
-_PATH = re.compile(r'<path d="([^"]+)"[^>]*?(?:transform="translate\(([-\d.]+),\s*([-\d.]+)\)")?\s*/>')
 _TOKEN = re.compile(r'[MLCQZmlcqz]|-?\d+(?:\.\d+)?')
-
-
-def transform_path(d: str, dx: float, dy: float, scale: float, decimals: int = 1) -> str:
-    """Apply (x + dx) / scale, (y + dy) / scale to an absolute M/L/C/Q/Z path."""
-    out, i = [], 0
-    for tok in _TOKEN.findall(d):
-        if tok.isalpha():
-            out.append(tok.upper())
-            continue
-        v = (float(tok) + (dx if i % 2 == 0 else dy)) / scale
-        i += 1
-        s = f'{v:.{decimals}f}'.rstrip('0').rstrip('.') if decimals else str(int(round(v)))
-        out.append('0' if s in ('-0', '') else s)
-    text = ' '.join(out)
-    return re.sub(r' ?([MLCQZ]) ?', r'\1', text)
 
 
 def _num(v: float, decimals: int) -> str:
@@ -90,17 +69,3 @@ def compact_path(d: str, dx: float = 0.0, dy: float = 0.0, scale: float = 1.0, d
             first = False
     return ''.join(out).replace('  ', ' ')
 
-
-def trace_mask(mask: np.ndarray, *, speckle: int, corner: int = 75, length: float = 9.0) -> list[str]:
-    """Trace a boolean mask (True = shape) into smooth spline paths, in the mask's pixel coordinates."""
-    pad = 4
-    img = np.pad(np.where(mask, 0, 255).astype(np.uint8), pad, constant_values=255)
-    buf = io.BytesIO()
-    Image.fromarray(img).convert('RGB').save(buf, format='PNG')
-    svg = vtracer.convert_raw_image_to_svg(buf.getvalue(), img_format='png', colormode='binary', mode='spline',
-                                           filter_speckle=speckle, corner_threshold=corner, length_threshold=length,
-                                           max_iterations=10, splice_threshold=45, path_precision=2)
-    paths = []
-    for d, tx, ty in _PATH.findall(svg):
-        paths.append(transform_path(d, float(tx or 0) - pad, float(ty or 0) - pad, 1.0, decimals=2))
-    return paths

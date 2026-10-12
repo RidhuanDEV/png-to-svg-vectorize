@@ -9,9 +9,11 @@ from PIL import Image
 from scipy import ndimage
 
 from .color import to_hex
+from .curves import fit_chain
 from .outline import Outline, OutlineParams, outline_mask, separate
+from .planar import build_chains, loop_area, loops_to_path, region_loops
 from .regions import RegionParams, fit_fill, segment
-from .trace import compact_path, trace_mask
+from .pathdata import compact_path
 
 
 @dataclass
@@ -19,7 +21,12 @@ class Options:
     scale: int | None = None          # tracing upscale; None = auto (long side ~4500 px)
     outlines: bool = True             # separate ink outlines into their own crisp layer
     gradients: bool = True            # gradient fills (False = flat colors)
-    overlap: int = 2                  # px (at tracing scale) each region grows so neighbours never show seams
+    smooth: float = 1.5               # fill boundary smoothing along the curve (sigma, source px)
+    tolerance: float = 0.5            # max Bezier deviation from the smoothed fill boundary (source px)
+    hidden_tolerance: float = 3.0     # ...where a fill boundary lies under the outline layer (invisible), up to this
+    outline_smooth: float = 0.5       # the outline is already sub-pixel smooth: lighter smoothing keeps line tips
+    outline_tolerance: float = 0.35
+    seam: float = 0.5                 # stroke width (source px) painted with each fill to hide anti-aliasing seams
     id_prefix: str = 'v'              # prefix for gradient ids (unique per file -> safe to inline many SVGs)
     outline: OutlineParams = field(default_factory=OutlineParams)
     regions: RegionParams = field(default_factory=RegionParams)
@@ -59,8 +66,20 @@ def vectorize(image: Image.Image, opts: Options | None = None) -> Result:
     label = segment(ol.behind_rgb, near, opts.regions)
     behind = ol.behind_rgb.astype(np.float64)
     objects = ndimage.find_objects(label)
-    area = np.bincount(label.ravel())
-    order = sorted((i for i in range(1, len(objects) + 1) if objects[i - 1] is not None), key=lambda i: -area[i])
+
+    # shared boundaries: every chain is fitted once and used by both regions it separates
+    chains = build_chains(label)
+    tol = _corner_tolerance(ol.alpha, opts.tolerance, opts.hidden_tolerance) if has_ink else None
+    fitted = [fit_chain(c.points, c.closed, opts.smooth, opts.tolerance if tol is None else
+                        tol[c.points[:, 1].astype(int), c.points[:, 0].astype(int)]) for c in chains]
+    shapes = {}
+    for r, loops in region_loops(chains).items():
+        areas = [loop_area(chains, lp) for lp in loops]
+        k = int(np.argmax(np.abs(areas)))
+        sign = np.sign(areas[k])
+        outer = [lp for lp, a in zip(loops, areas) if np.sign(a) == sign]      # holes are dropped: whatever
+        shapes[r] = (abs(sum(a for a in areas if np.sign(a) == sign)), outer)  # fills them is painted on top
+    order = sorted(shapes, key=lambda r: -shapes[r][0])
 
     defs, fills, n_grad = [], [], 0
     for i in order:
@@ -77,31 +96,35 @@ def vectorize(image: Image.Image, opts: Options | None = None) -> Result:
         if grad:
             defs.append(grad)
             n_grad += 1
-        mask = _upsample_mask(sel, S, opts.overlap)
-        for d in trace_mask(mask, speckle=S * 3):
-            fills.append((d, sl[1].start * S, sl[0].start * S, fill))
+        d = compact_path(loops_to_path(shapes[i][1], fitted))
+        stroke = f' stroke="{fill}"' if opts.seam > 0 else ''
+        fills.append(f'<path d="{d}" fill="{fill}"{stroke}/>')
 
     background = to_hex(behind[label == order[0]].mean(axis=0)) if order else '#FFFFFF'
-    fill_svg = ''.join(f'<path d="{compact_path(d, ox, oy, S)}" fill="{f}"/>' for d, ox, oy, f in fills)
+    seam = f' stroke-width="{opts.seam:g}" stroke-linejoin="round"' if opts.seam > 0 else ''
 
     outline_svg, n_out = '', 0
     if has_ink:
-        om = outline_mask(ol.alpha, S)
-        paths = trace_mask(om, speckle=S * 4)
-        n_out = len(paths)
+        om = outline_mask(ol.alpha, S).astype(np.int32)
+        ochains = build_chains(om)
+        ofit = [fit_chain(c.points, c.closed, opts.outline_smooth * S, opts.outline_tolerance * S, window=3 * S,
+                          corner_deg=60.0) for c in ochains]
+        loops = region_loops(ochains).get(1, [])
+        n_out = len(loops)
         outline_svg = (f'<g id="outline" fill="{to_hex(ol.ink_rgb)}">'
-                       + ''.join(f'<path d="{compact_path(d, 0, 0, S)}"/>' for d in paths) + '</g>')
+                       f'<path d="{compact_path(loops_to_path(loops, ofit), 0, 0, S)}"/></g>')
 
     svg = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}">'
            + (f'<defs>{"".join(defs)}</defs>' if defs else '')
-           + f'<g id="fill"><rect width="{w}" height="{h}" fill="{background}"/>{fill_svg}</g>'
+           + f'<g id="fill"{seam}><rect width="{w}" height="{h}" fill="{background}"/>{"".join(fills)}</g>'
            + outline_svg + '</svg>\n')
     return Result(svg, len(order), n_grad, n_out)
 
 
-def _upsample_mask(mask: np.ndarray, scale: int, overlap: int) -> np.ndarray:
-    h, w = mask.shape
-    big = np.asarray(Image.fromarray(mask.astype(np.uint8) * 255).resize((w * scale, h * scale), Image.BILINEAR),
-                     dtype=np.float32) / 255
-    big = ndimage.gaussian_filter(big, sigma=scale * 0.7) > 0.5
-    return ndimage.binary_dilation(big, iterations=overlap) if overlap else big
+def _corner_tolerance(alpha: np.ndarray, base: float, hidden: float) -> np.ndarray:
+    """Allowed curve deviation at every pixel corner (h+1, w+1): `base` where the boundary is visible, growing with
+    the depth inside the ink (minus a 1 px safety margin) where the outline layer will cover it anyway."""
+    depth = ndimage.distance_transform_edt(alpha >= 0.5)                 # px from the nearest non-ink pixel
+    corner = np.pad(depth, 1, constant_values=0)
+    corner = np.minimum.reduce([corner[:-1, :-1], corner[:-1, 1:], corner[1:, :-1], corner[1:, 1:]])
+    return np.clip(corner - 1.0, base, hidden)

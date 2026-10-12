@@ -1,116 +1,116 @@
 {
  "face": {
-  "similarity": 98.564,
-  "within24": 99.14,
-  "bytes": 96120,
-  "segments": 4882,
-  "regions": 69,
-  "gradients": 4,
-  "seconds": 9.25,
+  "similarity": 98.72,
+  "within24": 99.41,
+  "bytes": 6705,
+  "segments": 213,
+  "regions": 12,
+  "gradients": 2,
+  "seconds": 3.51,
   "size": [
    1024,
    768
   ]
  },
  "gradient-bg": {
-  "similarity": 99.466,
-  "within24": 99.67,
-  "bytes": 62038,
-  "segments": 3173,
-  "regions": 14,
-  "gradients": 3,
-  "seconds": 9.09,
+  "similarity": 99.452,
+  "within24": 99.64,
+  "bytes": 8675,
+  "segments": 329,
+  "regions": 4,
+  "gradients": 2,
+  "seconds": 3.79,
   "size": [
    1024,
    768
   ]
  },
  "icon-outline": {
-  "similarity": 99.813,
-  "within24": 99.56,
-  "bytes": 42758,
-  "segments": 2179,
-  "regions": 8,
+  "similarity": 99.847,
+  "within24": 99.84,
+  "bytes": 5703,
+  "segments": 229,
+  "regions": 6,
   "gradients": 0,
-  "seconds": 7.57,
+  "seconds": 2.94,
   "size": [
    1024,
    768
   ]
  },
  "leaves": {
-  "similarity": 98.974,
-  "within24": 97.78,
-  "bytes": 156408,
-  "segments": 7822,
-  "regions": 348,
-  "gradients": 22,
-  "seconds": 7.4,
+  "similarity": 99.022,
+  "within24": 98.09,
+  "bytes": 44677,
+  "segments": 1542,
+  "regions": 110,
+  "gradients": 20,
+  "seconds": 2.88,
   "size": [
    1024,
    768
   ]
  },
  "logo-flat": {
-  "similarity": 99.852,
-  "within24": 99.53,
-  "bytes": 48180,
-  "segments": 2488,
-  "regions": 288,
+  "similarity": 99.882,
+  "within24": 99.62,
+  "bytes": 5186,
+  "segments": 189,
+  "regions": 11,
   "gradients": 0,
-  "seconds": 7.89,
+  "seconds": 2.72,
   "size": [
    1024,
    768
   ]
  },
  "rings": {
-  "similarity": 99.366,
-  "within24": 99.69,
-  "bytes": 274245,
-  "segments": 14306,
-  "regions": 128,
+  "similarity": 99.371,
+  "within24": 99.66,
+  "bytes": 35181,
+  "segments": 1463,
+  "regions": 22,
   "gradients": 1,
-  "seconds": 10.03,
+  "seconds": 2.98,
   "size": [
    1024,
    768
   ]
  },
  "sphere": {
-  "similarity": 99.618,
-  "within24": 99.51,
-  "bytes": 141684,
-  "segments": 7487,
-  "regions": 24,
-  "gradients": 2,
-  "seconds": 6.01,
+  "similarity": 99.679,
+  "within24": 99.7,
+  "bytes": 14195,
+  "segments": 546,
+  "regions": 19,
+  "gradients": 1,
+  "seconds": 1.73,
   "size": [
    1024,
    768
   ]
  },
  "stripes": {
-  "similarity": 99.488,
-  "within24": 98.38,
-  "bytes": 130265,
-  "segments": 6916,
-  "regions": 142,
+  "similarity": 99.473,
+  "within24": 98.9,
+  "bytes": 22565,
+  "segments": 804,
+  "regions": 101,
   "gradients": 0,
-  "seconds": 7.8,
+  "seconds": 2.96,
   "size": [
    1024,
    768
   ]
  },
  "thin-lines": {
-  "similarity": 97.669,
-  "within24": 97.53,
-  "bytes": 37771,
-  "segments": 1896,
-  "regions": 142,
+  "similarity": 97.645,
+  "within24": 97.51,
+  "bytes": 8109,
+  "segments": 269,
+  "regions": 46,
   "gradients": 0,
-  "seconds": 5.56,
+  "seconds": 2.04,
   "size": [
    1024,
    768

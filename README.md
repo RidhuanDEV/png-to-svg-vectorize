@@ -20,7 +20,7 @@ input.png ──► outline separation ──► fill layer (regions + gradients
                                                                           <g id="outline">
 ```
 
-> **Status:** v0.1 — command line + Python library. A desktop app for **Windows and macOS** is planned for v1.0
+> **Status:** v0.2 — command line + Python library. A desktop app for **Windows and macOS** is planned for v1.0
 > (see [docs/PLAN.md](docs/PLAN.md)).
 
 ## Install
@@ -31,7 +31,7 @@ cd png-to-svg-vectorize
 pip install -e .            # add [dev] for tests
 ```
 
-Requirements: Python ≥ 3.10, numpy, scipy, Pillow, [vtracer](https://github.com/visioncortex/vtracer) (MIT).
+Requirements: Python ≥ 3.10, numpy, scipy, Pillow. No native tracer: curve fitting is built in.
 
 ## Usage
 
@@ -54,7 +54,11 @@ print(result.regions, result.gradients, result.outline_paths)
 
 | Option | Default | Meaning |
 |---|---|---|
-| `scale` | auto (long side ≈ 4500 px) | tracing upscale; higher = smoother curves, bigger files |
+| `scale` | auto (long side ≈ 4500 px) | outline upscale for sub-pixel tracing |
+| `tolerance` | `0.5` | max curve deviation of fill boundaries (px); higher = smaller file |
+| `smooth` | `1.5` | fill boundary smoothing (px) |
+| `hidden_tolerance` | `3` | looser tolerance where a fill boundary is hidden under the outline layer |
+| `outline_tolerance` | `0.35` | max curve deviation of outlines (px) |
 | `outlines` | `True` | separate ink outlines into their own layer |
 | `gradients` | `True` | gradient fills (`False` = flat colors) |
 | `regions.merge_de` | `9` | neighbours closer than this ΔE may merge (soft shading). Lower keeps more detail |
@@ -79,8 +83,13 @@ print(result.regions, result.gradients, result.outline_paths)
    hugging outlines. So skin shading merges, while rings, blush and patterns stay separate.
 4. **Gradients.** Per region, a linear regression of color vs. position gives the gradient direction; three
    stops are measured from the source pixels. Weak gradients become solid fills.
-5. **Tracing.** Each region mask is upsampled, smoothed, slightly dilated (no seams) and traced with vtracer;
-   painted largest first, outlines on top.
+5. **Shared boundaries.** The region label image becomes a planar map: every boundary between two regions is a
+   chain between junctions, smoothed and fitted **once** and used by both regions, so neighbours never gap or
+   overlap. Each region is painted as its outer boundary (holes are covered by the regions inside), largest
+   first; a thin same-color stroke hides anti-aliasing seams.
+6. **Curve fitting.** Chains are fitted with least-squares cubic Beziers (Schneider's algorithm) within a pixel
+   tolerance, splitting at sharp corners. Boundaries hidden under the ink get a much looser tolerance. The
+   outline is traced the same way from its sub-pixel mask. Paths use relative commands and minimal numbers.
 
 ## Quality check
 
@@ -93,7 +102,7 @@ a single number can hide local defects.
 - Designed for **cartoon / flat illustration** styles with ink outlines. Photos and painterly art produce many
   regions and large files.
 - Only linear gradients (no radial or mesh). Round soft blobs (blush) become flat or linear-shaded regions.
-- File size grows with detail (300 KB – 1 MB for a 1536×1024 detailed scene).
+- File size grows with detail (≈ 100–400 KB for a 1536×1024 detailed scene).
 
 ## Tests
 
@@ -104,12 +113,13 @@ pytest -q
 
 ## Roadmap
 
-See [docs/PLAN.md](docs/PLAN.md): better curve fitting (fewer nodes, smaller files), shared region boundaries,
-radial gradients, parallel processing, and a desktop app for Windows and macOS.
+See [docs/PLAN.md](docs/PLAN.md). Done: own curve fitting and shared boundaries (v0.2, see
+[docs/bench.md](docs/bench.md)). Next: radial gradients, parallel processing, presets, and a desktop app for
+Windows and macOS.
 
 ## License
 
-[MIT](LICENSE) © Ridhuan Rangga Kusuma. Uses [vtracer](https://github.com/visioncortex/vtracer) (MIT).
+[MIT](LICENSE) © Ridhuan Rangga Kusuma.
 
 ---
 
