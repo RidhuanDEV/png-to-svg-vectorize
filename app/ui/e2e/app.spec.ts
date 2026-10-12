@@ -99,10 +99,15 @@ test('preset change and re-process selected image', async ({ page }) => {
   await uploadAndWait(page, 'badge.png');
   await page.getByTestId('preset-logo').check();
   await page.getByTestId('apply-selected').click();
+  // the old job is replaced by a new one: wait until the service shows exactly the finished logo job
+  await expect
+    .poll(async () => {
+      const res = await page.request.get('/api/jobs', { headers: { 'X-Token': 'e2e' } });
+      return (await res.json()).jobs.map((j: { preset: string; status: string }) => `${j.preset}:${j.status}`);
+    })
+    .toEqual(['logo:done']);
   await expect(page.getByTestId('job')).toHaveCount(1);
   await expect(page.getByTestId('job').first()).toHaveAttribute('data-status', 'done');
-  const res = await page.request.get('/api/jobs', { headers: { 'X-Token': 'e2e' } });
-  expect((await res.json()).jobs[0].preset).toBe('logo');
 });
 
 test('language switch', async ({ page }) => {
