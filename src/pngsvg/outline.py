@@ -26,7 +26,7 @@ class OutlineParams:
     thin_ab: float = 16.0       # ...with ink-like hue (a*b* distance), so brown wrinkles / grey brows stay color
     band: int = 5               # px around ink cores examined for blending
     residual: float = 36.0      # max RGB distance from the I->B segment to count as a blend
-    ink_percentile: float = 2.0  # ink color = median of the darkest N% pixels
+    ink_percentile: float = 2.0  # ink color = median of the darkest N% pixels (halved down to 0.5 % if too light)
     max_ink_l: float = 35.0     # if the darkest pixels are lighter than this L*, the image has no outlines
     halo_px: int = 3            # sharpening halos: within this distance of ink...
     halo_ab: float = 12.0       # ...same hue as the color behind (a*b* distance below this)...
@@ -42,7 +42,11 @@ class Outline:
 
 def detect_ink(rgb: np.ndarray, lab: np.ndarray, p: OutlineParams):
     L = lab[..., 0]
-    cut = np.percentile(L, p.ink_percentile)
+    pct = p.ink_percentile
+    cut = np.percentile(L, pct)
+    while cut > p.max_ink_l and pct > 0.3:     # thin outlines on a big image cover < 2 % of the pixels:
+        pct /= 2                                # look at an even darker tail before concluding there is no ink
+        cut = np.percentile(L, pct)
     if cut > p.max_ink_l:
         return None
     return np.median(rgb[L <= cut], axis=0).astype(np.float32)

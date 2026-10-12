@@ -1,6 +1,6 @@
 [project]
 name = "png-to-svg-vectorize"
-version = "0.2.0"
+version = "0.3.0"
 description = "Turn raster cartoon illustrations into editable, library-free SVG: gradient fills and crisp outlines."
 readme = "README.md"
 license = "MIT"

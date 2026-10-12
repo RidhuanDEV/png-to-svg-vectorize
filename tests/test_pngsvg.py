@@ -75,7 +75,7 @@ def test_output_is_pure_path_svg():
     res = vectorize(_sample(), Options(id_prefix='test'))
     root = ET.fromstring(res.svg)
     tags = {el.tag.split('}')[-1] for el in root.iter()}
-    assert tags <= {'svg', 'defs', 'linearGradient', 'stop', 'g', 'rect', 'path'}
+    assert tags <= {'svg', 'defs', 'linearGradient', 'radialGradient', 'stop', 'g', 'rect', 'path'}
     assert not re.search(r'<image|<style|<script|href=', res.svg)
     assert res.outline_paths > 0
     assert res.gradients > 0                      # the shaded face became a gradient, not bands
@@ -85,7 +85,7 @@ def test_output_is_pure_path_svg():
 
 def test_flat_mode_has_no_gradients():
     res = vectorize(_sample(), Options(gradients=False))
-    assert '<linearGradient' not in res.svg
+    assert '<linearGradient' not in res.svg and '<radialGradient' not in res.svg
 
 
 @pytest.mark.skipif(find_browser() is None, reason='needs Chrome/Edge for rendering')

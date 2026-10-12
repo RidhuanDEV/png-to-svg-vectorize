@@ -179,8 +179,66 @@ def leaves():
     return finish(img, soft=0.6, noise=1.5, seed=4)
 
 
+def badge():
+    img = canvas((255, 255, 255))
+    d = ImageDraw.Draw(img)
+    d.ellipse(s(262, 134, 762, 634), fill=(220, 38, 38))
+    d.ellipse(s(302, 174, 722, 594), fill=(254, 242, 242))
+    pts = []
+    for i in range(10):
+        a = math.pi / 2 + i * math.pi / 5
+        r = 170 if i % 2 == 0 else 70
+        pts += [512 + r * math.cos(a), 384 - r * math.sin(a)]
+    d.polygon(s(*pts), fill=(234, 179, 8))
+    d.rounded_rectangle(s(372, 600, 652, 690), radius=20 * K, fill=(30, 64, 175))
+    return finish(img)
+
+
+def line_icon():
+    img = canvas((248, 250, 252))
+    d = ImageDraw.Draw(img)
+    c = (15, 23, 42)
+    d.rounded_rectangle(s(262, 184, 762, 604), radius=60 * K, outline=c, width=22 * K)
+    d.line(s(262, 300, 762, 300), fill=c, width=22 * K)
+    for x in (380, 512, 644):
+        d.ellipse(s(x - 34, 384, x + 34, 452), fill=c)
+    d.line(s(362, 130, 362, 230), fill=c, width=22 * K)
+    d.line(s(662, 130, 662, 230), fill=c, width=22 * K)
+    for x in (362, 662):
+        d.ellipse(s(x - 11, 119, x + 11, 141), fill=c)
+        d.ellipse(s(x - 11, 219, x + 11, 241), fill=c)
+    return finish(img)
+
+
+def landscape():
+    """Photo-like: smooth sky, radial sun glow, textured hills, blur and sensor noise (no outlines)."""
+    rng = np.random.default_rng(11)
+    w, h = W * K, H * K
+    img = lin_gradient((w, h), (96, 165, 250), (253, 230, 200), 90)
+    glow = radial_gradient((w, h), (255, 244, 214), (253, 230, 200), 720 * K, 250 * K, 260 * K)
+    m = Image.new('L', (w, h), 0)
+    ImageDraw.Draw(m).ellipse(s(460, 0, 980, 500), fill=255)
+    img.paste(glow, (0, 0), m.filter(ImageFilter.GaussianBlur(60 * K)))
+    for base, col, amp, seed in ((470, (74, 124, 89), 70, 1), (560, (52, 96, 64), 50, 2), (660, (35, 70, 45), 30, 3)):
+        xs = np.arange(0, W + 1, 8)
+        r = np.random.default_rng(seed)
+        ys = base + np.convolve(r.normal(0, amp, len(xs) + 20), np.ones(21) / 21, 'valid')[:len(xs)]
+        poly = [(x * K, y * K) for x, y in zip(xs, ys)] + [(W * K, H * K), (0, H * K)]
+        tex = np.asarray(Image.new('RGB', (w, h), col)).astype(np.float32)
+        tex *= (1 + 0.08 * ndimage_zoom(rng.normal(0, 1, (H // 8, W // 8)), (h, w)))[..., None]
+        mm = Image.new('L', (w, h), 0)
+        ImageDraw.Draw(mm).polygon(poly, fill=255)
+        img.paste(Image.fromarray(np.clip(tex, 0, 255).astype(np.uint8)), (0, 0), mm)
+    return finish(img, soft=1.0, noise=3.0, seed=5)
+
+
+def ndimage_zoom(a, shape):
+    return np.asarray(Image.fromarray(a.astype(np.float32)).resize((shape[1], shape[0]), Image.BICUBIC))
+
+
 SCENES = {'face': face, 'logo-flat': logo_flat, 'icon-outline': icon_outline, 'sphere': sphere, 'rings': rings,
-          'stripes': stripes, 'thin-lines': thin_lines, 'gradient-bg': gradient_bg, 'leaves': leaves}
+          'stripes': stripes, 'thin-lines': thin_lines, 'gradient-bg': gradient_bg, 'leaves': leaves,
+          'badge': badge, 'line-icon': line_icon, 'landscape': landscape}
 
 
 def main() -> None:

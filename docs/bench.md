@@ -3,15 +3,88 @@
 Run with `python bench/synthetic.py` once, then `python bench/run.py` (needs Chrome or Edge for the similarity
 render). Compare against the committed baseline with `python bench/run.py --baseline bench/baseline.json`
 (exit code 1 on regression: similarity −0.3 points or size +10 %). `bench/baseline.json` always holds the latest
-accepted synthetic numbers (currently v0.2 / M2).
+accepted synthetic numbers (currently v0.3 / M3). `--jobs 4` times with a warm process pool, like
+the CLI and the app.
 
-- **Synthetic set** (`bench/synthetic.py`, 9 procedural images, license-free): face with soft blush, flat logo,
+- **Synthetic set** (`bench/synthetic.py`, 12 procedural images, license-free): face with soft blush, flat logo,
   outlined icon, radial-gradient sphere, faint concentric rings, stripes + dots, thin lines, gradient background,
-  overlapping leaves.
+  overlapping leaves, star badge, line icon (v0.3+), photo-like landscape (v0.3+).
 - **Private set**: 15 cartoon illustrations from the Turion app (image-generator art, 1536×1024 / 1774×887). Not
   published; numbers reported for reference.
 
 Machine: Windows 11 laptop, Python 3.13, single process.
+
+## v0.3 — M3: radial gradients, speed, presets (2026-10-12)
+
+Changes: least-squares gradient stops at offsets 0/.5/1 (a straight ramp is reproduced almost exactly), elliptical
+`radialGradient` with a cone fit, radial growth that joins concentric bands of a ball/glow into one region,
+sub-pixel fill boundaries from anti-aliasing + boundary refinement (straight edges, sharp tips), wider
+anti-aliasing band merging, adaptive ink detection (thin outlines covering < 2 % of the image), statistics
+aggregated per initial label (segmentation ~2x faster), optional process pool (`executor=`, CLI `--jobs`),
+presets `cartoon` / `flat` / `logo` / `poster`.
+
+| Set | Similarity (median) | Size (median) | Segments (median) | Time (median) |
+|---|---|---|---|---|
+| Synthetic (9 shared images, vs v0.2) | 99.45 → 99.46 % | 8.5 → 8.7 KB | 329 → 349 | 2.9 → 3.4 s (serial) |
+| Private (Turion, vs v0.2) | 98.65 → 98.65 % | 188 → 165 KB (−10 %) | 6 547 → 6 233 | 10.1 s serial → **7.2 s** with `--jobs 4` |
+
+- M3 target "≤ 8 s per 1536×1024 image": met for the median (7.2 s with 4 worker processes); the heaviest scenes
+  take 8.0–9.8 s. Serial runs are ~8–9 s. Timing on this laptop varies ±20 % between runs.
+- Notable: `sphere` 17 → 8 regions, one radial gradient instead of concentric bands (−48 % size, +0.15);
+  `thin-lines` +1.34 (14 thin lines were lost before; the size grows because they are now drawn); `sukses` blush
+  is now soft-edged; `logo-flat` gets exactly its 6 shapes with the `logo` preset.
+- Known trade-off: very faint, tiny color spots (e.g. a light pink dot on a chin) can merge into the surrounding
+  skin.
+
+Presets on the logo/icon images (similarity / size / regions):
+
+| Image | cartoon | logo |
+|---|---|---|
+| logo-flat | 99.90 % / 4 KB / 8 | 99.92 % / 4 KB / 6 |
+| badge | 99.90 % / 6 KB / 11 | 99.90 % / 3 KB / 6 |
+| icon-outline | 99.84 % / 5 KB / 6 | 99.84 % / 5 KB / 6 |
+| line-icon | 99.90 % / 3 KB / 1 | 99.90 % / 3 KB / 1 |
+
+`poster` on the photo-like `landscape`: 98.52 % / 21 KB / 13 regions vs `cartoon` 98.48 % / 67 KB / 40.
+
+### Synthetic set (v0.3, delta vs v0.2)
+
+| Image | Similarity | Within 24 | Size (bytes) | Segments | Regions | Time (s) |
+|---|---|---|---|---|---|---|
+| badge | 99.90% | 99.6% | 7101 | 252 | 11 | 2.8 |
+| face | 98.73% (+0.01) | 99.4% | 7259 (+8%) | 189 (-11%) | 11 | 3.5 (+1%) |
+| gradient-bg | 99.60% (+0.15) | 99.6% | 8929 (+3%) | 349 (+6%) | 4 | 3.3 (-13%) |
+| icon-outline | 99.84% (-0.01) | 99.8% | 5884 (+3%) | 237 (+3%) | 6 | 3.0 (+0%) |
+| landscape | 98.45% | 99.8% | 59093 | 2496 | 35 | 4.9 |
+| leaves | 99.18% (+0.16) | 99.3% | 33835 (-24%) | 1262 (-18%) | 22 | 4.2 (+46%) |
+| line-icon | 99.90% | 99.9% | 3258 | 133 | 1 | 2.7 |
+| logo-flat | 99.90% (+0.01) | 99.7% | 4316 (-17%) | 158 (-16%) | 8 | 2.9 (+6%) |
+| rings | 99.33% (-0.05) | 99.4% | 26006 (-26%) | 1089 (-26%) | 12 | 4.0 (+33%) |
+| sphere | 99.83% (+0.15) | 99.8% | 7331 (-48%) | 251 (-54%) | 8 | 3.0 (+75%) |
+| stripes | 99.46% (-0.01) | 98.5% | 23725 (+5%) | 847 (+5%) | 101 | 3.4 (+15%) |
+| thin-lines | 98.99% (+1.34) | 98.2% | 24299 (+200%) | 1096 (+307%) | 2 | 3.7 (+80%) |
+| **median** | 99.53% | 99.6% | 8130 | 300 | 10 | 3.3 |
+
+### Private set (v0.3, `--jobs 4`, delta vs v0.2)
+
+| Image | Similarity | Within 24 | Size (bytes) | Segments | Regions | Time (s) |
+|---|---|---|---|---|---|---|
+| acuan-gagal | 99.19% (+0.03) | 98.9% | 115286 (-15%) | 4475 (-14%) | 102 | 6.9 (-32%) |
+| acuan-sukses | 99.11% (+0.09) | 99.0% | 82976 (-15%) | 2984 (-16%) | 86 | 8.0 (-12%) |
+| promo-gizi | 98.56% (-0.01) | 96.0% | 207949 (-9%) | 7653 (-1%) | 377 | 7.9 (-23%) |
+| promo-kendaraan | 98.40% (+0.00) | 95.9% | 194116 (-10%) | 7302 (-3%) | 226 | 8.4 (-16%) |
+| promo-kesehatan | 98.61% (+0.11) | 95.8% | 321756 (-15%) | 11175 (-11%) | 651 | 9.8 (-29%) |
+| promo-keuangan | 98.62% (-0.02) | 96.0% | 176930 (-14%) | 6574 (-9%) | 228 | 6.8 (-36%) |
+| promo-offline | 98.64% (-0.01) | 96.5% | 196326 (-10%) | 7197 (-7%) | 210 | 7.1 (-31%) |
+| promo-olahraga | 98.57% (-0.01) | 96.2% | 162651 (-8%) | 6109 (-0%) | 173 | 7.2 (-26%) |
+| promo-peluncuran | 98.75% (-0.03) | 96.3% | 169054 (-12%) | 6233 (-5%) | 224 | 7.4 (-45%) |
+| promo-pendidikan | 98.51% (+0.03) | 95.5% | 192077 (-13%) | 7085 (-7%) | 223 | 7.0 (-30%) |
+| promo-pengingat | 98.65% (+0.03) | 96.5% | 127433 (-8%) | 4790 (-5%) | 123 | 6.4 (-29%) |
+| promo-pola-hidup | 98.79% (-0.01) | 97.1% | 142849 (-13%) | 5498 (-6%) | 182 | 7.0 (-19%) |
+| promo-premium | 98.82% (+0.01) | 97.7% | 209685 (-9%) | 8042 (-3%) | 255 | 7.9 (-29%) |
+| promo-rumah | 98.91% (-0.02) | 97.1% | 152043 (-6%) | 5624 (-1%) | 181 | 7.2 (-23%) |
+| promo-sambutan | 98.91% (-0.01) | 97.5% | 114746 (-13%) | 4476 (-6%) | 126 | 6.8 (-26%) |
+| **median** | 98.65% | 96.5% | 169054 | 6233 | 210 | 7.2 |
 
 ## v0.2 — M2: shared boundaries + Bezier fitting (2026-10-12)
 

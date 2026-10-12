@@ -170,3 +170,44 @@ def loops_to_path(loops: list[list[tuple[int, bool]]], fitted: list[list[np.ndar
                              for _, a, b, c in segs))
         parts.append('Z')
     return ''.join(parts)
+
+
+def subpixel_offsets(chain: Chain, label: np.ndarray, rgb: np.ndarray, mean: np.ndarray, hidden: np.ndarray | None,
+                     min_contrast: float = 30.0) -> np.ndarray:
+    """Sub-pixel position of the color edge at every crack of a chain, from anti-aliasing.
+
+    Across a crack, the left pixel holds a fraction a_l of the left color A and the right pixel a_r of it (colors
+    projected on the A-B line). With an area-sampled edge, the edge lies e = a_l + a_r - 1 pixels from the crack,
+    toward the right. A and B are taken one pixel further out (local color, robust to gradients), falling back to
+    the region means. Cracks between similar colors, at the image border or under the outline layer get 0."""
+    h, w = label.shape
+    c = chain.points
+    nxt = np.roll(c, -1, axis=0) if chain.closed else c[1:]
+    cur = c if chain.closed else c[:-1]
+    mid = (cur + nxt) / 2
+    d = nxt - cur
+    nl = np.stack([d[:, 1], -d[:, 0]], 1)
+
+    def pix(k):
+        q = np.floor(mid + k * nl).astype(int)
+        ok = (q[:, 0] >= 0) & (q[:, 0] < w) & (q[:, 1] >= 0) & (q[:, 1] < h)
+        return np.clip(q[:, 1], 0, h - 1), np.clip(q[:, 0], 0, w - 1), ok
+
+    ly, lx, lok = pix(0.5)
+    ry, rx, rok = pix(-0.5)
+    out = np.zeros(len(mid))
+    if chain.left <= 0 or chain.right <= 0:
+        return out
+    ay, ax, aok = pix(1.5)
+    by, bx, bok = pix(-1.5)
+    A = np.where((aok & (label[ay, ax] == chain.left))[:, None], rgb[ay, ax], mean[chain.left])
+    B = np.where((bok & (label[by, bx] == chain.right))[:, None], rgb[by, bx], mean[chain.right])
+    ab = A - B
+    den = (ab * ab).sum(1)
+    a_l = np.clip(((rgb[ly, lx] - B) * ab).sum(1) / np.maximum(den, 1e-9), 0, 1)
+    a_r = np.clip(((rgb[ry, rx] - B) * ab).sum(1) / np.maximum(den, 1e-9), 0, 1)
+    use = lok & rok & (den >= min_contrast ** 2)
+    if hidden is not None:
+        use &= ~hidden[ly, lx] & ~hidden[ry, rx]
+    out[use] = np.clip(a_l + a_r - 1, -0.75, 0.75)[use]
+    return out

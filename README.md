@@ -6,9 +6,10 @@
 
 Turn **raster cartoon illustrations** (PNG/WebP/JPEG — e.g. from image generators or scans) into **editable, library-free SVG**:
 
-- **Gradient fills** — soft shading becomes one region with a fitted `linearGradient`, not posterized bands or blotches.
+- **Gradient fills** — soft shading becomes one region with a fitted `linearGradient`, and round shading (balls,
+  blush, glows) one elliptical `radialGradient` — not posterized bands or blotches.
 - **Crisp outlines** — ink lines are separated by color unmixing into a sub-pixel accurate, smooth outline layer.
-- **Pure SVG** — only `<path>`, `<rect>`, `<g>`, `<linearGradient>`. No `<image>`, CSS or scripts. Works in browsers,
+- **Pure SVG** — only `<path>`, `<rect>`, `<g>`, `<linearGradient>`, `<radialGradient>`. No `<image>`, CSS or scripts. Works in browsers,
   Figma/Illustrator/Inkscape, Flutter (`flutter_svg`), Android/iOS vector pipelines.
 - **Safe to inline** — gradient ids are prefixed per file, so many SVGs can share one page.
 - **Compact** — relative path commands with minimal number syntax (~50% smaller than absolute coordinates).
@@ -20,7 +21,7 @@ input.png ──► outline separation ──► fill layer (regions + gradients
                                                                           <g id="outline">
 ```
 
-> **Status:** v0.2 — command line + Python library. A desktop app for **Windows and macOS** is planned for v1.0
+> **Status:** v0.3 — command line + Python library. A desktop app for **Windows and macOS** is planned for v1.0
 > (see [docs/PLAN.md](docs/PLAN.md)).
 
 ## Install
@@ -38,14 +39,23 @@ Requirements: Python ≥ 3.10, numpy, scipy, Pillow. No native tracer: curve fit
 ```bash
 png2svg hero.png                         # -> hero.svg
 png2svg scenes/*.png -o out/ --report    # batch + similarity check (needs Chrome or Edge)
-png2svg logo.png --flat --no-outline     # flat colors, no outline layer
+png2svg logo.png --preset logo           # flat colors, crisp geometry (also: flat, poster, cartoon)
+png2svg scenes/*.png -o out/ -j 8        # 8 worker processes (default: min(4, CPUs))
 ```
+
+| Preset | For |
+|---|---|
+| `cartoon` (default) | character art with ink outlines and soft shading |
+| `flat` | flat illustration: solid shapes, only clear gradients |
+| `logo` | logos and icons: few flat colors, exact shapes, no gradients |
+| `poster` | photos/paintings → poster look: fewer, larger regions |
 
 ```python
 from PIL import Image
-from pngsvg import Options, vectorize
+from pngsvg import Options, options_for, vectorize
 
 result = vectorize(Image.open('hero.png'), Options(id_prefix='hero'))
+# or a preset: options_for('logo', id_prefix='hero'); parallel fitting: vectorize(img, opts, executor=pool)
 open('hero.svg', 'w', encoding='utf-8').write(result.svg)
 print(result.regions, result.gradients, result.outline_paths)
 ```
@@ -61,6 +71,8 @@ print(result.regions, result.gradients, result.outline_paths)
 | `outline_tolerance` | `0.35` | max curve deviation of outlines (px) |
 | `outlines` | `True` | separate ink outlines into their own layer |
 | `gradients` | `True` | gradient fills (`False` = flat colors) |
+| `radial` | `True` | allow elliptical radial gradients |
+| `subpixel` | `True` | place fill boundaries at their sub-pixel edge position (from anti-aliasing) |
 | `regions.merge_de` | `9` | neighbours closer than this ΔE may merge (soft shading). Lower keeps more detail |
 | `regions.fit_de` | `3.5` | ...only if one linear gradient still explains the union (extra error per px, ΔE) |
 | `regions.gradient_min_area` | `300` | smaller regions are always solid fills |
@@ -81,13 +93,19 @@ print(result.regions, result.gradients, result.outline_paths)
    connected regions, then merged with a union-find: similar neighbours **only if one linear gradient still
    explains their union** (evaluated in O(1) from per-region sufficient statistics), tiny regions, and thin rims
    hugging outlines. So skin shading merges, while rings, blush and patterns stay separate.
-4. **Gradients.** Per region, a linear regression of color vs. position gives the gradient direction; three
-   stops are measured from the source pixels. Weak gradients become solid fills.
-5. **Shared boundaries.** The region label image becomes a planar map: every boundary between two regions is a
+4. **Gradients.** Per region: a linear model (direction of strongest change) and, for blob shading, an
+   elliptical cone (center and ellipse refined by non-linear least squares). Stop colors at 0/.5/1 are solved by
+   least squares against exactly what a renderer draws. Radial is used when it is clearly better; gradients that
+   barely beat a solid color become solid. Concentric bands of a ball or glow are first grown back into one
+   region.
+5. **Sub-pixel edges.** Boundary pixels shifted by the segmentation filters are moved back to the label their
+   own color belongs to, and each boundary crack is placed where the anti-aliasing says the edge is
+   (`e = a_left + a_right − 1`), so straight edges stay straight and tips stay sharp.
+6. **Shared boundaries.** The region label image becomes a planar map: every boundary between two regions is a
    chain between junctions, smoothed and fitted **once** and used by both regions, so neighbours never gap or
    overlap. Each region is painted as its outer boundary (holes are covered by the regions inside), largest
    first; a thin same-color stroke hides anti-aliasing seams.
-6. **Curve fitting.** Chains are fitted with least-squares cubic Beziers (Schneider's algorithm) within a pixel
+7. **Curve fitting.** Chains are fitted with least-squares cubic Beziers (Schneider's algorithm) within a pixel
    tolerance, splitting at sharp corners. Boundaries hidden under the ink get a much looser tolerance. The
    outline is traced the same way from its sub-pixel mask. Paths use relative commands and minimal numbers.
 
@@ -101,7 +119,8 @@ a single number can hide local defects.
 
 - Designed for **cartoon / flat illustration** styles with ink outlines. Photos and painterly art produce many
   regions and large files.
-- Only linear gradients (no radial or mesh). Round soft blobs (blush) become flat or linear-shaded regions.
+- Linear and elliptical radial gradients only (no mesh gradients). Very faint tiny color spots may merge into
+  their surroundings.
 - File size grows with detail (≈ 100–400 KB for a 1536×1024 detailed scene).
 
 ## Tests
@@ -113,9 +132,9 @@ pytest -q
 
 ## Roadmap
 
-See [docs/PLAN.md](docs/PLAN.md). Done: own curve fitting and shared boundaries (v0.2, see
-[docs/bench.md](docs/bench.md)). Next: radial gradients, parallel processing, presets, and a desktop app for
-Windows and macOS.
+See [docs/PLAN.md](docs/PLAN.md). Done: own curve fitting and shared boundaries (v0.2), radial
+gradients, parallel processing and presets (v0.3) — see [docs/bench.md](docs/bench.md). Next: a local web UI and
+the desktop app for Windows and macOS.
 
 ## License
 

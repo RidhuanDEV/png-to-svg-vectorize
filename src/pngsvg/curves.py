@@ -12,42 +12,49 @@ _MAX_REPARAM = 4
 
 
 def _normalize(v: np.ndarray) -> np.ndarray:
-    n = np.linalg.norm(v)
+    n = float(np.hypot(v[0], v[1]))
     return v / n if n > 1e-12 else np.array([1.0, 0.0])
 
 
-def _bezier(ctrl: np.ndarray, t: np.ndarray) -> np.ndarray:
+def _basis(t: np.ndarray) -> np.ndarray:
+    """Cubic Bernstein basis, (N, 4)."""
     mt = 1 - t
-    return (mt ** 3)[:, None] * ctrl[0] + (3 * mt * mt * t)[:, None] * ctrl[1] + \
-           (3 * mt * t * t)[:, None] * ctrl[2] + (t ** 3)[:, None] * ctrl[3]
+    return np.stack([mt * mt * mt, 3 * mt * mt * t, 3 * mt * t * t, t * t * t], 1)
+
+
+def _bezier(ctrl: np.ndarray, t: np.ndarray) -> np.ndarray:
+    return _basis(t) @ ctrl
+
+
+_D1 = np.array([[-1, 1, 0, 0], [0, -1, 1, 0], [0, 0, -1, 1]], np.float64) * 3     # control points -> 1st derivative
+_D2 = np.array([[1, -2, 1, 0], [0, 1, -2, 1]], np.float64) * 6                    # control points -> 2nd derivative
 
 
 def _bezier_d1(ctrl: np.ndarray, t: np.ndarray) -> np.ndarray:
     mt = 1 - t
-    return (3 * mt * mt)[:, None] * (ctrl[1] - ctrl[0]) + (6 * mt * t)[:, None] * (ctrl[2] - ctrl[1]) + \
-           (3 * t * t)[:, None] * (ctrl[3] - ctrl[2])
+    return np.stack([mt * mt, 2 * mt * t, t * t], 1) @ (_D1 @ ctrl)
 
 
 def _bezier_d2(ctrl: np.ndarray, t: np.ndarray) -> np.ndarray:
-    mt = 1 - t
-    return (6 * mt)[:, None] * (ctrl[2] - 2 * ctrl[1] + ctrl[0]) + (6 * t)[:, None] * (ctrl[3] - 2 * ctrl[2] + ctrl[1])
+    return np.stack([1 - t, t], 1) @ (_D2 @ ctrl)
 
 
 def _chord_params(p: np.ndarray) -> np.ndarray:
-    d = np.r_[0.0, np.cumsum(np.linalg.norm(np.diff(p, axis=0), axis=1))]
+    dp = np.diff(p, axis=0)
+    d = np.r_[0.0, np.cumsum(np.hypot(dp[:, 0], dp[:, 1]))]
     return d / d[-1] if d[-1] > 0 else np.linspace(0, 1, len(p))
 
 
 def _generate(p: np.ndarray, u: np.ndarray, t1: np.ndarray, t2: np.ndarray) -> np.ndarray:
     first, last = p[0], p[-1]
-    b0, b1, b2, b3 = (1 - u) ** 3, 3 * u * (1 - u) ** 2, 3 * u * u * (1 - u), u ** 3
-    a1 = b1[:, None] * t1
-    a2 = b2[:, None] * t2
+    B = _basis(u)
+    a1 = np.outer(B[:, 1], t1)
+    a2 = np.outer(B[:, 2], t2)
     c00, c01, c11 = (a1 * a1).sum(), (a1 * a2).sum(), (a2 * a2).sum()
-    tmp = p - (b0 + b1)[:, None] * first - (b2 + b3)[:, None] * last
+    tmp = p - np.outer(B[:, 0] + B[:, 1], first) - np.outer(B[:, 2] + B[:, 3], last)
     x0, x1 = (a1 * tmp).sum(), (a2 * tmp).sum()
     det = c00 * c11 - c01 * c01
-    seg = np.linalg.norm(last - first)
+    seg = float(np.hypot(*(last - first)))
     if abs(det) > 1e-12:
         al, ar = (x0 * c11 - x1 * c01) / det, (c00 * x1 - c01 * x0) / det
     else:
@@ -77,7 +84,7 @@ def _max_error(ctrl: np.ndarray, p: np.ndarray, u: np.ndarray, err2: np.ndarray)
 def _fit(p: np.ndarray, t1: np.ndarray, t2: np.ndarray, err2: np.ndarray, out: list, depth: int = 0) -> None:
     n = len(p)
     if n == 2 or depth > 24:
-        dist = np.linalg.norm(p[-1] - p[0]) / 3
+        dist = float(np.hypot(*(p[-1] - p[0]))) / 3
         out.append(np.array([p[0], p[0] + t1 * dist, p[-1] + t2 * dist, p[-1]]))
         return
     u = _chord_params(p)
@@ -113,18 +120,25 @@ def fit_curve(p: np.ndarray, error) -> list[np.ndarray]:
     return out
 
 
-def _midpoints(corners: np.ndarray, closed: bool) -> np.ndarray:
-    """Crack corners -> crack midpoints (removes the pixel staircase). Open chains keep their exact end corners
-    (junctions are shared by several chains)."""
+def _midpoints(corners: np.ndarray, closed: bool, offsets: np.ndarray | None = None) -> np.ndarray:
+    """Crack corners -> crack midpoints (removes the pixel staircase), each optionally moved by its sub-pixel
+    offset toward the right side of the traversal. Open chains keep their exact end corners (junctions are shared
+    by several chains)."""
+    nxt = np.roll(corners, -1, axis=0) if closed else corners[1:]
+    cur = corners if closed else corners[:-1]
+    mid = (cur + nxt) / 2
+    if offsets is not None:
+        d = nxt - cur
+        mid = mid - offsets[:, None] * np.stack([d[:, 1], -d[:, 0]], 1)     # minus left normal = toward the right
     if closed:
-        return (corners + np.roll(corners, -1, axis=0)) / 2
-    return np.vstack([corners[:1], (corners[:-1] + corners[1:]) / 2, corners[-1:]]).astype(np.float64)
+        return mid
+    return np.vstack([corners[:1], mid, corners[-1:]]).astype(np.float64)
 
 
 def _smooth_closed(p: np.ndarray, sigma: float) -> np.ndarray:
     if sigma <= 0 or len(p) < 5:
         return p
-    return np.stack([ndimage.gaussian_filter1d(p[:, i], sigma, mode='wrap') for i in range(2)], 1)
+    return ndimage.gaussian_filter1d(p, sigma, axis=0, mode='wrap')
 
 
 def _smooth_open(p: np.ndarray, sigma: float) -> np.ndarray:
@@ -133,7 +147,7 @@ def _smooth_open(p: np.ndarray, sigma: float) -> np.ndarray:
     n = len(p)
     if sigma <= 0 or n < 5:
         return p
-    sm = np.stack([ndimage.gaussian_filter1d(p[:, i], sigma, mode='nearest') for i in range(2)], 1)
+    sm = ndimage.gaussian_filter1d(p, sigma, axis=0, mode='nearest')
     idx = np.arange(n)
     w = np.clip(np.minimum(idx, n - 1 - idx) / max(2 * sigma, 1), 0, 1)[:, None]
     out = p * (1 - w) + sm * w
@@ -166,16 +180,17 @@ def corner_indices(p: np.ndarray, closed: bool, window: int = 4, min_turn_deg: f
 
 
 def _unit_rows(v: np.ndarray) -> np.ndarray:
-    n = np.linalg.norm(v, axis=1, keepdims=True)
+    n = np.hypot(v[:, 0], v[:, 1])[:, None]
     return v / np.where(n > 1e-12, n, 1)
 
 
 def fit_chain(corners: np.ndarray, closed: bool, sigma: float, error, window: int = 4,
-              corner_deg: float = 55.0) -> list[np.ndarray]:
+              corner_deg: float = 55.0, offsets: np.ndarray | None = None) -> list[np.ndarray]:
     """Crack-edge chain -> smooth cubic Bezier segments. Sharp corners (turn > corner_deg over +-window points of
     the smoothed curve) are kept: the chain is split there and each piece is smoothed with pinned ends.
-    `error` is the allowed deviation: a scalar, or one value per corner (e.g. looser where the boundary is hidden)."""
-    raw = _midpoints(corners, closed)
+    `error` is the allowed deviation: a scalar, or one value per corner (e.g. looser where the boundary is hidden).
+    `offsets` (one per crack) move the boundary to its sub-pixel position (see planar.subpixel_offsets)."""
+    raw = _midpoints(corners, closed, offsets)
     tol = np.broadcast_to(np.asarray(error, np.float64), (len(corners),))
     tol = np.minimum(tol, np.roll(tol, -1)) if closed else np.r_[tol[:1], np.minimum(tol[:-1], tol[1:]), tol[-1:]]
     if closed:

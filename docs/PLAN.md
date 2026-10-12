@@ -60,9 +60,9 @@ Web app (versi berikutnya) = FastAPI yang sama di server + UI yang sama di brows
 |---|---|---|
 | E1 | **Fitting kurva sendiri** (algoritma Schneider: Bezier kubik dengan toleransi galat, deteksi sudut dari sudut belok) menggantikan spline pendek vtracer; vtracer hanya untuk kontur mentah (atau ganti dengan marching squares sendiri) | Segmen −50% atau lebih, kurva lebih mulus, sudut tajam tetap tajam — ✅ M2 (`curves.py`; toleransi per titik, longgar di bawah outline) |
 | E2 | **Peta batas bersama (planar map)**: label wilayah → graf batas; setiap batas antar dua wilayah dilacak & di-fit sekali, dipakai kedua wilayah (tanpa tumpang-tindih 2 px) | File −30–50%, tanpa celah/seam, tepi antar-warna konsisten — ✅ M2 (`planar.py`; vtracer tidak dipakai lagi) |
-| E3 | **Radial gradient**: deteksi wilayah berbentuk blob dengan pusat terang/gelap (rona pipi, bola) → `radialGradient` | Rona pipi & highlight bulat lebih mirip |
-| E4 | **Paralel**: fitting/tracing per wilayah di `ProcessPoolExecutor`; profil & optimasi titik panas (bincount, label) | ≤ 8 detik per gambar 1536×1024 |
-| E5 | **Preset**: `cartoon` (bawaan), `flat-illustration`, `logo/icon` (warna datar, sedikit wilayah), `poster` (foto → gaya poster) | Hasil baik tanpa mengatur parameter |
+| E3 | **Radial gradient**: deteksi wilayah berbentuk blob dengan pusat terang/gelap (rona pipi, bola) → `radialGradient` | Rona pipi & highlight bulat lebih mirip — ✅ M3 (`gradients.py`: fit kerucut elips; pertumbuhan radial menyatukan pita konsentris; stop least-squares) |
+| E4 | **Paralel**: fitting/tracing per wilayah di `ProcessPoolExecutor`; profil & optimasi titik panas (bincount, label) | ≤ 8 detik per gambar 1536×1024 — ✅ M3 untuk median (7,2 s, pool 4 proses); terberat 9,8 s. Paralel lewat `executor=` (pustaka) / `--jobs` (CLI): banyak file = satu file per proses; satu file = fitting kurva paralel |
+| E5 | **Preset**: `cartoon` (bawaan), `flat-illustration`, `logo/icon` (warna datar, sedikit wilayah), `poster` (foto → gaya poster) | Hasil baik tanpa mengatur parameter — ✅ M3 (`presets.py`, `--preset`; angka di `docs/bench.md`) |
 | E6 | **Kemiripan tanpa Chrome**: di aplikasi, SVG dirender oleh webview ke `<canvas>` lalu dibandingkan dengan PNG (JS) | Skor kualitas langsung di UI |
 | E7 | **Set uji pembanding** (`bench/`): 20–30 gambar berlisensi bebas (kartun, logo, ikon, flat, poster) + skrip yang mencatat kemiripan/ukuran/segmen/waktu ke tabel; perbandingan manual dengan Vectorizer.ai/Illustrator di beberapa gambar | Klaim kualitas berbasis angka; regresi terdeteksi di CI |
 
@@ -111,7 +111,7 @@ png-to-svg-vectorize/
 | **M0** — Fondasi repo (✅ dimulai 2026-10-12) | Pindah kode ke `src/pngsvg`, CLI `png2svg`, README, lisensi MIT, CI tes Windows/macOS/Linux | CI hijau di 3 OS |
 | **M1** — Set uji & baseline (✅ 2026-10-12) | `bench/` + skrip; catat angka v0.1 (kemiripan, ukuran, segmen, waktu) | Tabel baseline di `docs/bench.md` |
 | **M2** — Mesin kualitas (E1, E2) (✅ 2026-10-12, v0.2) | Fitting kurva Schneider + planar map | Target segmen −50%, ukuran −40%, kemiripan tidak turun > 0,3 — tercapai: set Turion segmen −69%, ukuran −58%, kemiripan +0,08 (lihat `docs/bench.md`) |
-| **M3** — Mesin lanjutan (E3, E4, E5) | Radial gradient, paralel, preset | ≤ 8 detik/gambar; preset logo/ikon bagus di set uji |
+| **M3** — Mesin lanjutan (E3, E4, E5) (✅ 2026-10-12, v0.3) | Radial gradient, paralel, preset; bonus: tepi sub-piksel, deteksi tinta adaptif | ≤ 8 detik/gambar; preset logo/ikon bagus di set uji — tercapai (median 7,2 s; preset `logo` sama/lebih baik dari `cartoon` di 4 gambar logo/ikon, jumlah wilayah tepat) |
 | **M4** — Service + UI (web mode) | FastAPI + UI Svelte lengkap §4, jalan di browser lokal (`png2svg serve`) | Tes API + tes e2e Playwright hijau |
 | **M5** — Desktop & paket | pywebview, dialog native, PyInstaller, installer Win/mac, `release.yml` | Installer terpasang & berjalan di Windows 11 dan macOS (arm64 + Intel), tes asap di CI |
 | **M6** — Rilis v1.0 | Panduan pengguna EN/ID, tangkapan layar, catatan rilis, (opsional) tanda tangan kode | Tag `v1.0.0`, artefak di GitHub Releases |

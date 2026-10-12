@@ -4,6 +4,7 @@
     python bench/run.py                                         # bench/images -> bench/results/latest.json + table
     python bench/run.py --images D:/my/set --name private      # any folder (results stay local)
     python bench/run.py --baseline bench/baseline.json          # compare and flag regressions (exit 1)
+    python bench/run.py --jobs 4                                # time with a warm process pool (like the app/CLI)
 
 Metrics per image: similarity (100 - MAE %, rendered with Chrome/Edge), % pixels within 24/255, SVG bytes,
 Bezier/line segments, regions, gradients, seconds.
@@ -16,6 +17,7 @@ import re
 import statistics
 import sys
 import time
+from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
 from PIL import Image
@@ -50,12 +52,12 @@ def count_segments(svg: str) -> int:
     return n
 
 
-def run(images: list[Path]) -> dict:
+def run(images: list[Path], executor=None) -> dict:
     rows = {}
     for p in images:
         img = Image.open(p).convert('RGB')
         t = time.time()
-        res = vectorize(img, Options(id_prefix=p.stem))
+        res = vectorize(img, Options(id_prefix=p.stem), executor=executor)
         secs = time.time() - t
         out = render(res.svg, *img.size)
         sim, within = similarity(img, out) if out is not None else (float('nan'), float('nan'))
@@ -110,13 +112,19 @@ def main(argv=None) -> int:
     ap.add_argument('--images', type=Path, default=ROOT / 'bench' / 'images')
     ap.add_argument('--name', default='latest')
     ap.add_argument('--baseline', type=Path)
+    ap.add_argument('--jobs', type=int, default=1, help='worker processes for curve fitting (pool is warmed first)')
     a = ap.parse_args(argv)
     files = sorted(p for p in a.images.iterdir() if p.suffix.lower() in ('.png', '.webp', '.jpg', '.jpeg'))
     if not files:
         print(f'no images in {a.images} (run bench/synthetic.py first)')
         return 2
     base = json.loads(a.baseline.read_text(encoding='utf-8')) if a.baseline else None   # fail fast on a bad path
-    rows = run(files)
+    if a.jobs > 1:
+        with ProcessPoolExecutor(a.jobs) as ex:
+            list(ex.map(abs, range(a.jobs * 4)))          # start the workers before timing
+            rows = run(files, ex)
+    else:
+        rows = run(files)
     res_dir = ROOT / 'bench' / 'results'
     res_dir.mkdir(parents=True, exist_ok=True)
     (res_dir / f'{a.name}.json').write_text(json.dumps(rows, indent=1), encoding='utf-8')
