@@ -9,10 +9,81 @@ the CLI and the app.
 - **Synthetic set** (`bench/synthetic.py`, 12 procedural images, license-free): face with soft blush, flat logo,
   outlined icon, radial-gradient sphere, faint concentric rings, stripes + dots, thin lines, gradient background,
   overlapping leaves, star badge, line icon (v0.3+), photo-like landscape (v0.3+).
+- **Comparison set (E7, v1.0+)**: 27 CC0 / public-domain images from Wikimedia Commons — 13 cartoons (10 rendered
+  clipart, 3 raster illustrations), 3 flat illustrations, 4 flags (logo-like geometry), 4 icons, 2 paintings and a
+  photo. Not stored in git: `python bench/fetch_sets.py` downloads them and checks SHA-256; sources and licenses in
+  [bench/sets/SOURCES.md](../bench/sets/SOURCES.md). CI checks it against `bench/baseline-sets.json`.
 - **Private set**: 15 cartoon illustrations from the Turion app (image-generator art, 1536×1024 / 1774×887). Not
   published; numbers reported for reference.
 
 Machine: Windows 11 laptop, Python 3.13, single process.
+
+## v1.0 — comparison set E7 (2026-10-12)
+
+Default preset (`cartoon`) on every image, 4 worker processes:
+
+| Category | Images | Similarity (median) | Size (median) |
+|---|---|---|---|
+| Cartoon (rendered clipart) | 10 | 99.58 % | 76 KB |
+| Cartoon (raster illustration) | 3 | 99.57 % | 20 KB |
+| Flat illustration | 3 | 99.72 % | 72 KB |
+| Logo-like (flags) | 4 | 99.81 % | 20 KB |
+| Icon | 4 | 99.94 % | 5 KB |
+| Painting / photo | 3 | 94.26 % | 1.1 MB |
+| **All** | 27 | **99.72 %** | 57 KB |
+
+Paintings and photos are not the target of the default preset: with `--preset poster` the three files shrink by
+50–57 % (Earth 1.2 MB → 0.56 MB, Great Wave 0.64 → 0.30 MB, Starry Night 1.95 → 0.84 MB) at a similar similarity
+(95.18 / 92.73 / 92.17 %).
+
+Found and fixed while building the set: transparent PNGs were flattened onto black (now white); when the darkest
+pixels are a colored dark AREA (a purple flag, deep blue water) instead of lines, the ink color is taken from line
+pixels (astronaut: purple outlines → black, +0.44, −27 % size). The synthetic and Turion sets are unchanged by both.
+
+### Visual checklist (PLAN §8) at 2× zoom
+
+| Check | Result |
+|---|---|
+| Lines not jagged | ✅ cartoon outlines and flag/icon edges are smooth; straight edges straight (sub-pixel edges, v0.3) |
+| No gaps between regions | ✅ none found (shared boundaries, v0.2) |
+| Gradients without bands | ⚠️ mostly ✅; glossy, strongly non-linear shading (penguin beak, metallic highlights) still shows a few soft bands |
+| Mouths / eyes intact | ✅ on all cartoon faces checked (cute-girl, shipment, silver-hair-girl, Turion set) |
+| Blush kept | ✅ for clear blush; ⚠️ very faint tiny spots (freckle dots) merge into skin |
+| No light rims | ✅ |
+| Hairlines | ⚠️ lines thinner than ~1.5 px that are mostly anti-aliasing (the sun rays on the Kiribati flag) are lost |
+
+### Comparison set results
+
+| Image | Similarity | Within 24 | Size (bytes) | Segments | Regions | Time (s) |
+|---|---|---|---|---|---|---|
+| astronaut | 99.44% | 98.4% | 102670 | 4567 | 53 | 7.1 |
+| basketball-mascot | 99.83% | 99.5% | 70176 | 2957 | 73 | 6.6 |
+| caticorn | 99.81% | 99.4% | 94987 | 3469 | 69 | 6.6 |
+| cow | 99.82% | 99.4% | 35199 | 1363 | 30 | 6.1 |
+| cute-girl | 99.52% | 98.1% | 178956 | 7115 | 209 | 10.7 |
+| donkey | 99.83% | 99.3% | 45186 | 1856 | 17 | 6.3 |
+| earth-apollo17 | 94.44% | 80.4% | 1198954 | 54803 | 1147 | 16.9 |
+| fish-mascot | 99.62% | 98.0% | 58415 | 2425 | 58 | 10.6 |
+| flag-brazil | 99.86% | 99.5% | 32805 | 1254 | 59 | 4.0 |
+| flag-kiribati | 99.26% | 97.8% | 56412 | 2499 | 29 | 3.0 |
+| flag-nepal | 99.92% | 99.5% | 8959 | 334 | 8 | 6.0 |
+| flag-south-africa | 99.76% | 99.3% | 6525 | 237 | 9 | 3.5 |
+| flying-plane | 99.72% | 99.0% | 63018 | 2444 | 83 | 5.2 |
+| futuristic-mascot | 99.11% | 93.5% | 20011 | 591 | 27 | 4.1 |
+| great-wave | 94.26% | 78.0% | 639638 | 28930 | 398 | 9.8 |
+| icon-cat | 99.97% | 99.9% | 2552 | 94 | 1 | 2.5 |
+| icon-exclamation | 99.92% | 99.6% | 3421 | 120 | 7 | 1.6 |
+| icon-flask | 99.96% | 99.8% | 7025 | 269 | 11 | 1.6 |
+| icon-shop | 99.81% | 98.7% | 34147 | 1335 | 79 | 1.9 |
+| kazoo | 99.88% | 99.5% | 11913 | 442 | 19 | 5.0 |
+| mountain-landscape | 99.75% | 99.6% | 74089 | 2852 | 61 | 6.1 |
+| penguin | 99.08% | 99.0% | 84868 | 2925 | 100 | 8.4 |
+| popcorn | 99.57% | 99.1% | 33523 | 1298 | 35 | 5.0 |
+| robot | 99.53% | 98.4% | 70776 | 2876 | 64 | 6.6 |
+| shipment | 99.67% | 99.2% | 93902 | 3751 | 97 | 6.5 |
+| silver-hair-girl | 99.14% | 98.7% | 132938 | 5439 | 76 | 7.4 |
+| starry-night | 92.07% | 55.0% | 1954044 | 90841 | 2035 | 22.3 |
+| **median** | 99.72% | 99.1% | 58415 | 2444 | 59 | 6.1 |
 
 ## v0.3 — M3: radial gradients, speed, presets (2026-10-12)
 

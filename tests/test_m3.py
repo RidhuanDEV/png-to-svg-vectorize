@@ -71,3 +71,13 @@ def test_parallel_fit_matches_serial():
     assert len(serial) == len(par)
     assert all(len(a) == len(b) and all(np.allclose(x, y) for x, y in zip(a, b)) for a, b in zip(serial, par))
     assert fit_chain(*jobs[0][:6])                       # positional API still works without offsets
+
+
+def test_transparent_png_is_flattened_on_white():
+    from pngsvg.core import flatten
+    img = Image.new('RGBA', (60, 40), (0, 0, 0, 0))                     # fully transparent black
+    ImageDraw.Draw(img).ellipse((10, 5, 50, 35), fill=(37, 99, 235, 255))
+    flat = np.asarray(flatten(img))
+    assert tuple(flat[0, 0]) == (255, 255, 255) and tuple(flat[20, 30]) == (37, 99, 235)
+    res = vectorize(img)
+    assert '#FFFFFF' in res.svg.upper()                                   # white background, not black

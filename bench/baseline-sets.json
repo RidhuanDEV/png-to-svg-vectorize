@@ -1,0 +1,353 @@
+{
+ "astronaut": {
+  "similarity": 99.435,
+  "within24": 98.41,
+  "bytes": 102670,
+  "segments": 4567,
+  "regions": 53,
+  "gradients": 5,
+  "seconds": 7.1,
+  "size": [
+   1280,
+   1547
+  ]
+ },
+ "basketball-mascot": {
+  "similarity": 99.83,
+  "within24": 99.48,
+  "bytes": 70176,
+  "segments": 2957,
+  "regions": 73,
+  "gradients": 5,
+  "seconds": 6.58,
+  "size": [
+   1280,
+   1280
+  ]
+ },
+ "caticorn": {
+  "similarity": 99.81,
+  "within24": 99.41,
+  "bytes": 94987,
+  "segments": 3469,
+  "regions": 69,
+  "gradients": 43,
+  "seconds": 6.59,
+  "size": [
+   1280,
+   1527
+  ]
+ },
+ "cow": {
+  "similarity": 99.818,
+  "within24": 99.38,
+  "bytes": 35199,
+  "segments": 1363,
+  "regions": 30,
+  "gradients": 4,
+  "seconds": 6.13,
+  "size": [
+   1280,
+   1449
+  ]
+ },
+ "cute-girl": {
+  "similarity": 99.519,
+  "within24": 98.09,
+  "bytes": 178956,
+  "segments": 7115,
+  "regions": 209,
+  "gradients": 38,
+  "seconds": 10.7,
+  "size": [
+   1280,
+   2054
+  ]
+ },
+ "donkey": {
+  "similarity": 99.834,
+  "within24": 99.31,
+  "bytes": 45186,
+  "segments": 1856,
+  "regions": 17,
+  "gradients": 7,
+  "seconds": 6.31,
+  "size": [
+   1280,
+   1811
+  ]
+ },
+ "earth-apollo17": {
+  "similarity": 94.436,
+  "within24": 80.37,
+  "bytes": 1198954,
+  "segments": 54803,
+  "regions": 1147,
+  "gradients": 137,
+  "seconds": 16.95,
+  "size": [
+   1280,
+   1281
+  ]
+ },
+ "fish-mascot": {
+  "similarity": 99.625,
+  "within24": 98.05,
+  "bytes": 58415,
+  "segments": 2425,
+  "regions": 58,
+  "gradients": 3,
+  "seconds": 10.64,
+  "size": [
+   1280,
+   2846
+  ]
+ },
+ "flag-brazil": {
+  "similarity": 99.863,
+  "within24": 99.45,
+  "bytes": 32805,
+  "segments": 1254,
+  "regions": 59,
+  "gradients": 2,
+  "seconds": 4.05,
+  "size": [
+   1280,
+   896
+  ]
+ },
+ "flag-kiribati": {
+  "similarity": 99.26,
+  "within24": 97.82,
+  "bytes": 56412,
+  "segments": 2499,
+  "regions": 29,
+  "gradients": 2,
+  "seconds": 2.99,
+  "size": [
+   1280,
+   640
+  ]
+ },
+ "flag-nepal": {
+  "similarity": 99.918,
+  "within24": 99.5,
+  "bytes": 8959,
+  "segments": 334,
+  "regions": 8,
+  "gradients": 0,
+  "seconds": 5.98,
+  "size": [
+   1280,
+   1561
+  ]
+ },
+ "flag-south-africa": {
+  "similarity": 99.758,
+  "within24": 99.26,
+  "bytes": 6525,
+  "segments": 237,
+  "regions": 9,
+  "gradients": 0,
+  "seconds": 3.49,
+  "size": [
+   1280,
+   854
+  ]
+ },
+ "flying-plane": {
+  "similarity": 99.718,
+  "within24": 98.95,
+  "bytes": 63018,
+  "segments": 2444,
+  "regions": 83,
+  "gradients": 6,
+  "seconds": 5.2,
+  "size": [
+   1280,
+   1098
+  ]
+ },
+ "futuristic-mascot": {
+  "similarity": 99.11,
+  "within24": 93.46,
+  "bytes": 20011,
+  "segments": 591,
+  "regions": 27,
+  "gradients": 16,
+  "seconds": 4.12,
+  "size": [
+   1280,
+   960
+  ]
+ },
+ "great-wave": {
+  "similarity": 94.263,
+  "within24": 77.96,
+  "bytes": 639638,
+  "segments": 28930,
+  "regions": 398,
+  "gradients": 29,
+  "seconds": 9.81,
+  "size": [
+   1280,
+   860
+  ]
+ },
+ "icon-cat": {
+  "similarity": 99.974,
+  "within24": 99.91,
+  "bytes": 2552,
+  "segments": 94,
+  "regions": 1,
+  "gradients": 0,
+  "seconds": 2.51,
+  "size": [
+   960,
+   960
+  ]
+ },
+ "icon-exclamation": {
+  "similarity": 99.921,
+  "within24": 99.59,
+  "bytes": 3421,
+  "segments": 120,
+  "regions": 7,
+  "gradients": 0,
+  "seconds": 1.62,
+  "size": [
+   960,
+   960
+  ]
+ },
+ "icon-flask": {
+  "similarity": 99.957,
+  "within24": 99.83,
+  "bytes": 7025,
+  "segments": 269,
+  "regions": 11,
+  "gradients": 1,
+  "seconds": 1.59,
+  "size": [
+   960,
+   960
+  ]
+ },
+ "icon-shop": {
+  "similarity": 99.812,
+  "within24": 98.69,
+  "bytes": 34147,
+  "segments": 1335,
+  "regions": 79,
+  "gradients": 8,
+  "seconds": 1.94,
+  "size": [
+   960,
+   960
+  ]
+ },
+ "kazoo": {
+  "similarity": 99.879,
+  "within24": 99.53,
+  "bytes": 11913,
+  "segments": 442,
+  "regions": 19,
+  "gradients": 1,
+  "seconds": 4.99,
+  "size": [
+   1280,
+   1368
+  ]
+ },
+ "mountain-landscape": {
+  "similarity": 99.75,
+  "within24": 99.61,
+  "bytes": 74089,
+  "segments": 2852,
+  "regions": 61,
+  "gradients": 31,
+  "seconds": 6.06,
+  "size": [
+   1280,
+   1279
+  ]
+ },
+ "penguin": {
+  "similarity": 99.075,
+  "within24": 98.95,
+  "bytes": 84868,
+  "segments": 2925,
+  "regions": 100,
+  "gradients": 53,
+  "seconds": 8.44,
+  "size": [
+   1280,
+   1283
+  ]
+ },
+ "popcorn": {
+  "similarity": 99.571,
+  "within24": 99.06,
+  "bytes": 33523,
+  "segments": 1298,
+  "regions": 35,
+  "gradients": 12,
+  "seconds": 5.03,
+  "size": [
+   1200,
+   1200
+  ]
+ },
+ "robot": {
+  "similarity": 99.528,
+  "within24": 98.37,
+  "bytes": 70776,
+  "segments": 2876,
+  "regions": 64,
+  "gradients": 4,
+  "seconds": 6.61,
+  "size": [
+   1280,
+   1509
+  ]
+ },
+ "shipment": {
+  "similarity": 99.672,
+  "within24": 99.17,
+  "bytes": 93902,
+  "segments": 3751,
+  "regions": 97,
+  "gradients": 15,
+  "seconds": 6.46,
+  "size": [
+   1280,
+   1477
+  ]
+ },
+ "silver-hair-girl": {
+  "similarity": 99.143,
+  "within24": 98.65,
+  "bytes": 132938,
+  "segments": 5439,
+  "regions": 76,
+  "gradients": 38,
+  "seconds": 7.38,
+  "size": [
+   1280,
+   1811
+  ]
+ },
+ "starry-night": {
+  "similarity": 92.068,
+  "within24": 55.04,
+  "bytes": 1954044,
+  "segments": 90841,
+  "regions": 2035,
+  "gradients": 173,
+  "seconds": 22.33,
+  "size": [
+   1280,
+   1014
+  ]
+ }
+}

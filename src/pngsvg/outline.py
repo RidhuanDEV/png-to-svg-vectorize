@@ -26,6 +26,10 @@ class OutlineParams:
     thin_ab: float = 16.0       # ...with ink-like hue (a*b* distance), so brown wrinkles / grey brows stay color
     band: int = 5               # px around ink cores examined for blending
     residual: float = 36.0      # max RGB distance from the I->B segment to count as a blend
+    ink_line_size: int = 21     # lines thinner than this (px) define the ink color...
+    ink_chroma: float = 15.0    # a darkest-pixel color with more chroma (a*b*) than this is checked against lines:
+    ink_line_fraction: float = 0.4  # use line pixels when fewer of the darkest pixels than this are lines...
+    ink_line_pct: float = 5.0   # ...and take the darkest N % of them (line cores; darker is the safer error)
     ink_percentile: float = 2.0  # ink color = median of the darkest N% pixels (halved down to 0.5 % if too light)
     max_ink_l: float = 35.0     # if the darkest pixels are lighter than this L*, the image has no outlines
     halo_px: int = 3            # sharpening halos: within this distance of ink...
@@ -41,6 +45,9 @@ class Outline:
 
 
 def detect_ink(rgb: np.ndarray, lab: np.ndarray, p: OutlineParams):
+    """Ink color = median of the darkest pixels. When that color is clearly chromatic and those pixels are mostly
+    large dark AREAS rather than lines (a dark purple flag, deep blue water), the ink is taken from line pixels instead - pixels darker than their
+    surroundings, i.e. structures thinner than ink_line_size - so the outline layer gets the color of the lines."""
     L = lab[..., 0]
     pct = p.ink_percentile
     cut = np.percentile(L, pct)
@@ -49,7 +56,17 @@ def detect_ink(rgb: np.ndarray, lab: np.ndarray, p: OutlineParams):
         cut = np.percentile(L, pct)
     if cut > p.max_ink_l:
         return None
-    return np.median(rgb[L <= cut], axis=0).astype(np.float32)
+    darkest = L <= cut
+    ink = np.median(rgb[darkest], axis=0).astype(np.float32)
+    chroma = float(np.hypot(*to_lab(ink)[1:]))
+    if chroma < p.ink_chroma:                   # near-neutral (black) ink: right for line art even when the
+        return ink                              # darkest pixels are hair or a night sky
+    line = (ndimage.grey_closing(L, size=p.ink_line_size) - L) > p.thin_depth
+    if (line & darkest).sum() < p.ink_line_fraction * darkest.sum() and line.sum() >= max(200, 0.002 * L.size):
+        lcut = np.percentile(L[line], p.ink_line_pct)
+        if lcut <= p.max_ink_l:
+            return np.median(rgb[line & (L <= lcut)], axis=0).astype(np.float32)
+    return ink
 
 
 def separate(rgb: np.ndarray, p: OutlineParams | None = None) -> Outline:

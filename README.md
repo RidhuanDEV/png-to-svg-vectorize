@@ -21,9 +21,11 @@ input.png ──► outline separation ──► fill layer (regions + gradients
                                                                           <g id="outline">
 ```
 
-> **Status:** v0.5 — command line, Python library, local web UI (`png2svg serve`) and a desktop app for
-> **Windows and macOS** (installers built by GitHub Actions; v1.0 release in progress, see
-> [docs/PLAN.md](docs/PLAN.md)).
+> **Status:** v1.0 — desktop app for **Windows and macOS**, local web UI, command line and Python library.
+> **[Download](https://github.com/RidhuanDEV/png-to-svg-vectorize/releases)** ·
+> [User guide](docs/user-guide.en.md) · [Panduan (ID)](docs/user-guide.id.md) · [Changelog](CHANGELOG.md)
+
+![PNG to SVG Vectorize](docs/images/app-overview.png)
 
 ## Install
 
@@ -155,8 +157,10 @@ a single number can hide local defects.
 
 - Designed for **cartoon / flat illustration** styles with ink outlines. Photos and painterly art produce many
   regions and large files.
-- Linear and elliptical radial gradients only (no mesh gradients). Very faint tiny color spots may merge into
-  their surroundings.
+- Linear and elliptical radial gradients only (no mesh gradients): glossy, strongly non-linear shading may show
+  a few soft bands. Very faint tiny color spots may merge into their surroundings.
+- One ink color per image; hairlines thinner than ~1.5 px that are mostly anti-aliasing can be lost.
+- Transparent images are flattened onto white (the SVG has a background).
 - File size grows with detail (≈ 100–400 KB for a 1536×1024 detailed scene).
 
 ## Tests
@@ -171,7 +175,7 @@ cd app/ui && npm run check && npm run e2e   # UI type check + Playwright end-to-
 
 See [docs/PLAN.md](docs/PLAN.md). Done: own curve fitting and shared boundaries (v0.2), radial
 gradients, parallel processing and presets (v0.3) — see [docs/bench.md](docs/bench.md) — and a local web UI
-(v0.4), desktop app + installers (v0.5). Next: v1.0 (user guide, wider benchmark set, release).
+(v0.4), desktop app + installers (v0.5), user guide and license-free comparison set (v1.0).
 
 ## License
 

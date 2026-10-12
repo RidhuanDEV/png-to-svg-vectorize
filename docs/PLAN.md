@@ -64,7 +64,7 @@ Web app (versi berikutnya) = FastAPI yang sama di server + UI yang sama di brows
 | E4 | **Paralel**: fitting/tracing per wilayah di `ProcessPoolExecutor`; profil & optimasi titik panas (bincount, label) | ≤ 8 detik per gambar 1536×1024 — ✅ M3 untuk median (7,2 s, pool 4 proses); terberat 9,8 s. Paralel lewat `executor=` (pustaka) / `--jobs` (CLI): banyak file = satu file per proses; satu file = fitting kurva paralel |
 | E5 | **Preset**: `cartoon` (bawaan), `flat-illustration`, `logo/icon` (warna datar, sedikit wilayah), `poster` (foto → gaya poster) | Hasil baik tanpa mengatur parameter — ✅ M3 (`presets.py`, `--preset`; angka di `docs/bench.md`) |
 | E6 | **Kemiripan tanpa Chrome**: di aplikasi, SVG dirender oleh webview ke `<canvas>` lalu dibandingkan dengan PNG (JS) | Skor kualitas langsung di UI — ✅ M4 (`app/ui/src/lib/similarity.ts`) |
-| E7 | **Set uji pembanding** (`bench/`): 20–30 gambar berlisensi bebas (kartun, logo, ikon, flat, poster) + skrip yang mencatat kemiripan/ukuran/segmen/waktu ke tabel; perbandingan manual dengan Vectorizer.ai/Illustrator di beberapa gambar | Klaim kualitas berbasis angka; regresi terdeteksi di CI |
+| E7 | **Set uji pembanding** (`bench/`): 20–30 gambar berlisensi bebas (kartun, logo, ikon, flat, poster) + skrip yang mencatat kemiripan/ukuran/segmen/waktu ke tabel; perbandingan manual dengan Vectorizer.ai/Illustrator di beberapa gambar | Klaim kualitas berbasis angka; regresi terdeteksi di CI — ✅ M6 (27 gambar CC0/PD Commons, manifest + sha256, job CI `bench`; perbandingan manual: `docs/compare-tools.md`) |
 
 ## 4. Fitur aplikasi v1.0
 
@@ -114,7 +114,7 @@ png-to-svg-vectorize/
 | **M3** — Mesin lanjutan (E3, E4, E5) (✅ 2026-10-12, v0.3) | Radial gradient, paralel, preset; bonus: tepi sub-piksel, deteksi tinta adaptif | ≤ 8 detik/gambar; preset logo/ikon bagus di set uji — tercapai (median 7,2 s; preset `logo` sama/lebih baik dari `cartoon` di 4 gambar logo/ikon, jumlah wilayah tepat) |
 | **M4** — Service + UI (web mode) (✅ 2026-10-12, v0.4) | FastAPI + UI Svelte lengkap §4, jalan di browser lokal (`png2svg serve`); E6 skor kemiripan di UI (canvas) | Tes API + tes e2e Playwright hijau |
 | **M5** — Desktop & paket (✅ 2026-10-12, v0.5) | pywebview, dialog native, PyInstaller, installer Win/mac, `release.yml` | Installer terpasang & berjalan di Windows 11 dan macOS (arm64 + Intel), tes asap di CI — build + tes asap hijau di CI (Win x64, mac arm64, mac Intel `macos-15-intel`); exe lokal Windows terbuka & melayani UI; uji pasang di perangkat nyata masuk checklist M6 |
-| **M6** — Rilis v1.0 | Panduan pengguna EN/ID, tangkapan layar, catatan rilis, (opsional) tanda tangan kode | Tag `v1.0.0`, artefak di GitHub Releases |
+| **M6** — Rilis v1.0 (✅ dokumen & set uji 2026-10-12; tag menunggu persetujuan pemilik) | Panduan pengguna EN/ID, tangkapan layar, catatan rilis, set uji E7, checklist visual; tanpa tanda tangan kode (P-1) | Tag `v1.0.0`, artefak di GitHub Releases |
 
 Setiap tahap: tes otomatis hijau, angka `bench/` dicatat (tidak boleh turun tanpa alasan), dokumen diperbarui.
 

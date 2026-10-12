@@ -45,6 +45,16 @@ class Result:
     outline_paths: int
 
 
+def flatten(image: Image.Image, background=(255, 255, 255)) -> Image.Image:
+    """RGB copy of the image; transparent pixels are composited onto `background` (white) instead of whatever color
+    the encoder left in them (often black)."""
+    if image.mode in ('RGBA', 'LA', 'PA') or (image.mode == 'P' and 'transparency' in image.info):
+        rgba = image.convert('RGBA')
+        canvas = Image.new('RGBA', rgba.size, background + (255,))
+        return Image.alpha_composite(canvas, rgba).convert('RGB')
+    return image.convert('RGB')
+
+
 def _auto_scale(w: int, h: int) -> int:
     return int(np.clip(round(4500 / max(w, h)), 1, 4))
 
@@ -62,7 +72,7 @@ def vectorize(image: Image.Image, opts: Options | None = None, executor: Executo
     opts = opts or Options()
     stage = on_stage or (lambda name, fraction: None)
     stage('ink', 0.05)
-    rgb = np.asarray(image.convert('RGB'))
+    rgb = np.asarray(flatten(image))
     h, w = rgb.shape[:2]
     S = opts.scale or _auto_scale(w, h)
     pid = _safe_id(opts.id_prefix)

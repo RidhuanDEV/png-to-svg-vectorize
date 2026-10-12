@@ -24,7 +24,8 @@ from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'src'))
-from pngsvg import Options, vectorize  # noqa: E402
+from pngsvg import options_for, vectorize  # noqa: E402
+from pngsvg.core import flatten  # noqa: E402
 from pngsvg.compare import render, similarity  # noqa: E402
 
 _D = re.compile(r' d="([^"]+)"')
@@ -52,12 +53,12 @@ def count_segments(svg: str) -> int:
     return n
 
 
-def run(images: list[Path], executor=None) -> dict:
+def run(images: list[Path], executor=None, preset: str = 'cartoon') -> dict:
     rows = {}
     for p in images:
-        img = Image.open(p).convert('RGB')
+        img = flatten(Image.open(p))
         t = time.time()
-        res = vectorize(img, Options(id_prefix=p.stem), executor=executor)
+        res = vectorize(img, options_for(preset, id_prefix=p.stem), executor=executor)
         secs = time.time() - t
         out = render(res.svg, *img.size)
         sim, within = similarity(img, out) if out is not None else (float('nan'), float('nan'))
@@ -112,9 +113,14 @@ def main(argv=None) -> int:
     ap.add_argument('--images', type=Path, default=ROOT / 'bench' / 'images')
     ap.add_argument('--name', default='latest')
     ap.add_argument('--baseline', type=Path)
+    ap.add_argument('--preset', default='cartoon', help='engine preset for every image (default: cartoon)')
+    ap.add_argument('--only', help='comma-separated image stems to run (default: all)')
     ap.add_argument('--jobs', type=int, default=1, help='worker processes for curve fitting (pool is warmed first)')
     a = ap.parse_args(argv)
     files = sorted(p for p in a.images.iterdir() if p.suffix.lower() in ('.png', '.webp', '.jpg', '.jpeg'))
+    if a.only:
+        keep = set(a.only.split(','))
+        files = [f for f in files if f.stem in keep]
     if not files:
         print(f'no images in {a.images} (run bench/synthetic.py first)')
         return 2
@@ -122,9 +128,9 @@ def main(argv=None) -> int:
     if a.jobs > 1:
         with ProcessPoolExecutor(a.jobs) as ex:
             list(ex.map(abs, range(a.jobs * 4)))          # start the workers before timing
-            rows = run(files, ex)
+            rows = run(files, ex, a.preset)
     else:
-        rows = run(files)
+        rows = run(files, preset=a.preset)
     res_dir = ROOT / 'bench' / 'results'
     res_dir.mkdir(parents=True, exist_ok=True)
     (res_dir / f'{a.name}.json').write_text(json.dumps(rows, indent=1), encoding='utf-8')

@@ -20,3 +20,4 @@ bench/results/
 src/pngsvg_app/static/
 app/ui/test-results/
 app/ui/playwright-report/
+bench/sets/images/
