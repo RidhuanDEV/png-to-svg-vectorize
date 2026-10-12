@@ -109,7 +109,7 @@ png-to-svg-vectorize/
 | Tahap | Isi | Selesai bila |
 |---|---|---|
 | **M0** — Fondasi repo (✅ dimulai 2026-10-12) | Pindah kode ke `src/pngsvg`, CLI `png2svg`, README, lisensi MIT, CI tes Windows/macOS/Linux | CI hijau di 3 OS |
-| **M1** — Set uji & baseline | `bench/` + skrip; catat angka v0.1 (kemiripan, ukuran, segmen, waktu) | Tabel baseline di `docs/bench.md` |
+| **M1** — Set uji & baseline (✅ 2026-10-12) | `bench/` + skrip; catat angka v0.1 (kemiripan, ukuran, segmen, waktu) | Tabel baseline di `docs/bench.md` |
 | **M2** — Mesin kualitas (E1, E2) | Fitting kurva Schneider + planar map | Target segmen −50%, ukuran −40%, kemiripan tidak turun > 0,3 |
 | **M3** — Mesin lanjutan (E3, E4, E5) | Radial gradient, paralel, preset | ≤ 8 detik/gambar; preset logo/ikon bagus di set uji |
 | **M4** — Service + UI (web mode) | FastAPI + UI Svelte lengkap §4, jalan di browser lokal (`png2svg serve`) | Tes API + tes e2e Playwright hijau |
@@ -132,8 +132,8 @@ Setiap tahap: tes otomatis hijau, angka `bench/` dicatat (tidak boleh turun tanp
 
 | # | Pertanyaan | Opsi | Rekomendasi |
 |---|---|---|---|
-| P-1 | Penandatanganan kode | (a) tidak di v1.0, (b) Apple Developer Program ($99/tahun) + sertifikat Windows (±$200–400/tahun, atau Azure Trusted Signing) | **(a)** untuk v1.0, **(b)** sebelum promosi luas |
-| P-2 | Nama & ikon aplikasi | "PNG to SVG Vectorize" atau nama merek baru | Putuskan sebelum M5 (memengaruhi installer & bundle id) |
+| P-1 | Penandatanganan kode | — | ✅ **Diputuskan 2026-10-12: tanpa tanda tangan** (gratis, open source). Panduan instalasi menjelaskan peringatan SmartScreen/Gatekeeper dan cara membuka |
+| P-2 | Nama & ikon aplikasi | — | ✅ Nama "PNG to SVG Vectorize"; logo `assets/logo.svg` (+ `logo-small.svg` untuk 16–48 px), ikon `.ico`/`.icns`/PNG lewat `scripts/build_icons.py` |
 | P-3 | Rilis ke PyPI | Ya / nanti | **Ya** setelah M2 (nama distribusi `png-to-svg-vectorize`) |
 | P-4 | Versi web publik (di-hosting) | Tidak di v1.0 / ya | **Tidak di v1.0**: arsitektur sudah siap, hosting menambah biaya & isu privasi unggahan |
 

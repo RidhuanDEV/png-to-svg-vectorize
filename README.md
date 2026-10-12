@@ -1,5 +1,7 @@
 # PNG to SVG Vectorize
 
+<p align="center"><img src="assets/icons/icon-256.png" width="128" alt="PNG to SVG Vectorize logo"></p>
+
 [![CI](https://github.com/RidhuanDEV/png-to-svg-vectorize/actions/workflows/ci.yml/badge.svg)](https://github.com/RidhuanDEV/png-to-svg-vectorize/actions/workflows/ci.yml)
 
 Turn **raster cartoon illustrations** (PNG/WebP/JPEG — e.g. from image generators or scans) into **editable, library-free SVG**:

@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <!-- PNG to SVG Vectorize — logo. Left: raster staircase (pixels). Right: the same curve as a smooth Bezier
+       with anchor points and handles. Pure paths, no fonts. -->
+  <defs>
+    <linearGradient id="pngsvg-logo-bg" x1="96" y1="64" x2="928" y2="960" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4F46E5"/>
+      <stop offset="1" stop-color="#0EA5A4"/>
+    </linearGradient>
+  </defs>
+  <rect x="64" y="64" width="896" height="896" rx="208" fill="url(#pngsvg-logo-bg)"/>
+  <!-- raster staircase: pixels approximating the curve -->
+  <g fill="#FFFFFF" fill-opacity=".42">
+    <rect x="176" y="624" width="72" height="72" rx="10"/>
+    <rect x="256" y="544" width="72" height="72" rx="10"/>
+    <rect x="256" y="624" width="72" height="72" rx="10"/>
+    <rect x="336" y="464" width="72" height="72" rx="10"/>
+    <rect x="336" y="544" width="72" height="72" rx="10"/>
+    <rect x="416" y="384" width="72" height="72" rx="10"/>
+    <rect x="416" y="464" width="72" height="72" rx="10"/>
+  </g>
+  <!-- divider -->
+  <path d="M512 232V792" stroke="#FFFFFF" stroke-opacity=".28" stroke-width="12" stroke-linecap="round" stroke-dasharray="8 30"/>
+  <!-- smooth vector curve continuing the staircase: A(540,430) -> B(852,236), controls C1(560,250) C2(700,236) -->
+  <path d="M540 430L560 250M852 236L700 236" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round" stroke-opacity=".85"/>
+  <path d="M540 430C560 250 700 236 852 236" fill="none" stroke="#FFFFFF" stroke-width="44" stroke-linecap="round"/>
+  <circle cx="560" cy="250" r="20" fill="#FFFFFF"/>
+  <circle cx="700" cy="236" r="20" fill="#FFFFFF"/>
+  <rect x="510" y="400" width="60" height="60" rx="12" fill="#FFFFFF"/>
+  <rect x="517" y="407" width="46" height="46" rx="8" fill="#4F46E5"/>
+  <rect x="822" y="206" width="60" height="60" rx="12" fill="#FFFFFF"/>
+  <rect x="829" y="213" width="46" height="46" rx="8" fill="#0EA5A4"/>
+  <!-- bottom bar: "PNG -> SVG" as two blocks + arrow (no text, scales to 16 px) -->
+  <rect x="176" y="760" width="248" height="56" rx="28" fill="#FFFFFF" fill-opacity=".42"/>
+  <path d="M470 788H600M566 752L604 788L566 824" fill="none" stroke="#FFFFFF" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="648" y="760" width="200" height="56" rx="28" fill="#FFFFFF"/>
+</svg>
