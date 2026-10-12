@@ -8,4 +8,4 @@ from .presets import PRESETS, options_for
 from .regions import RegionParams
 
 __all__ = ['vectorize', 'Options', 'Result', 'OutlineParams', 'RegionParams', 'PRESETS', 'options_for']
-__version__ = '0.3.0'
+__version__ = '0.4.0'

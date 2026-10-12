@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import re
 from concurrent.futures import Executor
+from typing import Callable
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -53,11 +54,14 @@ def _safe_id(s: str) -> str:
     return s if s[0].isalpha() else 'v' + s
 
 
-def vectorize(image: Image.Image, opts: Options | None = None, executor: Executor | None = None) -> Result:
+def vectorize(image: Image.Image, opts: Options | None = None, executor: Executor | None = None,
+              on_stage: Callable[[str, float], None] | None = None) -> Result:
     """Vectorize one image. `executor` (e.g. a ProcessPoolExecutor) optionally parallelizes curve fitting; the
     caller owns it, so one pool can be reused across images (on Windows/macOS create it under
-    `if __name__ == '__main__':`)."""
+    `if __name__ == '__main__':`). `on_stage(name, fraction)` reports progress: ink, regions, curves, svg."""
     opts = opts or Options()
+    stage = on_stage or (lambda name, fraction: None)
+    stage('ink', 0.05)
     rgb = np.asarray(image.convert('RGB'))
     h, w = rgb.shape[:2]
     S = opts.scale or _auto_scale(w, h)
@@ -70,6 +74,7 @@ def vectorize(image: Image.Image, opts: Options | None = None, executor: Executo
     has_ink = bool((ol.alpha > 0.5).any())
     near = ndimage.distance_transform_edt(ol.alpha < 0.5) <= opts.regions.ring_dist if has_ink else np.zeros((h, w), bool)
 
+    stage('regions', 0.3)
     label = segment(ol.behind_rgb, near, opts.regions)
     if opts.subpixel:
         label = refine_boundaries(label, ol.behind_rgb, ol.alpha >= 0.5 if has_ink else None)
@@ -77,6 +82,7 @@ def vectorize(image: Image.Image, opts: Options | None = None, executor: Executo
     objects = ndimage.find_objects(label)
 
     # shared boundaries: every chain is fitted once and used by both regions it separates
+    stage('curves', 0.65)
     chains = build_chains(label)
     tol = _corner_tolerance(ol.alpha, opts.tolerance, opts.hidden_tolerance) if has_ink else None
     if opts.subpixel:
@@ -102,6 +108,7 @@ def vectorize(image: Image.Image, opts: Options | None = None, executor: Executo
         shapes[r] = (abs(sum(a for a in areas if np.sign(a) == sign)), outer)  # fills them is painted on top
     order = sorted(shapes, key=lambda r: -shapes[r][0])
 
+    stage('svg', 0.9)
     defs, fills, n_grad = [], [], 0
     for i in order:
         sl = objects[i - 1]

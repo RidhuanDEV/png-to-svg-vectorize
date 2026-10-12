@@ -16,3 +16,7 @@ out/
 *.tmp.svg
 bench/images/
 bench/results/
+# UI build output (built in CI / release) and Playwright artifacts
+src/pngsvg_app/static/
+app/ui/test-results/
+app/ui/playwright-report/

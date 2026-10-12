@@ -21,8 +21,8 @@ input.png ──► outline separation ──► fill layer (regions + gradients
                                                                           <g id="outline">
 ```
 
-> **Status:** v0.3 — command line + Python library. A desktop app for **Windows and macOS** is planned for v1.0
-> (see [docs/PLAN.md](docs/PLAN.md)).
+> **Status:** v0.4 — command line, Python library and a local web UI (`png2svg serve`). A desktop app for
+> **Windows and macOS** is planned for v1.0 (see [docs/PLAN.md](docs/PLAN.md)).
 
 ## Install
 
@@ -109,6 +109,26 @@ print(result.regions, result.gradients, result.outline_paths)
    tolerance, splitting at sharp corners. Boundaries hidden under the ink get a much looser tolerance. The
    outline is traced the same way from its sub-pixel mask. Paths use relative commands and minimal numbers.
 
+## Web UI (local)
+
+```bash
+pip install -e ".[app]"
+cd app/ui && npm ci && npm run build && cd ../..   # builds the UI into src/pngsvg_app/static
+png2svg serve                                     # opens http://127.0.0.1:<port>/#t=<session token>
+```
+
+Drag images in (or **Open images…**), watch progress, compare original and SVG side by side or with a slider
+(synchronized zoom up to 800 %, fills-only / outlines-only views), see a similarity score, change the preset or
+advanced settings and re-process, then save one SVG, all SVGs (zip) or copy the SVG code. English and Bahasa
+Indonesia; light/dark follows the system.
+
+Privacy and safety: the service listens on `127.0.0.1` only, every API call needs the random per-session token
+from the link, foreign `Host` headers are refused, uploads are limited to 50 MB / 8000 px and checked by content
+(PNG, WebP, JPEG). Images and results stay in memory and are gone when the server stops.
+
+UI development: `python -m pngsvg_app --port 8765 --token dev --no-browser`, then `npm run dev` in `app/ui` and
+open `http://localhost:5173/#t=dev`.
+
 ## Quality check
 
 `--report` renders the SVG with headless Chrome/Edge and prints similarity (100 − mean abs error %, and % of
@@ -126,15 +146,16 @@ a single number can hide local defects.
 ## Tests
 
 ```bash
-pip install -e .[dev]
-pytest -q
+pip install -e ".[dev,app]"
+pytest -q                                   # engine + API tests
+cd app/ui && npm run check && npm run e2e   # UI type check + Playwright end-to-end tests (needs a UI build)
 ```
 
 ## Roadmap
 
 See [docs/PLAN.md](docs/PLAN.md). Done: own curve fitting and shared boundaries (v0.2), radial
-gradients, parallel processing and presets (v0.3) — see [docs/bench.md](docs/bench.md). Next: a local web UI and
-the desktop app for Windows and macOS.
+gradients, parallel processing and presets (v0.3) — see [docs/bench.md](docs/bench.md) — and a local web UI
+(v0.4). Next: the desktop app and installers for Windows and macOS.
 
 ## License
 
@@ -148,4 +169,6 @@ Alat untuk mengubah **ilustrasi kartun raster** (PNG/WebP/JPEG) menjadi **SVG pa
 isian bergradasi (kulit mulus, tanpa bercak), garis luar tajam dan akurat sampai sub-piksel, tanpa library/CSS/raster,
 ID gradien unik per file, dan ukuran ringkas. Pemakaian: `png2svg gambar.png` (hasil `gambar.svg`),
 atau `png2svg folder/*.png -o hasil/ --report` untuk banyak berkas sekaligus beserta ukuran kemiripan.
-Selalu periksa juga secara visual pada perbesaran 2×.
+Selalu periksa juga secara visual pada perbesaran 2×. Antarmuka lokal: `pip install -e ".[app]"`, build UI di
+`app/ui` (`npm ci && npm run build`), lalu `png2svg serve` — seret gambar, bandingkan, simpan SVG; semua tetap di
+komputer Anda.

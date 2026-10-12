@@ -1,4 +1,7 @@
-"""Command line: png2svg INPUT (or python -m pngsvg INPUT) [INPUT ...] [-o OUT] [options]"""
+"""Command line: png2svg INPUT (or python -m pngsvg INPUT) [INPUT ...] [-o OUT] [options]
+
+    png2svg serve [--port N] [--no-browser]     local web UI (needs the [app] extra)
+"""
 from __future__ import annotations
 
 import argparse
@@ -50,6 +53,15 @@ def _convert(src: Path, dst: Path, opts, report: bool, executor=None) -> str:
 
 
 def main(argv=None) -> int:
+    argv = sys.argv[1:] if argv is None else list(argv)
+    if argv[:1] == ['serve']:                  # png2svg serve [...]: local web UI
+        try:
+            from pngsvg_app.__main__ import main as serve_main
+            import fastapi, uvicorn  # noqa: F401
+        except ImportError:
+            print('The UI needs the app extra: pip install "png-to-svg-vectorize[app]"', file=sys.stderr)
+            return 2
+        return serve_main(argv[1:])
     ap = argparse.ArgumentParser(prog='png2svg', description='Raster cartoon illustration -> pure-path SVG with '
                                  'gradient fills and crisp outlines.')
     ap.add_argument('inputs', nargs='+', type=Path, help='PNG/WebP/JPEG files')
