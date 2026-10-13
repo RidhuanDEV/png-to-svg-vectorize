@@ -1,5 +1,7 @@
 # Rencana PNG to SVG Vectorize — menuju v1.0 (aplikasi desktop Windows & macOS)
 
+> **Lanjutan: [PLAN-v2.md](PLAN-v2.md)** — M8 tema & Pengaturan, M9 AI pra-proses, M10 fitur lengkap "kelas studio" (tetap gratis), M11 website produk.
+
 > Status: disusun 2026-10-12. Kondisi awal = v0.1: mesin vektorisasi (Python) + CLI `png2svg` + 5 tes,
 > dipindahkan dari monorepo Turion (`tools/vectorize`). Target v1.0: **aplikasi desktop terpasang di Windows 10/11
 > dan macOS 12+**, mesin dengan kualitas kurva & ukuran file mendekati tools berbayar, dan arsitektur yang sama
