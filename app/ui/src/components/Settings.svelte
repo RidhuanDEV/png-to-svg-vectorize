@@ -1,9 +1,25 @@
 <script lang="ts">
-  import type { OptionSpec, Overrides } from '../lib/api';
-  import { t, tk } from '../lib/i18n.svelte';
-  import { presetDefaults, retryJob, saveSettings, store } from '../lib/store.svelte';
+  // Right column, top: the result style (visual cards + optional fine-tuning) and the processing speed.
+  import type { OptionSpec, Overrides, Speed } from '../lib/api';
+  import { t, tf, tk } from '../lib/i18n.svelte';
+  import { presetDefaults, retryJob, saveSettings, selectedJob, setSpeed, store } from '../lib/store.svelte';
+  import Button from './ui/Button.svelte';
+  import Icon from './ui/Icon.svelte';
+  import Segmented from './ui/Segmented.svelte';
+  import Slider from './ui/Slider.svelte';
+  import Switch from './ui/Switch.svelte';
 
   const defaults = $derived(presetDefaults(store.settings.preset));
+  const job = $derived(selectedJob());
+  const canReprocess = $derived(!!job && store.focus === 'result' && (job.status === 'done' || job.status === 'error'));
+
+  // a tiny preview glyph per style, so the choice is visual and not only words
+  const glyph: Record<string, string> = {
+    cartoon: 'M6 18c2-6 4-9 6-9s4 3 6 9M9 9a3 3 0 1 1 6 0',
+    flat: 'M4 16l5-6 4 4 3-3 4 5z',
+    logo: 'M12 4l7 4v8l-7 4-7-4V8z',
+    poster: 'M5 5h14v14H5zM5 15l4-4 3 3 3-2 4 3',
+  };
 
   function value(spec: OptionSpec): boolean | number | null {
     const o = store.settings.overrides[spec.name];
@@ -23,137 +39,321 @@
     store.settings.overrides = {};
     saveSettings();
   }
+
+  const speeds: Speed[] = ['auto', 'saver', 'balanced', 'fast'];
+  const level = { saver: 1, balanced: 2, fast: 3 } as const;
+  const speedHelp = $derived.by(() => {
+    const s = store.service;
+    if (!s) return '';
+    if (s.speed === 'auto') return tf('speedHelp_auto', { mode: tk('speed_' + s.effective), n: s.concurrency });
+    return tf(('speedHelp_' + s.speed) as 'speedHelp_saver', { n: s.speeds[s.speed as 'fast'] ?? s.concurrency });
+  });
+  const changed = $derived(Object.keys(store.settings.overrides).length > 0);
 </script>
 
-<div class="panel">
-  <h2>{t('settings')}</h2>
-  <div class="presets" role="radiogroup" aria-label={t('preset')}>
+<section class="panel" data-tour="style" aria-labelledby="style-title">
+  <h2 id="style-title">{t('style')}</h2>
+  <div class="presets" role="radiogroup" aria-label={t('style')}>
     {#each store.info?.presets ?? [] as p (p.name)}
-      <label class="preset" class:on={store.settings.preset === p.name} title={p.description}>
-        <input
-          type="radio"
-          name="preset"
-          value={p.name}
-          checked={store.settings.preset === p.name}
-          onchange={() => choosePreset(p.name)}
-          data-testid="preset-{p.name}"
-        />
-        {tk('preset_' + p.name)}
-      </label>
+      {@const on = store.settings.preset === p.name}
+      <button
+        type="button"
+        role="radio"
+        aria-checked={on}
+        class="preset"
+        class:on
+        onclick={() => choosePreset(p.name)}
+        title={p.description}
+        data-testid="preset-{p.name}"
+      >
+        <span class="glyph" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d={glyph[p.name] ?? glyph.flat} /></svg>
+        </span>
+        <span class="txt">
+          <b>{tk('preset_' + p.name)}</b>
+          <span class="muted">{tk('desc_' + p.name)}</span>
+        </span>
+        {#if on}<span class="dot"><Icon name="check" size={12} stroke={3} /></span>{/if}
+      </button>
     {/each}
   </div>
 
-  <details
-    open={store.settings.advanced}
-    ontoggle={(e) => {
-      store.settings.advanced = (e.currentTarget as HTMLDetailsElement).open;
+  <button
+    class="more"
+    aria-expanded={store.settings.advanced}
+    onclick={() => {
+      store.settings.advanced = !store.settings.advanced;
       saveSettings();
     }}
+    data-testid="advanced-toggle"
   >
-    <summary>{t('advanced')}</summary>
+    <Icon name="sliders" size={16} />
+    <span>{t('advanced')}</span>
+    {#if changed}<span class="changed" aria-hidden="true"></span>{/if}
+    <span class="chev" class:open={store.settings.advanced}><Icon name="chevronDown" size={15} /></span>
+  </button>
+
+  {#if store.settings.advanced}
     <div class="opts">
       {#each store.info?.options ?? [] as spec (spec.name)}
         {@const v = value(spec)}
         {#if spec.type === 'bool'}
-          <label class="row check">
-            <input type="checkbox" checked={!!v} onchange={(e) => set(spec.name, e.currentTarget.checked)}
-              data-testid="opt-{spec.name}" />
-            {tk('opt_' + spec.name)}
-          </label>
+          <Switch checked={!!v} label={tk('opt_' + spec.name)} onchange={(c) => set(spec.name, c)} testid="opt-{spec.name}" />
         {:else if spec.name === 'scale'}
-          <label class="row">
-            <span>{tk('opt_scale')}</span>
-            <select
+          <div class="row">
+            <span class="lbl">{tk('opt_scale')}</span>
+            <Segmented
+              size="sm"
+              label={tk('opt_scale')}
               value={v === null ? 'auto' : String(v)}
-              onchange={(e) => set('scale', e.currentTarget.value === 'auto' ? null : Number(e.currentTarget.value))}
-              data-testid="opt-scale"
-            >
-              <option value="auto">{t('auto')}</option>
-              {#each [1, 2, 3, 4] as n (n)}<option value={String(n)}>{n}×</option>{/each}
-            </select>
-          </label>
-        {:else}
-          <label class="row">
-            <span>{tk('opt_' + spec.name)} <b>{Number(v).toFixed(spec.step && spec.step < 0.1 ? 2 : 1)}</b></span>
-            <input
-              type="range"
-              min={spec.min}
-              max={spec.max}
-              step={spec.step}
-              value={v ?? 0}
-              oninput={(e) => set(spec.name, Number(e.currentTarget.value))}
-              data-testid="opt-{spec.name}"
+              options={[{ value: 'auto', label: t('auto') }, ...[1, 2, 3, 4].map((n) => ({ value: String(n), label: `${n}×` }))]}
+              onchange={(x) => set('scale', x === 'auto' ? null : Number(x))}
+              testid="opt-scale"
             />
-          </label>
+          </div>
+        {:else}
+          <Slider
+            label={tk('opt_' + spec.name)}
+            min={spec.min ?? 0}
+            max={spec.max ?? 1}
+            step={spec.step ?? 0.1}
+            value={Number(v ?? 0)}
+            format={(x) => x.toFixed(spec.step && spec.step < 0.1 ? 2 : 1)}
+            onchange={(x) => set(spec.name, x)}
+            testid="opt-{spec.name}"
+          />
         {/if}
       {/each}
-      <button onclick={() => { store.settings.overrides = {}; saveSettings(); }}>{t('resetPreset')}</button>
+      <Button variant="ghost" size="sm" icon="retry" disabled={!changed} onclick={() => {
+        store.settings.overrides = {};
+        saveSettings();
+      }}>{t('resetPreset')}</Button>
     </div>
-  </details>
+  {/if}
 
-  <p class="muted hint">{t('newUploadsUse')}</p>
-  <button
-    class="primary wide"
-    disabled={!store.selected}
-    onclick={() => store.selected && retryJob(store.selected, true)}
-    data-testid="apply-selected">{t('applySelected')}</button
-  >
-</div>
+  <p class="note muted">{t('styleNote')}</p>
+  {#if canReprocess && job}
+    <Button variant="secondary" wide icon="retry" onclick={() => retryJob(job.id, true)} data-testid="apply-selected">{t('reprocess')}</Button>
+  {/if}
+</section>
+
+<section class="panel" data-tour="speed" aria-labelledby="speed-title">
+  <h2 id="speed-title"><Icon name="gauge" size={14} /> {t('speed')}</h2>
+  {#if store.service}
+    {@const svc = store.service}
+    <div class="speeds" role="radiogroup" aria-label={t('speed')} data-testid="speed">
+      {#each speeds as sp (sp)}
+        {@const on = svc.speed === sp}
+        <button
+          type="button"
+          role="radio"
+          aria-checked={on}
+          class="speed"
+          class:on
+          onclick={() => setSpeed(sp)}
+          data-testid="speed-{sp}"
+        >
+          <span class="bars" aria-hidden="true">
+            {#each [1, 2, 3] as b (b)}
+              <i class:lit={b <= level[sp === 'auto' ? svc.auto : sp]}></i>
+            {/each}
+          </span>
+          <b>{tk('speed_' + sp)}</b>
+          <span class="muted">{svc.speeds[sp === 'auto' ? svc.auto : sp]}×</span>
+        </button>
+      {/each}
+    </div>
+    <p class="note muted" data-testid="speed-help">{speedHelp}</p>
+  {/if}
+</section>
 
 <style>
+  section h2 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
   .presets {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    flex-direction: column;
     gap: 6px;
   }
   .preset {
+    position: relative;
     display: flex;
-    gap: 6px;
     align-items: center;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 6px 8px;
-    cursor: pointer;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--line);
+    background: var(--panel);
+    text-align: left;
+    transition:
+      border-color var(--fast) var(--ease),
+      background var(--fast) var(--ease),
+      transform var(--fast) var(--ease);
+  }
+  .preset:hover {
+    border-color: var(--line-strong);
+    transform: translateX(2px);
+  }
+  .preset:active {
+    transform: scale(0.98);
   }
   .preset.on {
     border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .glyph {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    display: grid;
+    place-items: center;
     background: var(--panel-2);
+    flex: none;
   }
-  details {
+  .on .glyph {
+    background: var(--accent);
+  }
+  .glyph svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: var(--muted);
+    stroke-width: 1.8;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .on .glyph svg {
+    stroke: var(--accent-text);
+  }
+  .txt {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.3;
+    min-width: 0;
+  }
+  .txt .muted {
+    font-size: 12px;
+  }
+  .dot {
+    margin-left: auto;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--accent);
+    color: var(--accent-text);
+    animation: pop-in var(--medium) var(--spring);
+  }
+  .more {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
     margin-top: 10px;
-  }
-  summary {
-    cursor: pointer;
+    padding: 8px 6px;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: none;
     color: var(--muted);
+    font-weight: 600;
+  }
+  .more:hover {
+    background: var(--panel-2);
+    color: var(--text);
+  }
+  .changed {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .chev {
+    margin-left: auto;
+    transition: transform var(--medium) var(--ease);
+  }
+  .chev.open {
+    transform: rotate(180deg);
   }
   .opts {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin-top: 8px;
+    gap: 10px;
+    padding: 6px 4px 2px;
+    animation: pop-in var(--medium) var(--ease);
   }
   .row {
     display: flex;
     flex-direction: column;
-    gap: 2px;
-  }
-  .row.check {
-    flex-direction: row;
-    align-items: center;
     gap: 6px;
   }
-  .row span {
-    display: flex;
-    justify-content: space-between;
+  .lbl {
+    font-size: 13px;
   }
-  input[type='range'] {
-    accent-color: var(--accent);
+  .note {
+    font-size: 12.5px;
+    margin: 10px 0 8px;
   }
-  .hint {
+  .speeds {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .speed {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--line);
+    background: var(--panel);
+    text-align: left;
+    font-size: 13px;
+    transition:
+      border-color var(--fast) var(--ease),
+      background var(--fast) var(--ease),
+      transform var(--fast) var(--ease);
+  }
+  .speed:hover {
+    border-color: var(--line-strong);
+  }
+  .speed:active {
+    transform: scale(0.97);
+  }
+  .speed.on {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .speed .muted {
     font-size: 12px;
-    margin: 10px 0 6px;
+    font-variant-numeric: tabular-nums;
   }
-  .wide {
-    width: 100%;
+  .bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 14px;
+  }
+  .bars i {
+    width: 4px;
+    border-radius: 2px;
+    background: var(--panel-3);
+    transition: background var(--medium) var(--ease);
+  }
+  .bars i:nth-child(1) {
+    height: 6px;
+  }
+  .bars i:nth-child(2) {
+    height: 10px;
+  }
+  .bars i:nth-child(3) {
+    height: 14px;
+  }
+  .bars i.lit {
+    background: var(--accent);
   }
 </style>

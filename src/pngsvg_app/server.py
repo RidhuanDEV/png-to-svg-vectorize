@@ -23,7 +23,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError
 import pngsvg
 from pngsvg import PRESETS
 
-from .jobs import JobManager
+from .jobs import SPEEDS, JobManager, WorkbenchFull
 
 MAX_UPLOAD = 50 * 1024 * 1024          # bytes
 MAX_SIDE = 8000                        # px, longest side
@@ -45,6 +45,19 @@ class OptionsIn(BaseModel):
     smooth: float | None = Field(None, ge=0.0, le=5.0)
     merge_de: float | None = Field(None, ge=1.0, le=30.0)
     scale: int | None = Field(None, ge=1, le=4)
+
+
+class StartIn(BaseModel):
+    """Start processing staged images with one style for all of them."""
+    model_config = ConfigDict(extra='forbid')
+    ids: list[str] = Field(..., min_length=1, max_length=200)
+    preset: str = 'cartoon'
+    options: OptionsIn | None = None
+
+
+class SettingsIn(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    speed: str
 
 
 OPTION_SCHEMA = [
@@ -164,11 +177,41 @@ def create_app(jobs: JobManager, token: str, allowed_hosts: set[str], static_dir
 
     @app.post('/api/jobs', status_code=201)
     async def create_job(request: Request, name: str = Query(''), preset: str = Query('cartoon'),
-                         options: str | None = Query(None)):
-        overrides = parse_options(preset, options)
+                         options: str | None = Query(None), start: bool = Query(True)):
+        """start=false puts the image on the workbench (status 'staged') until POST /api/jobs/start."""
+        overrides = parse_options(preset, options) if start else {}
         data = await read_body(request)
         w, h, _ = read_image(data)
+        if not start:
+            try:
+                return jobs.stage(clean_name(name), data, w, h).public()
+            except WorkbenchFull as e:
+                raise HTTPException(409, str(e))
         return jobs.submit(clean_name(name), data, w, h, preset, overrides).public()
+
+    @app.post('/api/jobs/start')
+    def start_jobs(body: StartIn):
+        if body.preset not in PRESETS:
+            raise HTTPException(422, f'unknown preset; choose one of: {", ".join(PRESETS)}')
+        overrides = body.options.model_dump(exclude_none=True) if body.options else {}
+        return {'jobs': [j.public() for j in jobs.start_jobs(body.ids, body.preset, overrides)]}
+
+    @app.post('/api/queue/cancel')
+    def cancel_all():
+        """Stop everything that is waiting or running (finished results stay)."""
+        stopped = [j.id for j in jobs.list() if j.status in ('queued', 'running') and jobs.cancel(j.id)]
+        return {'cancelled': stopped}
+
+    @app.get('/api/settings')
+    def get_settings():
+        return jobs.settings()
+
+    @app.put('/api/settings')
+    def put_settings(body: SettingsIn):
+        if body.speed not in SPEEDS:
+            raise HTTPException(422, f'speed must be one of: {", ".join(SPEEDS)}')
+        jobs.set_speed(body.speed)
+        return jobs.settings()
 
     @app.get('/api/jobs')
     def list_jobs():

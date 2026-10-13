@@ -2,25 +2,54 @@
   import { onMount } from 'svelte';
   import { hasToken } from './lib/api';
   import { i18n, setLang, t, type Lang } from './lib/i18n.svelte';
-  import { addFiles, init, selectedJob, store } from './lib/store.svelte';
+  import { registerFileInput } from './lib/picker';
+  import { tellLanguage } from './lib/platform';
+  import { addFiles, finished, inQueue, init, selectedJob, staged, store } from './lib/store.svelte';
+  import { startTour, tourSeen } from './lib/tour.svelte';
   import DropZone from './components/DropZone.svelte';
+  import Workbench from './components/Workbench.svelte';
   import Queue from './components/Queue.svelte';
   import Compare from './components/Compare.svelte';
   import Settings from './components/Settings.svelte';
   import Stats from './components/Stats.svelte';
   import Export from './components/Export.svelte';
+  import Tour from './components/Tour.svelte';
+  import Button from './components/ui/Button.svelte';
+  import Icon from './components/ui/Icon.svelte';
+  import Select from './components/ui/Select.svelte';
+  import Toasts from './components/ui/Toasts.svelte';
 
   const authed = hasToken();
   let dragging = $state(false);
   let depth = 0;
+  let input: HTMLInputElement;
 
   onMount(() => {
     document.documentElement.lang = i18n.lang;
-    if (authed) void init();
+    tellLanguage(i18n.lang);
+    registerFileInput(() => input.click());
+    if (!authed) return;
+    void init().then(() => {
+      if (!tourSeen()) startTour();
+    });
   });
 
   const job = $derived(selectedJob());
   const media = $derived(job ? store.media[job.id] : undefined);
+  const bench = $derived(staged());
+  const queue = $derived(inQueue());
+  const results = $derived(finished());
+  const empty = $derived(!bench.length && !queue.length && !results.length);
+  const showBench = $derived(bench.length > 0 && (store.focus === 'bench' || (!queue.length && !results.length)));
+
+  // where the user is in the flow: 0 add, 1 choose, 2 process, 3 save
+  const step = $derived(empty ? 0 : showBench ? 1 : queue.length ? 2 : 3);
+  const steps = $derived([t('step_add'), t('step_pick'), t('step_queue'), t('step_save')]);
+
+  function changeLang(l: Lang) {
+    setLang(l);
+    tellLanguage(l);
+  }
 
   function isFileDrag(e: DragEvent): boolean {
     return authed && !!e.dataTransfer && Array.from(e.dataTransfer.types).includes('Files');
@@ -45,55 +74,104 @@
     e.preventDefault();
     depth = 0;
     dragging = false;
-    if (e.dataTransfer?.files.length) void addFiles(e.dataTransfer.files);
+    if (e.dataTransfer?.files.length) void addFiles(Array.from(e.dataTransfer.files));
+  }}
+/>
+
+<input
+  bind:this={input}
+  class="sr-only"
+  type="file"
+  multiple
+  tabindex="-1"
+  aria-hidden="true"
+  accept="image/png,image/webp,image/jpeg"
+  data-testid="file-input"
+  onchange={(e) => {
+    const files = (e.currentTarget as HTMLInputElement).files;
+    if (files?.length) void addFiles(Array.from(files));
+    (e.currentTarget as HTMLInputElement).value = '';
   }}
 />
 
 <div class="shell">
   <header>
-    <img src="./favicon.svg" alt="" width="28" height="28" />
-    <div class="title">
-      <h1>{t('appName')}</h1>
-      <span class="muted">{t('privacy')}</span>
+    <div class="brand">
+      <img src="./favicon.svg" alt="" width="30" height="30" />
+      <div class="title">
+        <h1>{t('appName')}</h1>
+        <span class="muted"><Icon name="lock" size={12} /> {t('privacy')}</span>
+      </div>
     </div>
-    <label class="lang">
-      <span class="sr-only">{t('language')}</span>
-      <select
+
+    {#if authed}
+      <ol class="steps" aria-label="{t('step_add')} → {t('step_save')}">
+        {#each steps as label, i (i)}
+          <li class:done={i < step} class:now={i === step} aria-current={i === step ? 'step' : undefined}>
+            <span class="num">{#if i < step}<Icon name="check" size={13} stroke={3} />{:else}{i + 1}{/if}</span>
+            <span class="lbl">{label}</span>
+          </li>
+        {/each}
+      </ol>
+    {/if}
+
+    <div class="right">
+      {#if authed}
+        <Button variant="ghost" size="sm" icon="help" onclick={startTour} data-testid="tour-open">{t('help')}</Button>
+      {/if}
+      <Select
+        label={t('language')}
+        icon="globe"
         value={i18n.lang}
-        onchange={(e) => setLang((e.currentTarget as HTMLSelectElement).value as Lang)}
-        aria-label={t('language')}
-      >
-        <option value="en">English</option>
-        <option value="id">Bahasa Indonesia</option>
-      </select>
-    </label>
+        options={[
+          { value: 'en', label: 'English' },
+          { value: 'id', label: 'Bahasa Indonesia' },
+        ]}
+        onchange={changeLang}
+        testid="lang"
+      />
+    </div>
   </header>
 
   {#if !authed}
     <p class="panel warn" role="alert">{t('noToken')}</p>
   {:else}
-    <main>
-      <aside class="left">
-        <DropZone />
-        <Queue />
-      </aside>
+    <main class:empty>
+      {#if !empty}
+        <aside class="left">
+          <Queue />
+        </aside>
+      {/if}
       <section class="center">
-        <Compare {job} {media} />
+        {#if empty}
+          <DropZone />
+        {:else if showBench}
+          <Workbench />
+        {:else}
+          <Compare {job} {media} />
+        {/if}
       </section>
-      <aside class="right">
+      <aside class="right-col">
+        <!-- results view: saving comes first; the style stays below for "process again" -->
+        {#if !showBench}
+          <Export {job} {media} />
+          <Stats {job} {media} />
+        {/if}
         <Settings />
-        <Stats {job} {media} />
-        <Export {job} {media} />
       </aside>
     </main>
   {/if}
 
   {#if dragging}
-    <div class="drop-overlay" aria-hidden="true"><span>{t('drop')}</span></div>
+    <div class="drop-overlay" aria-hidden="true">
+      <div class="drop-card">
+        <Icon name="upload" size={40} />
+        <span>{t('drop')}</span>
+      </div>
+    </div>
   {/if}
-  {#if store.notice}
-    <div class="toast" role="status" data-testid="notice">{t('rejected')} — {store.notice}</div>
-  {/if}
+  <Toasts />
+  <Tour />
 </div>
 
 <style>
@@ -104,37 +182,118 @@
   }
   header {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 10px;
+    gap: 8px 16px;
     padding: 10px 16px;
     border-bottom: 1px solid var(--line);
     background: var(--panel);
   }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
   .title {
     display: flex;
     flex-direction: column;
-    line-height: 1.2;
+    line-height: 1.25;
+    min-width: 0;
   }
   h1 {
     margin: 0;
-    font-size: 16px;
+    font-size: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .title span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     font-size: 12px;
+    white-space: nowrap;
   }
-  .lang {
+  .steps {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+  }
+  .steps li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px 4px 4px;
+    border-radius: 999px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition:
+      background var(--medium) var(--ease),
+      color var(--medium) var(--ease);
+  }
+  .steps li + li::before {
+    content: '';
+    width: 18px;
+    height: 2px;
+    margin-right: 4px;
+    margin-left: -10px;
+    background: var(--line);
+    border-radius: 2px;
+  }
+  .num {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    transition:
+      background var(--medium) var(--ease),
+      color var(--medium) var(--ease);
+  }
+  .steps li.now {
+    background: var(--accent-soft);
+    color: var(--text);
+  }
+  .steps li.now .num {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-text);
+  }
+  .steps li.done .num {
+    background: var(--ok);
+    border-color: var(--ok);
+    color: var(--panel);
+  }
+  .right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     margin-left: auto;
   }
   main {
     flex: 1;
     min-height: 0;
     display: grid;
-    grid-template-columns: 280px minmax(0, 1fr) 300px;
-    gap: 12px;
-    padding: 12px;
+    grid-template-columns: 290px minmax(0, 1fr) 300px;
+    gap: 14px;
+    padding: 14px;
+  }
+  main.empty {
+    grid-template-columns: minmax(0, 1fr) 300px;
   }
   .left,
-  .right {
+  .right-col {
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -151,27 +310,67 @@
   .drop-overlay {
     position: fixed;
     inset: 0;
+    z-index: 70;
     display: grid;
     place-items: center;
-    background: color-mix(in srgb, var(--accent) 18%, transparent);
-    border: 3px dashed var(--accent);
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+    backdrop-filter: blur(2px);
     pointer-events: none;
-    font-size: 20px;
-    font-weight: 600;
+    animation: fade-in var(--fast) var(--ease);
   }
-  .toast {
-    position: fixed;
-    bottom: 16px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--text);
-    color: var(--bg);
-    padding: 8px 14px;
-    border-radius: 8px;
-    max-width: min(90vw, 640px);
+  .drop-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 32px 40px;
+    border-radius: var(--radius-lg);
+    border: 3px dashed var(--accent);
+    background: var(--panel);
+    color: var(--accent);
+    font-size: 18px;
+    font-weight: 700;
+    box-shadow: var(--shadow-lg);
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    50% {
+      transform: scale(1.03);
+    }
+  }
+  @media (max-width: 1180px) {
+    .steps .lbl {
+      display: none;
+    }
+    .steps li {
+      padding: 4px;
+    }
+  }
+  @media (max-width: 900px) {
+    .steps {
+      order: 3;
+      flex-basis: 100%;
+      justify-content: flex-start;
+      overflow-x: auto;
+    }
+    .steps .lbl {
+      display: inline;
+    }
+    .steps li {
+      padding: 4px 10px 4px 4px;
+    }
+  }
+  @media (max-width: 700px) {
+    .title span {
+      display: none;
+    }
+    .steps .lbl {
+      display: none;
+    }
   }
   @media (max-width: 1000px) {
-    main {
+    main,
+    main.empty {
       grid-template-columns: 1fr;
       overflow: auto;
     }

@@ -2,6 +2,22 @@
 
 All notable changes. Benchmarks for every engine version are in [docs/bench.md](docs/bench.md).
 
+## 1.1.0 — 2026-10-13 — friendlier workflow
+
+- **Workbench**: added photos wait (status `staged`) until you press **Process N photos**; tick only the ones you want.
+  API: `POST /api/jobs?start=false`, `POST /api/jobs/start` (ids + style), `POST /api/queue/cancel`.
+- **Queue that spares the computer**: a real FIFO queue with a limit on simultaneous conversions; **processing speed**
+  Automatic (default, from cores and memory) / Saver (1) / Balanced (2) / Fast (≤ 4, one core left free), changeable
+  at any time (`GET`/`PUT /api/settings`); workers run at below-normal priority; queue position shown per photo.
+- **New interface**: custom components instead of browser/OS controls (buttons, checkbox, switch, segmented control,
+  dropdown, slider, progress ring, dialog, toasts with Undo), step indicator, result styles as visual cards,
+  micro-interactions (press, hover, drop zone, finish animation) that respect *reduce motion*, plain-language messages
+  for every failure, keyboard and screen-reader support.
+- **First-run guide** (skippable, Esc; reopen with **Guide**).
+- Removing a result can be undone for a few seconds; **Stop all** asks first; closing the desktop window while photos
+  are still being converted asks first (in the page language).
+- Desktop "Open" now puts photos on the workbench instead of converting them at once.
+
 ## 1.0.0 — 2026-10-12
 
 First release of the desktop app for Windows and macOS.

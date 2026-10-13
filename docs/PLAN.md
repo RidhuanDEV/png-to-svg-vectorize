@@ -115,8 +115,51 @@ png-to-svg-vectorize/
 | **M4** — Service + UI (web mode) (✅ 2026-10-12, v0.4) | FastAPI + UI Svelte lengkap §4, jalan di browser lokal (`png2svg serve`); E6 skor kemiripan di UI (canvas) | Tes API + tes e2e Playwright hijau |
 | **M5** — Desktop & paket (✅ 2026-10-12, v0.5) | pywebview, dialog native, PyInstaller, installer Win/mac, `release.yml` | Installer terpasang & berjalan di Windows 11 dan macOS (arm64 + Intel), tes asap di CI — build + tes asap hijau di CI (Win x64, mac arm64, mac Intel `macos-15-intel`); exe lokal Windows terbuka & melayani UI; uji pasang di perangkat nyata masuk checklist M6 |
 | **M6** — Rilis v1.0 (✅ dokumen & set uji 2026-10-12; tag menunggu persetujuan pemilik) | Panduan pengguna EN/ID, tangkapan layar, catatan rilis, set uji E7, checklist visual; tanpa tanda tangan kode (P-1) | Tag `v1.0.0`, artefak di GitHub Releases |
+| **M7** — UX v1.1 (✅ 2026-10-13, v1.1.0; tag menunggu persetujuan pemilik) | Lihat §7a: alur bertahap (tambah → pilih & atur → antrean → bandingkan & simpan), antrean hemat sumber daya, komponen UI kustom + micro-interaction, tutorial pertama kali | Tes API + e2e hijau, installer v1.1.0 terpasang lokal untuk QA pemilik |
 
 Setiap tahap: tes otomatis hijau, angka `bench/` dicatat (tidak boleh turun tanpa alasan), dokumen diperbarui.
+
+### 7a. M7 — UX v1.1 (permintaan pemilik 2026-10-13)
+
+Masalah v1.0: foto langsung diproses begitu dipilih; 4 gambar diproses bersamaan sehingga laptop lemah terasa berat;
+kontrol masih bawaan browser/OS (select, checkbox, range); tidak ada panduan bagi pengguna non-teknis.
+
+**Alur baru (bahasa manusia, satu tombol utama per langkah)**
+1. **Tambah foto** — seret, tempel, atau tombol "Pilih foto" (banyak sekaligus). Foto divalidasi saat itu juga
+   (format, ukuran ≤ 50 MB, sisi ≤ 8000 px) dan masuk **meja kerja** sebagai status `staged` — belum diproses.
+   Penolakan dijelaskan per foto dengan bahasa awam ("Foto ini terlalu besar…").
+2. **Pilih & atur** — kartu thumbnail dengan checkbox (semua tercentang default), "Pilih semua / Kosongkan",
+   jumlah terpilih; gaya hasil sebagai kartu visual (Kartun, Logo, Ikon, Foto datar, …) + pengaturan lanjutan
+   tersembunyi (progressive disclosure). Tombol utama: **"Proses N foto"**.
+3. **Antrean** — foto masuk antrean FIFO; tampil posisi ("Menunggu · urutan 2"), tahap dalam bahasa awam
+   (membaca garis → membagi warna → menghaluskan kurva → menyusun SVG), batal per foto / batalkan semua.
+4. **Bandingkan & simpan** — tampilan geser/berdampingan yang sudah ada, skor kemiripan, simpan satu/semua.
+
+**Antrean hemat sumber daya (server)**
+- `JobManager` jadi antrean sungguhan: dispatcher hanya mengirim *n* job berjalan sekaligus (*n* = kecepatan),
+  sisanya menunggu di antrean (bisa dibatalkan seketika, tidak memakan memori pekerja).
+- Kecepatan: **Hemat** (1), **Seimbang** (2 bila ≥ 4 core), **Cepat** (≤ min(4, core − 1)); default **Otomatis**
+  (keputusan pemilik): dipilih dari jumlah core & RAM saat aplikasi dibuka. Bisa diganti kapan saja (`PUT /api/settings`).
+- Proses pekerja berprioritas rendah (Windows `BELOW_NORMAL_PRIORITY_CLASS`, POSIX `nice`) agar laptop tetap lancar.
+- Batas meja kerja (mis. 100 foto) dengan pesan yang jelas.
+
+**Komponen UI kustom (tanpa kontrol native)**: tombol (primer/sekunder/hantu/bahaya + loading + efek tekan), checkbox,
+switch, segmented control, dropdown/listbox (bahasa, gaya), slider dengan nilai, toast bertumpuk (ikon, auto-tutup,
+"Urungkan"), dialog (focus trap), progress ring, skeleton, empty state berilustrasi, scrollbar kustom, tooltip.
+Micro-interaction 150–300 ms (hover, tekan, drop zone berdenyut, centang tergambar saat selesai, angka naik),
+semuanya menghormati `prefers-reduced-motion`; fokus keyboard terlihat; WCAG AA.
+
+**Tutorial pertama kali**: 4–5 langkah coach-mark dengan sorotan pada elemen nyata (tambah foto → pilih → proses →
+bandingkan → simpan), tombol Lewati/Kembali/Lanjut, titik progres, Esc = lewati; disimpan di `localStorage`;
+bisa diulang dari tombol "Panduan" di header.
+
+**Pengerasan (hardening)**: semua aksi menampilkan status (memuat/sukses/gagal) dengan pesan awam + tindakan;
+tombol dinonaktifkan selama aksi berjalan (anti klik ganda); hapus hasil bisa diurungkan; peringatan saat menutup
+jendela ketika masih ada foto diproses; batas & validasi tetap di server.
+
+**Verifikasi**: pytest (staged → start, antrean membatasi job berjalan, posisi, batal di antrean, kecepatan, batas
+meja kerja), Playwright (alur penuh: tambah banyak → pilih sebagian → proses → selesai; tutorial lewati/selesai;
+kecepatan), `svelte-check`, build installer v1.1.0 + tes asap, pasang lokal.
 
 ## 8. Pengujian
 

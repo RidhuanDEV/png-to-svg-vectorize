@@ -120,10 +120,12 @@ cd app/ui && npm ci && npm run build && cd ../..   # builds the UI into src/pngs
 png2svg serve                                     # opens http://127.0.0.1:<port>/#t=<session token>
 ```
 
-Drag images in (or **Open images…**), watch progress, compare original and SVG side by side or with a slider
-(synchronized zoom up to 800 %, fills-only / outlines-only views), see a similarity score, change the preset or
-advanced settings and re-process, then save one SVG, all SVGs (zip) or copy the SVG code. English and Bahasa
-Indonesia; light/dark follows the system.
+Add photos (drag them in or **Choose photos**) — they wait on a workbench until you tick the ones you want and press
+**Process**; they are then converted in a queue that spares the computer (speed: Automatic / Saver / Balanced / Fast,
+low-priority workers). Compare original and SVG side by side or with a slider (synchronized zoom up to 800 %,
+fills-only / outlines-only views), see a similarity score, change the style and process again, then save one SVG, all
+SVGs (zip) or copy the SVG code. Custom, keyboard-accessible components; a skippable first-run guide; English and
+Bahasa Indonesia; light/dark follows the system.
 
 Privacy and safety: the service listens on `127.0.0.1` only, every API call needs the random per-session token
 from the link, foreign `Host` headers are refused, uploads are limited to 50 MB / 8000 px and checked by content

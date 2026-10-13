@@ -58,6 +58,21 @@ class Bridge:
         self._jobs = jobs
         self._server = server_module
         self._window = None
+        self._lang = 'en'
+
+    def set_lang(self, lang: str) -> None:
+        """The page reports its language so native messages (close confirmation) match it."""
+        self._lang = 'id' if lang == 'id' else 'en'
+
+    def _on_closing(self, window) -> None:
+        """Ask before closing only while images are still waiting or being processed."""
+        busy = self._jobs.busy()
+        window.confirm_close = busy > 0
+        if busy:
+            window.localization['global.quitConfirmation'] = (
+                f'Masih ada {busy} foto yang menunggu atau sedang diproses. Tutup aplikasi dan hentikan prosesnya?'
+                if self._lang == 'id' else
+                f'{busy} image(s) are still waiting or being processed. Close the app and stop them?')
 
     def _dialog(self, kind: str, **kw):
         import webview
@@ -65,25 +80,23 @@ class Bridge:
         dialog = getattr(kinds, kind) if kinds else getattr(webview, f'{kind}_DIALOG')
         return self._window.create_file_dialog(dialog, **kw)
 
-    def open_files(self, preset: str = 'cartoon', overrides: dict | None = None) -> dict:
-        """Native multi-select dialog; each readable image becomes a job with the page's current settings.
-        Returns {'ids': [...], 'errors': [...]}."""
+    def open_files(self) -> dict:
+        """Native multi-select dialog; each readable image is put on the workbench (staged, not processed yet).
+        Returns {'ids': [...], 'errors': [{'name': ..., 'code': ..., 'detail': ...}]}."""
         paths = self._dialog('OPEN', allow_multiple=True, file_types=IMAGE_TYPES) or []
         ids, errors = [], []
-        settings = {'preset': preset if isinstance(preset, str) else 'cartoon',
-                    'overrides': overrides if isinstance(overrides, dict) else {}}
         for p in paths:
             path = Path(p)
             try:
                 if path.stat().st_size > self._server.MAX_UPLOAD:
-                    raise ValueError('file too large')
+                    raise self._server.HTTPException(413, 'upload too large')
                 data = path.read_bytes()
                 w, h, _ = self._server.read_image(data)
-                overrides = self._server.parse_options(settings['preset'], json.dumps(settings['overrides']))
-                ids.append(self._jobs.submit(self._server.clean_name(path.name), data, w, h, settings['preset'],
-                                             overrides).id)
+                ids.append(self._jobs.stage(self._server.clean_name(path.name), data, w, h).id)
             except Exception as e:  # noqa: BLE001 - reported to the page per file
-                errors.append(f'{path.name}: {getattr(e, "detail", None) or e}')
+                code = getattr(e, 'status_code', None) or (409 if type(e).__name__ == 'WorkbenchFull' else 400)
+                errors.append({'name': self._server.clean_name(path.name), 'code': code,
+                               'detail': str(getattr(e, 'detail', None) or e)[:200]})
         return {'ids': ids, 'errors': errors}
 
     def save_svg(self, job_id: str) -> bool:
@@ -188,7 +201,9 @@ def main(argv=None) -> int:
         import webview
         bridge = Bridge(jobs, server)
         bridge._window = webview.create_window(TITLE, f'http://127.0.0.1:{port}/#t={token}', js_api=bridge,
-                                               width=1360, height=880, min_size=(900, 600))
+                                               width=1360, height=880, min_size=(900, 600),
+                                               background_color='#F6F7FB')
+        bridge._window.events.closing += bridge._on_closing
         webview.start(debug=a.debug, private_mode=False, storage_path=str(data_dir()))
         return 0
     except Exception as e:  # noqa: BLE001 - surfaced to the user; no image data in the message

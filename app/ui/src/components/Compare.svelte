@@ -1,7 +1,10 @@
 <script lang="ts">
   import type { Job } from '../lib/api';
-  import { t } from '../lib/i18n.svelte';
+  import { t, tf, tk } from '../lib/i18n.svelte';
   import type { Media } from '../lib/store.svelte';
+  import Button from './ui/Button.svelte';
+  import ProgressRing from './ui/ProgressRing.svelte';
+  import Segmented from './ui/Segmented.svelte';
 
   let { job, media }: { job: Job | undefined; media: Media | undefined } = $props();
 
@@ -102,32 +105,56 @@
   );
 </script>
 
-<div class="panel compare">
+<div class="panel compare" data-tour="compare">
   <div class="toolbar">
-    <div class="seg" role="group" aria-label={t('compare')}>
-      <button class:on={mode === 'side'} aria-pressed={mode === 'side'} onclick={() => (mode = 'side')}
-        data-testid="mode-side">{t('sideBySide')}</button>
-      <button class:on={mode === 'slider'} aria-pressed={mode === 'slider'} onclick={() => (mode = 'slider')}
-        data-testid="mode-slider">{t('slider')}</button>
-    </div>
-    <label class="layers">
+    <Segmented
+      size="sm"
+      label={t('compare')}
+      value={mode}
+      options={[
+        { value: 'side', label: t('sideBySide') },
+        { value: 'slider', label: t('slider') },
+      ]}
+      onchange={(m) => (mode = m)}
+      testid="mode"
+    />
+    <span class="layers">
       <span class="muted">{t('layers')}</span>
-      <select bind:value={layer} data-testid="layer">
-        <option value="all">{t('layer_all')}</option>
-        <option value="fill">{t('layer_fill')}</option>
-        <option value="outline">{t('layer_outline')}</option>
-      </select>
-    </label>
+      <Segmented
+        size="sm"
+        label={t('layers')}
+        value={layer}
+        options={[
+          { value: 'all', label: t('layer_all') },
+          { value: 'fill', label: t('layer_fill') },
+          { value: 'outline', label: t('layer_outline') },
+        ]}
+        onchange={(l) => (layer = l)}
+        testid="layer"
+      />
+    </span>
     <div class="zoom">
-      <button onclick={() => zoomAt(0.8, paneW / 2, paneH / 2)} aria-label={t('zoomOut')}>−</button>
+      <Button variant="ghost" size="sm" iconOnly icon="zoomOut" title={t('zoomOut')} onclick={() => zoomAt(0.8, paneW / 2, paneH / 2)}>{t('zoomOut')}</Button>
       <span class="pct" data-testid="zoom">{Math.round(view.s * 100)}%</span>
-      <button onclick={() => zoomAt(1.25, paneW / 2, paneH / 2)} aria-label={t('zoomIn')}>+</button>
-      <button onclick={fit}>{t('fit')}</button>
+      <Button variant="ghost" size="sm" iconOnly icon="zoomIn" title={t('zoomIn')} onclick={() => zoomAt(1.25, paneW / 2, paneH / 2)}>{t('zoomIn')}</Button>
+      <Button variant="secondary" size="sm" icon="fit" onclick={fit}>{t('fit')}</Button>
     </div>
   </div>
 
   {#if !job}
     <div class="empty muted">{t('selectHint')}</div>
+  {:else if job.status === 'queued' || job.status === 'running'}
+    <div class="empty waiting" data-testid="compare-waiting">
+      <ProgressRing value={job.status === 'running' ? job.progress : null} size={64} label={tk('status_' + job.status)} />
+      <b>{job.name}</b>
+      <span class="muted">
+        {job.status === 'running'
+          ? `${tk('status_running')} · ${tk('stage_' + (job.stage || 'start'))}`
+          : job.position
+            ? tf('waitingPos', { n: job.position })
+            : t('waitingHere')}
+      </span>
+    </div>
   {:else if mode === 'side'}
     <div class="panes">
       {#each ['source', 'svg'] as which (which)}
@@ -230,24 +257,6 @@
     gap: 10px;
     align-items: center;
   }
-  .seg {
-    display: inline-flex;
-  }
-  .seg button {
-    border-radius: 0;
-  }
-  .seg button:first-child {
-    border-radius: 8px 0 0 8px;
-  }
-  .seg button:last-child {
-    border-radius: 0 8px 8px 0;
-    margin-left: -1px;
-  }
-  .seg button.on {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: var(--accent-text);
-  }
   .layers {
     display: inline-flex;
     gap: 6px;
@@ -343,6 +352,13 @@
     flex: 1;
     text-align: center;
     padding: 16px;
+  }
+  .waiting {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+    animation: fade-in var(--medium) var(--ease);
   }
   @media (max-width: 700px) {
     .panes {

@@ -41,12 +41,38 @@ Prefer no installer? Use `PNG-to-SVG-Vectorize-x.y.z-windows-x64-portable.zip`: 
 
 ## 2. Convert images
 
-1. **Add images**: drag one or more PNG, WebP or JPEG files anywhere into the window, or click **Open images…**.
-   Limits: 50 MB per file, at most 8000 px on the longest side.
-2. Each image appears in the **Images** list with its progress (finding outlines → finding color regions → fitting
-   curves → writing SVG). A typical 1536×1024 illustration takes 5–10 seconds; several images are processed in
-   parallel.
-3. Click an image in the list to show it. Use ■ to cancel, ↻ to run again, ✕ to remove it.
+The first time you open the app, a short **guide** walks through the four steps. Skip it with **Skip** (or Esc);
+open it again any time with **Guide** at the top. The steps at the top of the window show where you are.
+
+1. **Add photos** — drag one or more PNG, WebP or JPEG files anywhere into the window, or press **Choose photos**.
+   Add as many as you like (up to 100 waiting at once): **nothing is processed yet**. Limits: 50 MB per file, at most
+   8000 px on the longest side; a photo that cannot be used is explained in a short message.
+2. **Choose & set up** — the photos wait on the **workbench**. All of them are ticked; untick the ones you want to
+   leave for later (**Select all** / **Clear** help with many photos). Pick a **result style** on the right
+   (section 4). Then press **Process N photos**.
+
+   ![Workbench](images/app-workbench.png)
+3. **Process** — the photos wait in line and are converted one after another; the list on the left shows each
+   photo's place in line and what is happening (reading the outlines → splitting the colors → smoothing the curves →
+   building the SVG). You can keep working, add more photos, or **Stop** one photo or **Stop all** (it asks first;
+   finished results stay). When everything is done a message says how many results are ready.
+4. **Compare & save** — click a finished photo on the left (sections 3 and 5). Photos you left on the workbench are
+   one click away under **Workbench**.
+
+**Processing speed** (right column) decides how many photos are converted at the same time. Converting uses the
+processor heavily, so the app is careful by default:
+
+| Speed | At the same time | When to use |
+|---|---|---|
+| Automatic (default) | chosen for this computer: *Saver* on most laptops, *Balanced* on computers with 6+ cores and 12 GB+ memory | leave it like this |
+| Saver | 1 | older or slower computers, or while you use other programs |
+| Balanced | 2 (computers with 4+ cores) | a good middle |
+| Fast | up to 4 (one core is always left free) | many photos and nothing else running |
+
+Conversions always run at low priority, so the computer stays responsive. A typical 1536×1024 illustration takes
+5–10 seconds. If you close the window while photos are still waiting or being converted, the app asks first.
+
+To remove a result, press its trash icon; you have a few seconds to press **Undo**.
 
 ## 3. Compare original and SVG
 
@@ -61,16 +87,16 @@ Always check details at 200 % or more: one number can hide a small local defect.
 
 ## 4. Settings
 
-**Presets** — pick the one that matches the picture before adding images (or re-process later):
+**Result style** — pick the one that matches the pictures before pressing Process (or process again later):
 
-| Preset | Use for |
+| Style | Use for |
 |---|---|
 | Cartoon | character art with dark ink outlines and soft shading (default) |
 | Flat illustration | solid shapes with few outlines; only clear gradients are kept |
 | Logo / icon | few flat colors and exact geometry; no gradients |
 | Photo → poster | photos or paintings turned into a poster-like vector with fewer, larger regions |
 
-**Advanced** settings (change them, then click **Re-process selected image**):
+**Fine-tune** (optional; a dot shows when something differs from the style). To apply new settings to a finished photo, select it and press **Process again with this style**:
 
 | Setting | Effect |
 |---|---|
@@ -81,7 +107,7 @@ Always check details at 200 % or more: one number can hide a small local defect.
 | Merge similar colors (ΔE) | larger = fewer regions (simpler), smaller = more detail |
 | Outline detail | resolution used to trace the outlines (auto is usually right) |
 
-New images always use the current settings. **Reset to preset** brings the defaults back.
+Photos you process next always use the current settings. **Reset to style defaults** brings the defaults back.
 
 ## 5. Save
 

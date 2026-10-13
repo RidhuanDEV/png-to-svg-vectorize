@@ -152,3 +152,85 @@ def test_on_stage_reports_progress():
     seen = []
     vectorize(Image.open(io.BytesIO(png())), on_stage=lambda name, f: seen.append(name))
     assert seen == ['ink', 'regions', 'curves', 'svg']
+
+
+# -- M7: workbench (staged) → queue, speed settings ------------------------------------------------------------
+
+def test_staged_images_wait_until_started(client):
+    a = client.post('/api/jobs?name=a.png&start=false', content=png(), headers=H).json()
+    b = client.post('/api/jobs?name=b.png&start=false', content=png(), headers=H).json()
+    assert a['status'] == b['status'] == 'staged'
+    time.sleep(0.5)
+    assert client.get(f'/api/jobs/{a["id"]}', headers=H).json()['status'] == 'staged', 'not processed by itself'
+    r = client.post('/api/jobs/start', json={'ids': [b['id'], 'missing'], 'preset': 'logo',
+                                             'options': {'tolerance': 0.4}}, headers=H)
+    assert r.status_code == 200 and [j['id'] for j in r.json()['jobs']] == [b['id']]
+    done = wait(client, b['id'])
+    assert done['status'] == 'done' and done['preset'] == 'logo' and done['options'] == {'tolerance': 0.4}
+    assert client.get(f'/api/jobs/{a["id"]}', headers=H).json()['status'] == 'staged', 'unselected photo untouched'
+    again = client.post('/api/jobs/start', json={'ids': [b['id']]}, headers=H).json()
+    assert again['jobs'] == [], 'a finished job is not started twice'
+
+
+def test_start_validates_settings(client):
+    a = client.post('/api/jobs?name=a.png&start=false', content=png(), headers=H).json()
+    assert client.post('/api/jobs/start', json={'ids': [a['id']], 'preset': 'nope'}, headers=H).status_code == 422
+    bad = {'ids': [a['id']], 'options': {'tolerance': 99}}
+    assert client.post('/api/jobs/start', json=bad, headers=H).status_code == 422
+    assert client.post('/api/jobs/start', json={'ids': []}, headers=H).status_code == 422
+    assert client.get(f'/api/jobs/{a["id"]}', headers=H).json()['status'] == 'staged'
+
+
+def test_workbench_limit(client, monkeypatch):
+    from pngsvg_app import jobs as jobs_mod
+    staged = sum(1 for j in client.get('/api/jobs', headers=H).json()['jobs'] if j['status'] == 'staged')
+    monkeypatch.setattr(jobs_mod, 'MAX_STAGED', staged + 1)
+    assert client.post('/api/jobs?name=x.png&start=false', content=png(), headers=H).status_code == 201
+    r = client.post('/api/jobs?name=y.png&start=false', content=png(), headers=H)
+    assert r.status_code == 409 and 'workbench' in r.json()['detail']
+
+
+def test_settings_speed(client):
+    s = client.get('/api/settings', headers=H).json()
+    assert s['speed'] in ('auto', 'saver', 'balanced', 'fast') and s['concurrency'] >= 1
+    assert set(s['speeds']) == {'saver', 'balanced', 'fast'} and s['speeds']['saver'] == 1
+    r = client.put('/api/settings', json={'speed': 'saver'}, headers=H)
+    assert r.status_code == 200 and r.json()['speed'] == 'saver'
+    assert client.put('/api/settings', json={'speed': 'turbo'}, headers=H).status_code == 422
+    client.put('/api/settings', json={'speed': 'auto'}, headers=H)
+
+
+def test_auto_speed_and_concurrency_rules():
+    from pngsvg_app.jobs import auto_speed, concurrency_for
+    assert auto_speed(4, 8) == 'saver'
+    assert auto_speed(8, None) == 'saver', 'unknown memory is treated as a weak machine'
+    assert auto_speed(8, 16) == 'balanced'
+    assert [concurrency_for(s, 2) for s in ('saver', 'balanced', 'fast')] == [1, 1, 1]
+    assert [concurrency_for(s, 8) for s in ('saver', 'balanced', 'fast')] == [1, 2, 4]
+
+
+def test_queue_runs_one_at_a_time_in_order_and_cancels_waiting(client):
+    ids = [client.post(f'/api/jobs?name={i}.png&start=false', content=png((480, 360)), headers=H).json()['id']
+           for i in range(3)]
+    client.post('/api/jobs/start', json={'ids': ids}, headers=H)
+    snap = {j['id']: j for j in client.get('/api/jobs', headers=H).json()['jobs']}
+    running = [i for i in ids if snap[i]['status'] == 'running']
+    assert len(running) <= 1, 'fixture manager runs one job at a time'
+    queued = [snap[i] for i in ids if snap[i]['status'] == 'queued']
+    assert [q['position'] for q in queued] == list(range(1, len(queued) + 1))
+    last = ids[-1]
+    if snap[last]['status'] == 'queued':
+        assert client.post(f'/api/jobs/{last}/cancel', headers=H).json()['status'] == 'cancelled'
+    for i in ids[:-1]:
+        assert wait(client, i)['status'] == 'done'
+    assert client.get(f'/api/jobs/{last}', headers=H).json()['status'] in ('cancelled', 'done')
+
+
+def test_cancel_all_stops_waiting_work(client):
+    ids = [client.post(f'/api/jobs?name=c{i}.png&start=false', content=png((480, 360)), headers=H).json()['id']
+           for i in range(3)]
+    client.post('/api/jobs/start', json={'ids': ids}, headers=H)
+    stopped = client.post('/api/queue/cancel', headers=H).json()['cancelled']
+    assert set(stopped) <= set(ids) and stopped
+    for i in ids:
+        assert wait(client, i)['status'] in ('cancelled', 'done')

@@ -42,12 +42,39 @@ jalankan `PNG to SVG Vectorize.exe`.
 
 ## 2. Mengonversi gambar
 
-1. **Tambahkan gambar**: seret satu atau beberapa berkas PNG, WebP, atau JPEG ke mana saja di jendela, atau klik
-   **Buka gambar…**. Batas: 50 MB per berkas, sisi terpanjang maksimal 8000 px.
-2. Setiap gambar muncul di daftar **Gambar** beserta progresnya (mencari garis tinta → mencari wilayah warna →
-   menyusun kurva → menulis SVG). Ilustrasi 1536×1024 biasanya selesai dalam 5–10 detik; beberapa gambar diproses
-   bersamaan.
-3. Klik gambar di daftar untuk menampilkannya. ■ untuk membatalkan, ↻ untuk memproses lagi, ✕ untuk menghapus.
+Saat pertama kali membuka aplikasi, **panduan** singkat menjelaskan empat langkahnya. Lewati dengan **Lewati** (atau
+Esc); buka lagi kapan saja lewat **Panduan** di bagian atas. Langkah di bagian atas jendela menunjukkan posisi Anda.
+
+1. **Tambah foto** — seret satu atau beberapa berkas PNG, WebP, atau JPEG ke mana saja di jendela, atau tekan
+   **Pilih foto**. Tambahkan sebanyak yang Anda mau (hingga 100 menunggu sekaligus): **belum ada yang diproses**.
+   Batas: 50 MB per berkas, sisi terpanjang maksimal 8000 px; foto yang tidak bisa dipakai dijelaskan dengan pesan
+   singkat.
+2. **Pilih & atur** — foto menunggu di **meja kerja**. Semuanya tercentang; hapus centang pada foto yang mau ditunda
+   (**Pilih semua** / **Kosongkan** membantu bila fotonya banyak). Pilih **gaya hasil** di kanan (bagian 4). Lalu tekan
+   **Proses N foto**.
+
+   ![Meja kerja](images/app-workbench.png)
+3. **Proses** — foto mengantre dan diubah satu per satu; daftar di kiri menunjukkan urutan antrean tiap foto dan
+   prosesnya (membaca garis → membagi warna → menghaluskan kurva → menyusun SVG). Anda bisa lanjut bekerja, menambah
+   foto, atau **Hentikan** satu foto atau **Hentikan semua** (ditanyakan dulu; hasil yang selesai tetap ada). Setelah
+   semuanya selesai, muncul pesan berapa hasil yang siap.
+4. **Bandingkan & simpan** — klik foto yang selesai di kiri (bagian 3 dan 5). Foto yang ditunda tetap ada di
+   **Meja kerja**, satu klik saja.
+
+**Kecepatan proses** (kolom kanan) menentukan berapa foto yang diubah bersamaan. Proses ini berat untuk prosesor,
+jadi bawaannya berhati-hati:
+
+| Kecepatan | Bersamaan | Kapan dipakai |
+|---|---|---|
+| Otomatis (bawaan) | dipilihkan untuk komputer ini: *Hemat* di kebanyakan laptop, *Seimbang* di komputer 6+ core dan memori 12 GB+ | biarkan saja |
+| Hemat | 1 | komputer lama/lambat, atau sambil memakai program lain |
+| Seimbang | 2 (komputer 4+ core) | jalan tengah |
+| Cepat | hingga 4 (selalu menyisakan satu core) | banyak foto dan tidak ada program lain |
+
+Proses selalu berjalan dengan prioritas rendah sehingga komputer tetap lancar. Ilustrasi 1536×1024 biasanya selesai
+5–10 detik. Bila jendela ditutup saat masih ada foto menunggu atau diproses, aplikasi bertanya dulu.
+
+Untuk menghapus hasil, tekan ikon tempat sampahnya; ada beberapa detik untuk menekan **Urungkan**.
 
 ## 3. Membandingkan asli dan SVG
 
@@ -62,16 +89,16 @@ Selalu periksa detail di perbesaran 200% atau lebih: satu angka bisa menyembunyi
 
 ## 4. Pengaturan
 
-**Preset** — pilih yang sesuai dengan gambar sebelum menambahkan gambar (atau proses ulang setelahnya):
+**Gaya hasil** — pilih yang sesuai dengan gambar sebelum menekan Proses (atau proses ulang setelahnya):
 
-| Preset | Untuk |
+| Gaya | Untuk |
 |---|---|
 | Kartun | karakter dengan garis tinta gelap dan bayangan halus (bawaan) |
 | Ilustrasi datar | bentuk warna solid dengan sedikit garis; hanya gradien yang jelas dipertahankan |
 | Logo / ikon | sedikit warna datar dan geometri tepat; tanpa gradien |
 | Foto → poster | foto atau lukisan menjadi vektor bergaya poster dengan wilayah lebih sedikit dan besar |
 
-Pengaturan **Lanjutan** (ubah, lalu klik **Proses ulang gambar terpilih**):
+**Atur lebih detail** (opsional; titik muncul bila ada yang berbeda dari gaya). Untuk menerapkan pengaturan baru ke foto yang sudah selesai, pilih fotonya lalu tekan **Proses ulang dengan gaya ini**:
 
 | Pengaturan | Efek |
 |---|---|
@@ -82,7 +109,7 @@ Pengaturan **Lanjutan** (ubah, lalu klik **Proses ulang gambar terpilih**):
 | Gabung warna mirip (ΔE) | lebih besar = wilayah lebih sedikit (lebih sederhana); lebih kecil = lebih detail |
 | Detail garis | resolusi untuk menelusuri garis (otomatis biasanya sudah tepat) |
 
-Gambar baru selalu memakai pengaturan saat itu. **Kembalikan ke preset** memulihkan nilai bawaan.
+Foto yang diproses berikutnya selalu memakai pengaturan saat itu. **Kembalikan ke bawaan gaya** memulihkan nilai bawaan.
 
 ## 5. Menyimpan
 

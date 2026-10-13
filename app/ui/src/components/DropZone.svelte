@@ -1,57 +1,101 @@
 <script lang="ts">
+  // Empty start: one obvious action. The whole window also accepts dropped photos (App).
   import { t } from '../lib/i18n.svelte';
-  import { openNative } from '../lib/platform';
-  import { addFiles, adoptJobs, report, store } from '../lib/store.svelte';
-
-  let input: HTMLInputElement;
-
-  async function open() {
-    const res = await openNative(store.settings.preset, store.settings.overrides);
-    if (res === null) {
-      input.click();
-      return;
-    }
-    if (res.errors.length) report(res.errors.join('; '));
-    await adoptJobs(res.ids);
-  }
+  import { pickFiles } from '../lib/picker';
+  import Button from './ui/Button.svelte';
 </script>
 
-<div class="panel zone" data-testid="dropzone">
-  <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
-    <path d="M12 16V4m0 0-4 4m4-4 4 4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor"
-      stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+<div class="welcome" data-testid="dropzone">
+  <svg class="art" viewBox="0 0 220 150" aria-hidden="true">
+    <rect x="18" y="26" width="104" height="92" rx="14" class="card back" />
+    <rect x="30" y="16" width="104" height="92" rx="14" class="card" />
+    <circle cx="62" cy="48" r="10" class="sun" />
+    <path d="M40 96l26-28 20 20 14-12 24 20z" class="hill" />
+    <path d="M146 62h40" class="arrow" />
+    <path d="M176 52l10 10-10 10" class="arrow" />
+    <path d="M150 104c14-26 40-26 54 0" class="vec" />
+    <circle cx="150" cy="104" r="4" class="node" />
+    <circle cx="204" cy="104" r="4" class="node" />
+    <circle cx="177" cy="85" r="4" class="node" />
   </svg>
-  <p>{t('drop')}</p>
-  <span class="muted">{t('orOpen')}</span>
-  <button class="primary" onclick={open}>{t('open')}</button>
-  <input
-    bind:this={input}
-    class="sr-only"
-    type="file"
-    multiple
-    accept="image/png,image/webp,image/jpeg"
-    data-testid="file-input"
-    onchange={(e) => {
-      const files = (e.currentTarget as HTMLInputElement).files;
-      if (files?.length) void addFiles(Array.from(files));
-      (e.currentTarget as HTMLInputElement).value = '';
-    }}
-  />
+  <h2>{t('addTitle')}</h2>
+  <p>{t('addBody')}</p>
+  <span data-tour="add">
+    <Button variant="primary" size="lg" icon="upload" onclick={pickFiles} data-testid="add-photos">{t('addButton')}</Button>
+  </span>
+  <span class="muted small">{t('formats')}</span>
 </div>
 
 <style>
-  .zone {
+  .welcome {
+    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
+    justify-content: center;
+    gap: 10px;
     text-align: center;
-    border-style: dashed;
-    border-width: 2px;
-    color: var(--muted);
+    padding: 32px;
+    border-radius: var(--radius-lg);
+    border: 2px dashed var(--line-strong);
+    background:
+      radial-gradient(circle at 50% 35%, var(--accent-soft), transparent 60%),
+      var(--panel);
+    animation: fade-in var(--slow) var(--ease);
+  }
+  .art {
+    width: 220px;
+    max-width: 70%;
+    margin-bottom: 6px;
+    animation: float 5s ease-in-out infinite;
+  }
+  .card {
+    fill: var(--panel);
+    stroke: var(--line-strong);
+    stroke-width: 2;
+  }
+  .back {
+    fill: var(--panel-2);
+  }
+  .sun {
+    fill: #f6b73c;
+  }
+  .hill {
+    fill: var(--accent);
+    opacity: 0.85;
+  }
+  .arrow {
+    fill: none;
+    stroke: var(--muted);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .vec {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 3;
+  }
+  .node {
+    fill: var(--panel);
+    stroke: var(--accent);
+    stroke-width: 2;
+  }
+  h2 {
+    margin: 0;
+    font-size: 22px;
   }
   p {
-    margin: 0;
-    color: var(--text);
+    margin: 0 0 8px;
+    max-width: 440px;
+    color: var(--muted);
+  }
+  .small {
+    font-size: 12.5px;
+  }
+  @keyframes float {
+    50% {
+      transform: translateY(-6px);
+    }
   }
 </style>

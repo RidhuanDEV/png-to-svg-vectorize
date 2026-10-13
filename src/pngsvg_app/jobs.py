@@ -1,13 +1,18 @@
-"""Job queue: each image is vectorized in a worker process; progress and results are kept in memory only."""
+"""Job queue: images wait on a workbench until the user starts them, then run one (or a few) at a time in
+low-priority worker processes. Progress and results are kept in memory only.
+
+Statuses: staged (added, not started) → queued (waiting its turn) → running → done | error | cancelled.
+"""
 from __future__ import annotations
 
 import io
 import multiprocessing as mp
 import os
+import sys
 import threading
 import time
 import uuid
-from collections import OrderedDict
+from collections import OrderedDict, deque
 from concurrent.futures import CancelledError, Future, ProcessPoolExecutor
 from dataclasses import dataclass, field
 from typing import Any
@@ -18,6 +23,69 @@ from pngsvg import options_for, vectorize
 
 MAX_JOBS = 200                       # oldest finished jobs are dropped beyond these limits
 MAX_KEPT_BYTES = 512 * 1024 * 1024
+MAX_STAGED = 100                     # photos waiting on the workbench at once
+
+# Processing speed = how many images run at the same time. "auto" picks one from the machine at start-up.
+SPEEDS = ('auto', 'saver', 'balanced', 'fast')
+
+
+class WorkbenchFull(Exception):
+    """Too many photos are waiting on the workbench."""
+
+
+def cpu_count() -> int:
+    return os.cpu_count() or 1
+
+
+def total_ram_gb() -> float | None:
+    """Physical memory in GB, or None when it cannot be read (no extra dependency)."""
+    try:
+        if sys.platform == 'win32':
+            import ctypes
+
+            class MemoryStatus(ctypes.Structure):
+                _fields_ = [('dwLength', ctypes.c_ulong), ('dwMemoryLoad', ctypes.c_ulong),
+                            ('ullTotalPhys', ctypes.c_ulonglong), ('ullAvailPhys', ctypes.c_ulonglong),
+                            ('ullTotalPageFile', ctypes.c_ulonglong), ('ullAvailPageFile', ctypes.c_ulonglong),
+                            ('ullTotalVirtual', ctypes.c_ulonglong), ('ullAvailVirtual', ctypes.c_ulonglong),
+                            ('ullAvailExtendedVirtual', ctypes.c_ulonglong)]
+            st = MemoryStatus()
+            st.dwLength = ctypes.sizeof(MemoryStatus)
+            if ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(st)):
+                return st.ullTotalPhys / 1024 ** 3
+            return None
+        return os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES') / 1024 ** 3
+    except (AttributeError, OSError, ValueError):
+        return None
+
+
+def auto_speed(cpus: int, ram_gb: float | None) -> str:
+    """Weak or unknown machines save resources; only clearly capable ones run two images at once."""
+    if cpus >= 6 and ram_gb is not None and ram_gb >= 12:
+        return 'balanced'
+    return 'saver'
+
+
+def concurrency_for(speed: str, cpus: int) -> int:
+    if speed == 'fast':
+        return max(1, min(4, cpus - 1))
+    if speed == 'balanced':
+        return 2 if cpus >= 4 else 1
+    return 1
+
+
+def _lower_priority() -> None:
+    """Worker initializer: run below normal priority so the computer stays responsive."""
+    try:
+        if sys.platform == 'win32':
+            import ctypes
+            BELOW_NORMAL_PRIORITY_CLASS = 0x00004000
+            ctypes.windll.kernel32.SetPriorityClass(ctypes.windll.kernel32.GetCurrentProcess(),
+                                                    BELOW_NORMAL_PRIORITY_CLASS)
+        else:
+            os.nice(10)
+    except (AttributeError, OSError):
+        pass
 
 
 @dataclass
@@ -29,9 +97,10 @@ class Job:
     source: bytes
     width: int
     height: int
-    status: str = 'queued'           # queued | running | done | error | cancelled
+    status: str = 'staged'           # staged | queued | running | done | error | cancelled
     stage: str = ''
     progress: float = 0.0
+    position: int | None = None      # 1-based place in the queue while queued
     created: float = field(default_factory=time.time)
     started: float | None = None
     seconds: float | None = None
@@ -43,7 +112,8 @@ class Job:
     def public(self) -> dict[str, Any]:
         return {'id': self.id, 'name': self.name, 'preset': self.preset, 'options': self.options,
                 'status': self.status, 'stage': self.stage, 'progress': round(self.progress, 3),
-                'width': self.width, 'height': self.height, 'seconds': self.seconds,
+                'position': self.position, 'width': self.width, 'height': self.height, 'seconds': self.seconds,
+                'source_bytes': len(self.source),
                 'bytes': len(self.svg.encode()) if self.svg else None, 'stats': self.stats, 'error': self.error}
 
 
@@ -73,20 +143,47 @@ def _work(job_id: str, source: bytes, preset: str, overrides: dict[str, Any], qu
 
 
 class JobManager:
-    def __init__(self, workers: int | None = None):
-        self._workers = workers or min(4, os.cpu_count() or 1)
+    def __init__(self, workers: int | None = None, speed: str = 'auto'):
+        self._cpus = cpu_count()
+        self._ram = total_ram_gb()
+        self._fixed = workers                     # tests / CLI: a fixed number of simultaneous jobs
+        self._speed = speed if speed in SPEEDS else 'auto'
         self._pool: ProcessPoolExecutor | None = None
         self._manager = None
         self._queue = None
         self._jobs: OrderedDict[str, Job] = OrderedDict()
-        self._lock = threading.Lock()
+        self._pending: deque[str] = deque()       # queued job ids, first in first out
+        self._running: set[str] = set()           # ids holding a worker (a cancelled run still holds one)
+        # Reentrant: a future that is already done runs its callback (_finish) inside _dispatch.
+        self._lock = threading.RLock()
         self._listener: threading.Thread | None = None
+
+    # -- settings --------------------------------------------------------------------------------------------
+    def effective_speed(self) -> str:
+        return auto_speed(self._cpus, self._ram) if self._speed == 'auto' else self._speed
+
+    def concurrency(self) -> int:
+        return self._fixed or concurrency_for(self.effective_speed(), self._cpus)
+
+    def settings(self) -> dict[str, Any]:
+        return {'speed': self._speed, 'effective': self.effective_speed(), 'concurrency': self.concurrency(),
+                'auto': auto_speed(self._cpus, self._ram),
+                'cpus': self._cpus, 'ram_gb': round(self._ram, 1) if self._ram else None,
+                'speeds': {s: concurrency_for(s, self._cpus) for s in SPEEDS if s != 'auto'}}
+
+    def set_speed(self, speed: str) -> None:
+        if speed not in SPEEDS:
+            raise ValueError(f'speed must be one of {", ".join(SPEEDS)}')
+        with self._lock:
+            self._speed = speed
+            self._dispatch()
 
     # -- lifecycle -------------------------------------------------------------------------------------------
     def start(self) -> None:
         if self._pool is not None:
             return
-        self._pool = ProcessPoolExecutor(self._workers)
+        most = self._fixed or concurrency_for('fast', self._cpus)
+        self._pool = ProcessPoolExecutor(most, initializer=_lower_priority)
         self._manager = mp.Manager()
         self._queue = self._manager.Queue()
         self._listener = threading.Thread(target=self._listen, name='pngsvg-progress', daemon=True)
@@ -100,6 +197,11 @@ class JobManager:
         self._manager.shutdown()
         self._pool = self._manager = self._queue = None
 
+    def busy(self) -> int:
+        """Images still waiting or running (the window asks before closing when this is not zero)."""
+        with self._lock:
+            return sum(1 for j in self._jobs.values() if j.status in ('queued', 'running'))
+
     def _listen(self) -> None:
         q = self._queue
         while True:
@@ -112,38 +214,82 @@ class JobManager:
             job_id, name, fraction = item
             with self._lock:
                 job = self._jobs.get(job_id)
-                if job and job.status in ('queued', 'running'):
-                    job.status, job.stage, job.progress = 'running', name, fraction
-                    job.started = job.started or time.time()
+                if job and job.status == 'running':
+                    job.stage, job.progress = name, fraction
 
     # -- jobs ------------------------------------------------------------------------------------------------
-    def submit(self, name: str, source: bytes, width: int, height: int, preset: str,
-               overrides: dict[str, Any]) -> Job:
-        self.start()
-        job = Job(uuid.uuid4().hex, name, preset, overrides, source, width, height)
+    def stage(self, name: str, source: bytes, width: int, height: int) -> Job:
+        """Put a validated image on the workbench without processing it."""
+        job = Job(uuid.uuid4().hex, name, 'cartoon', {}, source, width, height)
         with self._lock:
+            if sum(1 for j in self._jobs.values() if j.status == 'staged') >= MAX_STAGED:
+                raise WorkbenchFull(f'at most {MAX_STAGED} photos can wait on the workbench')
             self._jobs[job.id] = job
             self._trim()
-        job.future = self._pool.submit(_work, job.id, source, preset, overrides, self._queue)
-        job.future.add_done_callback(lambda f, j=job: self._finish(j, f))
         return job
+
+    def start_jobs(self, ids: list[str], preset: str, overrides: dict[str, Any]) -> list[Job]:
+        """Queue staged images with these settings, in the given order. Unknown or non-staged ids are skipped."""
+        self.start()
+        started = []
+        with self._lock:
+            for jid in ids:
+                job = self._jobs.get(jid)
+                if job is None or job.status != 'staged':
+                    continue
+                job.preset, job.options, job.status = preset, dict(overrides), 'queued'
+                self._pending.append(job.id)
+                started.append(job)
+            self._dispatch()
+        return started
+
+    def submit(self, name: str, source: bytes, width: int, height: int, preset: str,
+               overrides: dict[str, Any]) -> Job:
+        """Stage and queue in one step (API clients, retry, smoke test)."""
+        job = Job(uuid.uuid4().hex, name, preset, dict(overrides), source, width, height, status='queued')
+        self.start()
+        with self._lock:
+            self._jobs[job.id] = job
+            self._pending.append(job.id)
+            self._trim()
+            self._dispatch()
+        return job
+
+    def _dispatch(self) -> None:
+        """Hand queued jobs to workers while fewer than `concurrency()` are running (caller holds the lock)."""
+        while self._pending and len(self._running) < self.concurrency() and self._pool is not None:
+            job = self._jobs.get(self._pending.popleft())
+            if job is None or job.status != 'queued':
+                continue
+            job.status, job.stage, job.progress, job.started = 'running', 'start', 0.0, time.time()
+            self._running.add(job.id)
+            job.future = self._pool.submit(_work, job.id, job.source, job.preset, job.options, self._queue)
+            job.future.add_done_callback(lambda f, j=job: self._finish(j, f))
+        for i, jid in enumerate(self._pending):
+            if (job := self._jobs.get(jid)) is not None:
+                job.position = i + 1
+        for jid in self._running:
+            if (job := self._jobs.get(jid)) is not None:
+                job.position = None
 
     def _finish(self, job: Job, fut: Future) -> None:
         with self._lock:
-            if job.status == 'cancelled':
-                return
+            self._running.discard(job.id)
             try:
-                out = fut.result()
-            except CancelledError:
-                job.status = 'cancelled'
-                return
-            except Exception as e:  # noqa: BLE001 - reported to the UI, never the image content
-                job.status, job.error = 'error', f'{type(e).__name__}: {e}'[:300]
-                return
-            job.svg = out.pop('svg')
-            job.seconds = round(out.pop('seconds'), 2)
-            job.stats = out
-            job.status, job.stage, job.progress = 'done', 'done', 1.0
+                if job.status != 'cancelled':
+                    try:
+                        out = fut.result()
+                    except CancelledError:
+                        job.status = 'cancelled'
+                    except Exception as e:  # noqa: BLE001 - reported to the UI, never the image content
+                        job.status, job.error = 'error', f'{type(e).__name__}: {e}'[:300]
+                    else:
+                        job.svg = out.pop('svg')
+                        job.seconds = round(out.pop('seconds'), 2)
+                        job.stats = out
+                        job.status, job.stage, job.progress = 'done', 'done', 1.0
+            finally:
+                self._dispatch()
 
     def get(self, job_id: str) -> Job | None:
         with self._lock:
@@ -154,12 +300,20 @@ class JobManager:
             return list(self._jobs.values())
 
     def cancel(self, job_id: str) -> bool:
-        """Queued jobs are cancelled; a running job is marked cancelled and its result discarded."""
+        """A waiting job leaves the queue at once; a running one is marked cancelled and its result discarded
+        (the worker finishes the image in the background, then takes the next one)."""
         with self._lock:
             job = self._jobs.get(job_id)
             if job is None:
                 return False
-            if job.status in ('queued', 'running'):
+            if job.status == 'queued':
+                try:
+                    self._pending.remove(job.id)
+                except ValueError:
+                    pass
+                job.status, job.position = 'cancelled', None
+                self._dispatch()
+            elif job.status == 'running':
                 if job.future is not None:
                     job.future.cancel()
                 job.status = 'cancelled'

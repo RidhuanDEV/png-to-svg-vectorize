@@ -42,22 +42,35 @@ def wait_done(jobs, job_id):
     return jobs.get(job_id)
 
 
-def test_open_files_creates_jobs_and_reports_bad_files(jobs, tmp_path):
+def test_open_files_stages_images_and_reports_bad_files(jobs, tmp_path):
     good = tmp_path / 'ball.png'
     good.write_bytes(png_bytes())
     bad = tmp_path / 'notes.png'
     bad.write_text('not an image')
-    out = bridge(jobs, {'OPEN': [str(good), str(bad)]}).open_files('logo', {'tolerance': 0.4})
-    assert len(out['ids']) == 1 and len(out['errors']) == 1 and out['errors'][0].startswith('notes.png')
-    job = wait_done(jobs, out['ids'][0])
+    out = bridge(jobs, {'OPEN': [str(good), str(bad)]}).open_files()
+    assert len(out['ids']) == 1 and len(out['errors']) == 1
+    assert out['errors'][0]['name'] == 'notes.png' and out['errors'][0]['code'] == 415
+    job = jobs.get(out['ids'][0])
+    assert job.status == 'staged', 'nothing is processed until the user presses Process'
+    jobs.start_jobs([job.id], 'logo', {'tolerance': 0.4})
+    job = wait_done(jobs, job.id)
     assert job.status == 'done' and job.preset == 'logo' and job.options == {'tolerance': 0.4}
 
 
-def test_open_files_rejects_invalid_settings_per_file(jobs, tmp_path):
-    good = tmp_path / 'ball.png'
-    good.write_bytes(png_bytes())
-    out = bridge(jobs, {'OPEN': [str(good)]}).open_files('cartoon', {'tolerance': 999})
-    assert out['ids'] == [] and 'invalid options' in out['errors'][0]
+def test_close_asks_only_while_busy(jobs):
+    class FakeWindow:
+        confirm_close = False
+        localization = {'global.quitConfirmation': ''}
+
+    b = bridge(jobs, {})
+    w = FakeWindow()
+    b._on_closing(w)
+    assert w.confirm_close is False
+    j = jobs.submit('scene.png', png_bytes(), 120, 90, 'cartoon', {})
+    b.set_lang('id')
+    b._on_closing(w)
+    assert w.confirm_close is True and 'foto' in w.localization['global.quitConfirmation']
+    wait_done(jobs, j.id)
 
 
 def test_cancelled_dialog_does_nothing(jobs):

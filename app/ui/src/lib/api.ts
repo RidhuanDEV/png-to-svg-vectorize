@@ -1,7 +1,7 @@
 // Client for the local service. Every /api call carries the per-session token, which arrives once in the URL
 // fragment (#t=...) - fragments are never sent to the server or written to its logs.
 
-export type Status = 'queued' | 'running' | 'done' | 'error' | 'cancelled';
+export type Status = 'staged' | 'queued' | 'running' | 'done' | 'error' | 'cancelled';
 
 export interface Job {
   id: string;
@@ -11,9 +11,12 @@ export interface Job {
   status: Status;
   stage: string;
   progress: number;
+  /** 1-based place in the queue while waiting. */
+  position: number | null;
   width: number;
   height: number;
   seconds: number | null;
+  source_bytes: number;
   bytes: number | null;
   stats: { regions?: number; gradients?: number; outline_paths?: number };
   error: string | null;
@@ -47,6 +50,20 @@ export interface PresetInfo {
   presets: Preset[];
   options: OptionSpec[];
   limits: { max_upload: number; max_side: number; formats: string[] };
+}
+
+export type Speed = 'auto' | 'saver' | 'balanced' | 'fast';
+
+export interface ServiceSettings {
+  speed: Speed;
+  /** The speed "auto" resolved to on this machine. */
+  effective: Exclude<Speed, 'auto'>;
+  /** What "auto" picks on this machine, whatever is selected now. */
+  auto: Exclude<Speed, 'auto'>;
+  concurrency: number;
+  cpus: number;
+  ram_gb: number | null;
+  speeds: Record<Exclude<Speed, 'auto'>, number>;
 }
 
 const TOKEN_KEY = 'pngsvg.token';
@@ -114,12 +131,33 @@ export const hasToken = () => token.length > 0;
 export const api = {
   presets: async (): Promise<PresetInfo> => (await call('/api/presets')).json(),
   jobs: async (): Promise<Job[]> => (await (await call('/api/jobs')).json()).jobs,
-  upload: async (file: Blob, name: string, preset: string, options: Partial<Overrides>): Promise<Job> =>
+  /** Put an image on the workbench (validated, not processed until `start`). */
+  stage: async (file: Blob, name: string): Promise<Job> =>
     (
-      await call(`/api/jobs?${query({ name, preset, options: JSON.stringify(options) })}`, {
+      await call(`/api/jobs?${query({ name, start: 'false' })}`, {
         method: 'POST',
         body: file,
         headers: { 'Content-Type': file.type || 'application/octet-stream' },
+      })
+    ).json(),
+  start: async (ids: string[], preset: string, options: Partial<Overrides>): Promise<Job[]> =>
+    (
+      await (
+        await call('/api/jobs/start', {
+          method: 'POST',
+          body: JSON.stringify({ ids, preset, options }),
+          headers: { 'Content-Type': 'application/json' },
+        })
+      ).json()
+    ).jobs,
+  cancelAll: async (): Promise<string[]> => (await (await call('/api/queue/cancel', { method: 'POST' })).json()).cancelled,
+  settings: async (): Promise<ServiceSettings> => (await call('/api/settings')).json(),
+  setSpeed: async (speed: Speed): Promise<ServiceSettings> =>
+    (
+      await call('/api/settings', {
+        method: 'PUT',
+        body: JSON.stringify({ speed }),
+        headers: { 'Content-Type': 'application/json' },
       })
     ).json(),
   retry: async (id: string, preset: string, options: Partial<Overrides>): Promise<Job> =>
