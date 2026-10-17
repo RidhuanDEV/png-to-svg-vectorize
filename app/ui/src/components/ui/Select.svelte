@@ -119,7 +119,7 @@
     border: 1px solid var(--line);
     background: var(--panel);
     font-weight: 600;
-    font-size: 13px;
+    font-size: calc(13px * var(--ts));
     transition: border-color var(--fast) var(--ease), background var(--fast) var(--ease);
   }
   .trigger:hover,

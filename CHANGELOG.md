@@ -2,6 +2,21 @@
 
 All notable changes. Benchmarks for every engine version are in [docs/bench.md](docs/bench.md).
 
+## 1.2.0 — 2026-10-18 — themes and Settings
+
+- **Three themes** to choose from — *Paper & ink*, *Lightbox*, *Blueprint* — or *Match system* (default). Colors live
+  in `app/ui/src/theme/themes.json`; `npm run check` verifies WCAG contrast for every theme and that components use
+  no literal colors.
+- Bundled **IBM Plex Sans / Mono** (SIL OFL); numbers use the monospaced face. Pen-node motif in titles and the new
+  brand mark.
+- **Settings** (gear or `Ctrl+,`): language, theme, density, text size, reduce animation, guide; processing speed,
+  largest photo, workbench size; style for new photos, save folder (desktop), **file name pattern** (`{name}`
+  `{style}` `{date}`), **coordinate precision** (engine option `decimals`, 0–3), width/height in the SVG; diagnostic
+  log (desktop); version, licenses and a manual **update check** (`GET /api/update`).
+- **Languages from files**: `app/ui/src/locales/<code>.json`; a new language is one file (see CONTRIBUTING.md).
+- API: `PUT /api/settings` accepts `name_pattern`, `size_attrs`, `max_side`, `max_staged` (each optional); jobs carry
+  `filename`; saved/zip/downloaded SVGs follow the pattern and size setting.
+
 ## 1.1.0 — 2026-10-13 — friendlier workflow
 
 - **Workbench**: added photos wait (status `staged`) until you press **Process N photos**; tick only the ones you want.

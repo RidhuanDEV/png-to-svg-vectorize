@@ -58,7 +58,7 @@
     fill: var(--panel-2);
   }
   .sun {
-    fill: #f6b73c;
+    fill: var(--node);
   }
   .hill {
     fill: var(--accent);
@@ -83,7 +83,7 @@
   }
   h2 {
     margin: 0;
-    font-size: 22px;
+    font-size: calc(22px * var(--ts));
   }
   p {
     margin: 0 0 8px;
@@ -91,7 +91,7 @@
     color: var(--muted);
   }
   .small {
-    font-size: 12.5px;
+    font-size: calc(12.5px * var(--ts));
   }
   @keyframes float {
     50% {

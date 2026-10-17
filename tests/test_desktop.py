@@ -28,8 +28,8 @@ def jobs():
     m.shutdown()
 
 
-def bridge(jobs, answers: dict) -> Bridge:
-    b = Bridge(jobs, server)
+def bridge(jobs, answers: dict, prefs_dir=None) -> Bridge:
+    b = Bridge(jobs, server, prefs_dir=prefs_dir)
     b._dialog = lambda kind, **kw: answers.get(kind)
     return b
 
@@ -67,9 +67,10 @@ def test_close_asks_only_while_busy(jobs):
     b._on_closing(w)
     assert w.confirm_close is False
     j = jobs.submit('scene.png', png_bytes(), 120, 90, 'cartoon', {})
-    b.set_lang('id')
+    b.set_close_message('Masih ada {n} foto. Tutup?')
+    b.set_close_message('no placeholder')  # ignored: must contain {n}
     b._on_closing(w)
-    assert w.confirm_close is True and 'foto' in w.localization['global.quitConfirmation']
+    assert w.confirm_close is True and w.localization['global.quitConfirmation'] == 'Masih ada 1 foto. Tutup?'
     wait_done(jobs, j.id)
 
 
@@ -91,3 +92,52 @@ def test_save_svg_and_save_all_never_overwrite(jobs, tmp_path):
     assert bridge(jobs, {'FOLDER': str(folder)}).save_all([j.id, 'missing']) == 1
     assert (folder / 'scene.svg').read_text(encoding='utf-8') == 'keep me'
     assert (folder / 'scene-2.svg').read_text(encoding='utf-8').startswith('<svg')
+
+
+def test_save_folder_preferences_and_direct_save(jobs, tmp_path):
+    prefs_dir = tmp_path / 'prefs'
+    prefs_dir.mkdir()
+    out = tmp_path / 'out'
+    out.mkdir()
+    b = bridge(jobs, {'FOLDER': str(out)}, prefs_dir=prefs_dir)
+    assert b.get_prefs()['save_dir'] is None and b.get_prefs()['ask_each_time'] is True
+    assert b.choose_save_dir()['save_dir'] == str(out)
+    b.set_pref('ask_each_time', False)
+    b.set_pref('save_dir', 'C:/elsewhere')  # not settable from the page
+    again = Bridge(jobs, server, prefs_dir=prefs_dir).get_prefs()
+    assert again['save_dir'] == str(out) and again['ask_each_time'] is False, 'remembered between runs'
+
+    j = jobs.submit('scene.png', png_bytes(), 120, 90, 'logo', {})
+    wait_done(jobs, j.id)
+    jobs.name_pattern, jobs.size_attrs = '{name}-{style}', True
+    try:
+        def no_dialog(kind, **kw):
+            raise AssertionError('no dialog when not asking')
+        b._dialog = no_dialog
+        assert b.save_svg(j.id) is True and b.save_svg(j.id) is True
+        assert b.save_all([j.id]) == 1
+    finally:
+        jobs.name_pattern, jobs.size_attrs = '{name}', False
+    names = sorted(p.name for p in out.iterdir())
+    assert names == ['scene-logo-2.svg', 'scene-logo-3.svg', 'scene-logo.svg']
+    assert (out / 'scene-logo.svg').read_text(encoding='utf-8').startswith('<svg width="120" height="90"')
+
+    assert b.clear_save_dir()['save_dir'] is None
+
+
+def test_broken_prefs_file_means_defaults(tmp_path):
+    from pngsvg_app.desktop import load_prefs
+    (tmp_path / 'settings.json').write_text('{not json', encoding='utf-8')
+    assert load_prefs(tmp_path) == {'save_dir': None, 'ask_each_time': True, 'log': True}
+    (tmp_path / 'settings.json').write_text('{"save_dir": "Z:/missing", "log": "yes"}', encoding='utf-8')
+    assert load_prefs(tmp_path)['save_dir'] is None and load_prefs(tmp_path)['log'] is True
+
+
+def test_open_url_only_allows_the_project(jobs, monkeypatch):
+    import webbrowser
+    opened = []
+    monkeypatch.setattr(webbrowser, 'open', lambda url: opened.append(url) or True)
+    b = bridge(jobs, {})
+    assert b.open_url('https://example.com/phish') is False
+    assert b.open_url('https://github.com/RidhuanDEV/png-to-svg-vectorize/releases') is True
+    assert opened == ['https://github.com/RidhuanDEV/png-to-svg-vectorize/releases']

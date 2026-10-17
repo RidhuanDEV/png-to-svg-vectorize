@@ -3,9 +3,10 @@
 // Flow: photos are added to the workbench (status "staged", nothing processed) → the user ticks the ones to
 // process and picks a style → they wait in the service's queue → results are compared and saved.
 
-import { api, ApiError, type Job, type Overrides, type PresetInfo, type ServiceSettings, type Speed } from './api';
+import { api, ApiError, type Job, type Overrides, type PresetInfo, type ServiceSettings, type ServicePrefs, type Speed } from './api';
 import { tf, t } from './i18n.svelte';
 import type { FileError } from './platform';
+import { prefs, servicePrefs } from './prefs.svelte';
 import { similarity } from './similarity';
 import { toast } from './toast.svelte';
 
@@ -135,7 +136,8 @@ export async function refresh(): Promise<void> {
 
 export async function init(): Promise<void> {
   try {
-    [store.info, store.service] = await Promise.all([api.presets(), api.settings()]);
+    // a fresh service (desktop restart) gets the user's saved limits and file-name settings
+    [store.info, store.service] = await Promise.all([api.presets(), api.putSettings(servicePrefs())]);
     if (!store.info.presets.some((p) => p.name === store.settings.preset)) store.settings.preset = 'cartoon';
   } catch (e) {
     report(e);
@@ -231,7 +233,7 @@ export async function processPicked(): Promise<void> {
   if (!ids.length || store.busy) return;
   store.busy = true;
   try {
-    const started = await api.start(ids, store.settings.preset, store.settings.overrides);
+    const started = await api.start(ids, store.settings.preset, jobOptions());
     for (const j of started) delete store.picked[j.id];
     if (started.length) toast('info', tf('t_queued', { n: started.length }));
     // follow the work: show progress and results; photos left on the workbench stay one click away
@@ -247,9 +249,21 @@ export async function processPicked(): Promise<void> {
   await refresh();
 }
 
+/** Style overrides plus the output precision from Settings (decimals 1 is the engine default). */
+export function jobOptions(): Partial<Overrides> {
+  const o: Partial<Overrides> = { ...store.settings.overrides };
+  if (prefs.decimals !== 1) o.decimals = prefs.decimals;
+  return o;
+}
+
 export async function setSpeed(speed: Speed): Promise<void> {
+  await updateService({ speed });
+}
+
+export async function updateService(body: ServicePrefs): Promise<void> {
   try {
-    store.service = await api.setSpeed(speed);
+    store.service = await api.putSettings(body);
+    await refresh(); // file names shown in the lists follow the pattern
   } catch (e) {
     report(e);
   }
@@ -311,7 +325,7 @@ export async function retryJob(id: string, useCurrentSettings = false): Promise<
   if (!job) return;
   try {
     const next = useCurrentSettings
-      ? await api.retry(id, store.settings.preset, store.settings.overrides)
+      ? await api.retry(id, store.settings.preset, jobOptions())
       : await api.retry(id, job.preset, job.options);
     await api.remove(id);
     const thumb = store.media[id]?.sourceUrl;

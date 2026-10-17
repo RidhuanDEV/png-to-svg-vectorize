@@ -16,14 +16,15 @@ test.beforeEach(async ({ request }) => {
   await request.put('/api/settings', { headers: H, data: { speed: 'auto' } });
 });
 
-async function open(page: Page, lang: 'en' | 'id', tour = false) {
+async function open(page: Page, lang: 'en' | 'id', tour = false, theme = 'system') {
   await page.addInitScript(
-    ([l, t]) => {
+    ([l, t, th]) => {
       localStorage.clear();
       localStorage.setItem('pngsvg.lang', l as string);
+      localStorage.setItem('pngsvg.prefs', JSON.stringify({ theme: th }));
       if (!t) localStorage.setItem('pngsvg.tour.v1', 'done');
     },
-    [lang, tour] as const,
+    [lang, tour, theme] as const,
   );
   await page.goto('/#t=e2e');
 }
@@ -51,9 +52,8 @@ test('welcome with the guide (light, English)', async ({ page }) => {
   await page.screenshot({ path: `${OUT}app-tour.png` });
 });
 
-test('workbench (light, Indonesian)', async ({ page }) => {
-  await page.emulateMedia({ colorScheme: 'light' });
-  await open(page, 'id');
+test('workbench (blueprint, Indonesian)', async ({ page }) => {
+  await open(page, 'id', false, 'blueprint');
   await stage(page);
   await page.locator('[data-testid="staged"][data-name="face.png"] .check label').click();
   await page.waitForTimeout(5000);
@@ -77,4 +77,12 @@ test('slider, zoomed (dark, Indonesian)', async ({ page }) => {
   await page.mouse.move(box.x + box.width * 0.5, box.y + box.height * 0.55);
   await page.mouse.wheel(0, -500);
   await page.screenshot({ path: `${OUT}app-slider-dark.png` });
+});
+
+test('settings (paper, Indonesian)', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'light' });
+  await open(page, 'id');
+  await page.getByTestId('settings-open').click();
+  await page.waitForTimeout(600);
+  await page.screenshot({ path: `${OUT}app-settings.png` });
 });

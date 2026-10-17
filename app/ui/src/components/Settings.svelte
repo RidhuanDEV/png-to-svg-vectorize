@@ -235,7 +235,7 @@
     min-width: 0;
   }
   .txt .muted {
-    font-size: 12px;
+    font-size: calc(12px * var(--ts));
   }
   .dot {
     margin-left: auto;
@@ -291,10 +291,10 @@
     gap: 6px;
   }
   .lbl {
-    font-size: 13px;
+    font-size: calc(13px * var(--ts));
   }
   .note {
-    font-size: 12.5px;
+    font-size: calc(12.5px * var(--ts));
     margin: 10px 0 8px;
   }
   .speeds {
@@ -312,7 +312,7 @@
     border: 1.5px solid var(--line);
     background: var(--panel);
     text-align: left;
-    font-size: 13px;
+    font-size: calc(13px * var(--ts));
     transition:
       border-color var(--fast) var(--ease),
       background var(--fast) var(--ease),
@@ -329,7 +329,7 @@
     background: var(--accent-soft);
   }
   .speed .muted {
-    font-size: 12px;
+    font-size: calc(12px * var(--ts));
     font-variant-numeric: tabular-nums;
   }
   .bars {

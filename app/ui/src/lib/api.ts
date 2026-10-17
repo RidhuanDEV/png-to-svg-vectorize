@@ -17,6 +17,8 @@ export interface Job {
   height: number;
   seconds: number | null;
   source_bytes: number;
+  /** Name the result is saved under (Settings → file name pattern). */
+  filename: string;
   bytes: number | null;
   stats: { regions?: number; gradients?: number; outline_paths?: number };
   error: string | null;
@@ -30,6 +32,7 @@ export interface Overrides {
   smooth: number;
   merge_de: number;
   scale: number | null;
+  decimals: number;
 }
 
 export interface OptionSpec {
@@ -64,6 +67,25 @@ export interface ServiceSettings {
   cpus: number;
   ram_gb: number | null;
   speeds: Record<Exclude<Speed, 'auto'>, number>;
+  max_staged: number;
+  max_side: number;
+  name_pattern: string;
+  size_attrs: boolean;
+}
+
+export interface ServicePrefs {
+  speed?: Speed;
+  name_pattern?: string;
+  size_attrs?: boolean;
+  max_side?: number;
+  max_staged?: number;
+}
+
+export interface UpdateInfo {
+  current: string;
+  latest: string | null;
+  newer: boolean;
+  url: string | null;
 }
 
 const TOKEN_KEY = 'pngsvg.token';
@@ -152,14 +174,18 @@ export const api = {
     ).jobs,
   cancelAll: async (): Promise<string[]> => (await (await call('/api/queue/cancel', { method: 'POST' })).json()).cancelled,
   settings: async (): Promise<ServiceSettings> => (await call('/api/settings')).json(),
-  setSpeed: async (speed: Speed): Promise<ServiceSettings> =>
+  putSettings: async (body: ServicePrefs): Promise<ServiceSettings> =>
     (
       await call('/api/settings', {
         method: 'PUT',
-        body: JSON.stringify({ speed }),
+        body: JSON.stringify(body),
         headers: { 'Content-Type': 'application/json' },
       })
     ).json(),
+  health: async (): Promise<{ version: string }> => (await call('/api/health')).json(),
+  checkUpdate: async (): Promise<UpdateInfo> => (await call('/api/update')).json(),
+  /** The SVG as saved (with width/height when Settings ask for it). */
+  svgDownload: async (id: string): Promise<Blob> => (await call(`/api/jobs/${id}/svg?download=true`)).blob(),
   retry: async (id: string, preset: string, options: Partial<Overrides>): Promise<Job> =>
     (await call(`/api/jobs/${id}/retry?${query({ preset, options: JSON.stringify(options) })}`, { method: 'POST' })).json(),
   cancel: async (id: string): Promise<void> => {

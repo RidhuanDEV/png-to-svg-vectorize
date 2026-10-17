@@ -16,10 +16,10 @@
     {#if job.status === 'done'}
       <div class="score">
         <span class="muted">{t('similarity')}</span>
-        <b data-testid="score">{score !== undefined ? `${score.toFixed(2)} %` : t('measuring')}</b>
+        <b class="num" data-testid="score">{score !== undefined ? `${score.toFixed(2)} %` : t('measuring')}</b>
         <span class="meter" aria-hidden="true"><span style="width:{score ?? 0}%"></span></span>
       </div>
-      <dl data-testid="stats">
+      <dl class="num-values" data-testid="stats">
         <dt>{t('regions')}</dt>
         <dd>{job.stats.regions ?? '—'}</dd>
         <dt>{t('gradients')}</dt>
@@ -46,7 +46,7 @@
     margin-bottom: 10px;
   }
   .score b {
-    font-size: 20px;
+    font-size: calc(20px * var(--ts));
     font-variant-numeric: tabular-nums;
   }
   .meter {
@@ -67,7 +67,7 @@
     grid-template-columns: auto 1fr;
     gap: 4px 12px;
     margin: 0;
-    font-size: 13px;
+    font-size: calc(13px * var(--ts));
   }
   dt {
     color: var(--muted);
@@ -75,6 +75,7 @@
   dd {
     margin: 0;
     text-align: right;
+    font-family: var(--mono);
     font-variant-numeric: tabular-nums;
   }
   .err {

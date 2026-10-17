@@ -35,7 +35,10 @@ test.beforeEach(async ({ page, request }, info) => {
   // every test starts from an empty service and fresh page storage (once per test, not on reloads)
   const res = await request.get('/api/jobs', { headers: H });
   for (const j of (await res.json()).jobs) await request.delete(`/api/jobs/${j.id}`, { headers: H });
-  await request.put('/api/settings', { headers: H, data: { speed: 'auto' } });
+  await request.put('/api/settings', {
+    headers: H,
+    data: { speed: 'auto', name_pattern: '{name}', size_attrs: false, max_side: 8000, max_staged: 100 },
+  });
   const showTour = info.title.includes('tour');
   await page.addInitScript((tour) => {
     if (sessionStorage.getItem('e2e-init')) return;
@@ -276,4 +279,133 @@ test('the image stays fitted when the window is resized, until the user zooms', 
   await expect.poll(fits).toBe(true);
   await page.setViewportSize({ width: 900, height: 700 });
   await expect.poll(fits).toBe(true);
+});
+
+
+// -- M8: Settings ------------------------------------------------------------------------------------------------
+
+async function openSettings(page: Page, section?: string) {
+  await page.getByTestId('settings-open').click();
+  await expect(page.getByTestId('settings-dialog')).toBeVisible();
+  if (section) await page.getByTestId(`nav-${section}`).click();
+}
+
+test('settings open from the gear and Ctrl+comma, Esc closes', async ({ page }) => {
+  await openApp(page);
+  await openSettings(page);
+  await page.keyboard.press('Escape');
+  await expect(page.getByTestId('settings-dialog')).toHaveCount(0);
+  await page.keyboard.press('Control+Comma');
+  await expect(page.getByTestId('settings-dialog')).toBeVisible();
+  await page.getByTestId('nav-appearance').focus();
+  await page.keyboard.press('ArrowDown');
+  await expect(page.getByTestId('nav-processing')).toHaveAttribute('aria-selected', 'true');
+  await page.getByTestId('settings-close').click();
+  await expect(page.getByTestId('settings-dialog')).toHaveCount(0);
+});
+
+test('themes: three to choose from, "match system" follows light and dark, remembered', async ({ page }) => {
+  const html = page.locator('html');
+  await page.emulateMedia({ colorScheme: 'light' });
+  await openApp(page);
+  await expect(html).toHaveAttribute('data-theme', 'paper');
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await expect(html).toHaveAttribute('data-theme', 'lightbox');
+
+  await openSettings(page);
+  for (const th of ['paper', 'lightbox', 'blueprint']) {
+    await page.getByTestId(`theme-${th}`).click();
+    await expect(html).toHaveAttribute('data-theme', th);
+    await expect(page.getByTestId(`theme-${th}`)).toHaveAttribute('aria-checked', 'true');
+  }
+  const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+  expect(bg).toBe('rgb(14, 42, 68)'); // blueprint --bg
+  await page.reload();
+  await expect(html).toHaveAttribute('data-theme', 'blueprint');
+});
+
+test('density, text size and animation preferences apply to the whole app', async ({ page }) => {
+  await openApp(page);
+  await openSettings(page);
+  await page.getByTestId('density-compact').click();
+  await expect(page.locator('html')).toHaveAttribute('data-density', 'compact');
+  await page.getByTestId('text-size-1.3').click();
+  const size = await page.evaluate(() => getComputedStyle(document.body).fontSize);
+  expect(size).toBe('18.2px'); // 14 px × 1.3
+  await page.getByTestId('motion-reduce').click();
+  await expect(page.locator('html')).toHaveAttribute('data-motion', 'reduce');
+  const t = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--medium').trim());
+  expect(t).toBe('1ms');
+});
+
+test('language can be changed in Settings; every language file is offered', async ({ page }) => {
+  await openApp(page);
+  await openSettings(page);
+  await page.getByTestId('settings-lang').click();
+  await expect(page.getByRole('option')).toHaveCount(2);
+  await page.getByTestId('settings-lang-id').click();
+  await expect(page.getByTestId('settings-dialog')).toContainText('Tampilan');
+  await expect(page.getByTestId('nav-output')).toContainText('Hasil');
+});
+
+test('results: file name pattern, size attributes and precision shape the saved SVG', async ({ page }) => {
+  await openApp(page);
+  await openSettings(page, 'output');
+  const field = page.getByTestId('name-pattern');
+  await field.fill('{name}-{style}');
+  await expect(page.getByTestId('name-preview')).toHaveText('Example: kucing-cartoon.svg');
+  await field.press('Enter');
+  await page.getByTestId('size-attrs').click();
+  await page.getByTestId('decimals-0').click();
+  await expect(page.getByTestId('save-dir')).toHaveCount(0); // web mode: desktop-only note instead
+  await expect(page.getByTestId('settings-dialog')).toContainText('Available in the desktop app');
+  await page.keyboard.press('Escape');
+
+  await uploadAndWait(page);
+  const [download] = await Promise.all([page.waitForEvent('download'), page.getByTestId('save-svg').click()]);
+  expect(download.suggestedFilename()).toBe('face-cartoon.svg');
+  const svg = readFileSync(await download.path(), 'utf8');
+  expect(svg.startsWith('<svg width="')).toBe(true);
+  const d = [...svg.matchAll(/ d="([^"]+)"/g)].map((m) => m[1]).join(' ');
+  expect(d).not.toContain('.');
+
+  await openSettings(page, 'output');
+  await page.getByTestId('name-pattern').fill('');
+  await page.getByTestId('name-pattern').press('Enter');
+  await expect(page.getByTestId('name-pattern')).toHaveAttribute('aria-invalid', 'true');
+});
+
+test('processing limits are sent to the service', async ({ page }) => {
+  await openApp(page);
+  await openSettings(page, 'processing');
+  await page.getByTestId('max-staged-25').click();
+  await page.getByTestId('max-side-4000').click();
+  await expect
+    .poll(async () => {
+      const s = await (await page.request.get('/api/settings', { headers: H })).json();
+      return `${s.max_staged}/${s.max_side}`;
+    })
+    .toBe('25/4000');
+  await page.reload();
+  // a fresh page pushes the saved preferences again (as after a desktop restart)
+  await request_settings_reset(page);
+  await page.reload();
+  await expect
+    .poll(async () => (await (await page.request.get('/api/settings', { headers: H })).json()).max_staged)
+    .toBe(25);
+});
+
+async function request_settings_reset(page: Page) {
+  await page.request.put('/api/settings', { headers: H, data: { max_staged: 100, max_side: 8000 } });
+}
+
+test('about shows the version; the guide can be replayed from Settings', async ({ page }) => {
+  await openApp(page);
+  const health = await (await page.request.get('/api/health', { headers: H })).json();
+  await openSettings(page, 'about');
+  await expect(page.getByTestId('version')).toHaveText(health.version);
+  await expect(page.getByTestId('check-updates')).toBeVisible(); // not clicked: no network in tests
+  await page.getByTestId('nav-appearance').click();
+  await page.getByTestId('replay-tour').click();
+  await expect(page.getByTestId('tour')).toBeVisible();
 });

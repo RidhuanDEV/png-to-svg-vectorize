@@ -9,9 +9,22 @@ export interface FileError {
   detail: string;
 }
 
+export interface DesktopPrefs {
+  save_dir: string | null;
+  ask_each_time: boolean;
+  log: boolean;
+  log_dir: string;
+}
+
 interface DesktopApi {
   open_files(): Promise<{ ids: string[]; errors: FileError[] }>;
-  set_lang(lang: string): Promise<void>;
+  set_close_message(template: string): Promise<void>;
+  get_prefs(): Promise<DesktopPrefs>;
+  set_pref(key: 'ask_each_time' | 'log', value: boolean): Promise<DesktopPrefs>;
+  choose_save_dir(): Promise<DesktopPrefs>;
+  clear_save_dir(): Promise<DesktopPrefs>;
+  open_log_folder(): Promise<boolean>;
+  open_url(url: string): Promise<boolean>;
   save_svg(id: string): Promise<boolean>;
   save_all(ids: string[]): Promise<number>;
 }
@@ -35,10 +48,6 @@ function download(blob: Blob, filename: string): void {
   setTimeout(() => URL.revokeObjectURL(url), 10_000);
 }
 
-export function svgName(name: string): string {
-  const stem = name.includes('.') ? name.slice(0, name.lastIndexOf('.')) : name;
-  return `${stem || 'image'}.svg`;
-}
 
 /** Desktop: native multi-file dialog; the photos go on the workbench (not processed yet). Returns the new
  * job ids and per-file errors. Web: null (the page uses an <input type=file>). */
@@ -46,15 +55,26 @@ export async function openNative(): Promise<{ ids: string[]; errors: FileError[]
   return isDesktop() ? window.pywebview!.api.open_files() : null;
 }
 
-/** Native messages (the close confirmation) follow the page language. */
-export function tellLanguage(lang: string): void {
-  if (isDesktop() && typeof window.pywebview!.api.set_lang === 'function') void window.pywebview!.api.set_lang(lang);
+/** Native messages (the close confirmation) follow the page language: the page sends the translated text. */
+export function setCloseMessage(template: string): void {
+  if (isDesktop() && typeof window.pywebview!.api.set_close_message === 'function')
+    void window.pywebview!.api.set_close_message(template);
 }
 
-/** Returns false when the user cancelled the desktop save dialog. */
-export async function saveSvg(id: string, name: string, svg: string): Promise<boolean> {
+/** Desktop-only preferences (save folder, log); null in web mode. */
+export const desktop = (): DesktopApi | null => (isDesktop() ? window.pywebview!.api : null);
+
+/** External links: the desktop app opens the project's pages in the system browser; web mode uses a new tab. */
+export function openExternal(url: string): void {
+  if (isDesktop()) void window.pywebview!.api.open_url(url);
+  else window.open(url, '_blank', 'noopener,noreferrer');
+}
+
+/** Returns false when the user cancelled the desktop save dialog. Web mode downloads the SVG as the service
+ * saves it (Settings → file name, width/height). */
+export async function saveSvg(id: string, filename: string): Promise<boolean> {
   if (isDesktop()) return window.pywebview!.api.save_svg(id);
-  download(new Blob([svg], { type: 'image/svg+xml' }), svgName(name));
+  download(await api.svgDownload(id), filename);
   return true;
 }
 

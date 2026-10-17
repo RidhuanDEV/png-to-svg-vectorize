@@ -157,13 +157,13 @@
     animation: fade-in var(--medium) var(--ease);
   }
   .count {
-    font-size: 12px;
+    font-size: calc(12px * var(--ts));
     font-weight: 600;
     color: var(--accent);
   }
   h2 {
     margin: 4px 0 6px;
-    font-size: 17px;
+    font-size: calc(17px * var(--ts));
   }
   p {
     margin: 0;

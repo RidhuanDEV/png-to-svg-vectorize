@@ -46,7 +46,7 @@
 
 <style>
   .btn {
-    --h: 36px;
+    --h: calc(36px * var(--d));
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -56,7 +56,7 @@
     border-radius: var(--radius-sm);
     border: 1px solid transparent;
     font-weight: 600;
-    font-size: 14px;
+    font-size: calc(14px * var(--ts));
     line-height: 1.2;
     white-space: nowrap;
     user-select: none;
@@ -75,15 +75,15 @@
     cursor: not-allowed;
   }
   .sm {
-    --h: 30px;
+    --h: calc(30px * var(--d));
     padding: 0 10px;
-    font-size: 13px;
+    font-size: calc(13px * var(--ts));
     gap: 6px;
   }
   .lg {
-    --h: 44px;
+    --h: calc(44px * var(--d));
     padding: 0 20px;
-    font-size: 15px;
+    font-size: calc(15px * var(--ts));
     border-radius: var(--radius);
   }
   .wide {

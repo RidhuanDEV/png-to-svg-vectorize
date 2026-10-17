@@ -181,10 +181,9 @@ def test_start_validates_settings(client):
     assert client.get(f'/api/jobs/{a["id"]}', headers=H).json()['status'] == 'staged'
 
 
-def test_workbench_limit(client, monkeypatch):
-    from pngsvg_app import jobs as jobs_mod
+def test_workbench_limit(client, jobs, monkeypatch):
     staged = sum(1 for j in client.get('/api/jobs', headers=H).json()['jobs'] if j['status'] == 'staged')
-    monkeypatch.setattr(jobs_mod, 'MAX_STAGED', staged + 1)
+    monkeypatch.setattr(jobs, 'max_staged', staged + 1)
     assert client.post('/api/jobs?name=x.png&start=false', content=png(), headers=H).status_code == 201
     r = client.post('/api/jobs?name=y.png&start=false', content=png(), headers=H)
     assert r.status_code == 409 and 'workbench' in r.json()['detail']
@@ -234,3 +233,113 @@ def test_cancel_all_stops_waiting_work(client):
     assert set(stopped) <= set(ids) and stopped
     for i in ids:
         assert wait(client, i)['status'] in ('cancelled', 'done')
+
+
+# -- M8: output settings, limits, update check ------------------------------------------------------------------
+
+def test_settings_change_one_field_at_a_time(client):
+    before = client.get('/api/settings', headers=H).json()
+    r = client.put('/api/settings', json={'name_pattern': '{nama}-{gaya}', 'size_attrs': True}, headers=H)
+    s = r.json()
+    assert r.status_code == 200 and s['name_pattern'] == '{nama}-{gaya}' and s['size_attrs'] is True
+    assert s['speed'] == before['speed'], 'speed untouched'
+    for bad in ({'max_side': 100}, {'max_staged': 0}, {'name_pattern': ''}, {'colour': 'red'}):
+        assert client.put('/api/settings', json=bad, headers=H).status_code == 422, bad
+    client.put('/api/settings', json={'name_pattern': '{name}', 'size_attrs': False}, headers=H)
+
+
+def test_saved_names_and_size_follow_the_settings(client):
+    job = client.post('/api/jobs?name=foto%20kucing.png&preset=logo', content=png(), headers=H).json()
+    assert job['filename'] == 'foto kucing.svg'
+    wait(client, job['id'])
+    client.put('/api/settings', json={'name_pattern': '{name}-{style}', 'size_attrs': True}, headers=H)
+    try:
+        assert client.get(f'/api/jobs/{job["id"]}', headers=H).json()['filename'] == 'foto kucing-logo.svg'
+        r = client.get(f'/api/jobs/{job["id"]}/svg?download=true', headers=H)
+        assert 'foto%20kucing-logo.svg' in r.headers['content-disposition']
+        assert r.text.startswith('<svg width="160" height="120"')
+        z = zipfile.ZipFile(io.BytesIO(client.get(f'/api/export.zip?ids={job["id"]}', headers=H).content))
+        assert z.namelist() == ['foto kucing-logo.svg']
+        assert z.read('foto kucing-logo.svg').decode().startswith('<svg width="160"')
+    finally:
+        client.put('/api/settings', json={'name_pattern': '{name}', 'size_attrs': False}, headers=H)
+    assert client.get(f'/api/jobs/{job["id"]}/svg', headers=H).text.startswith('<svg xmlns=')
+
+
+def test_largest_photo_setting(client):
+    client.put('/api/settings', json={'max_side': 500}, headers=H)
+    try:
+        r = client.post('/api/jobs?name=big.png&start=false', content=png((640, 480)), headers=H)
+        assert r.status_code == 413 and '500 px' in r.json()['detail']
+    finally:
+        client.put('/api/settings', json={'max_side': 8000}, headers=H)
+    assert client.post('/api/jobs?name=big.png&start=false', content=png((640, 480)), headers=H).status_code == 201
+
+
+def test_coordinate_precision_option(client):
+    import re as _re
+    a = client.post('/api/jobs?name=a.png&preset=cartoon&options=' + json.dumps({'decimals': 0}), content=png(),
+                    headers=H).json()
+    b = client.post('/api/jobs?name=b.png&preset=cartoon&options=' + json.dumps({'decimals': 2}), content=png(),
+                    headers=H).json()
+    sa = client.get(f'/api/jobs/{wait(client, a["id"])["id"]}/svg', headers=H).text
+    sb = client.get(f'/api/jobs/{wait(client, b["id"])["id"]}/svg', headers=H).text
+
+    def paths(s):
+        return ' '.join(_re.findall(r' d="([^"]+)"', s))
+    assert '.' not in paths(sa), 'no decimals in path data'
+    assert _re.search(r'\.\d\d', paths(sb)), 'two decimals used'
+    assert len(sa) < len(sb)
+    bad = client.post('/api/jobs?name=c.png&options=' + json.dumps({'decimals': 5}), content=png(), headers=H)
+    assert bad.status_code == 422
+
+
+def test_update_check(client, monkeypatch):
+    import urllib.error
+
+    from pngsvg_app import server as srv
+
+    class Resp(io.BytesIO):
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+
+    calls = []
+
+    def fake(payload=None, error=None):
+        def opener(req, timeout):
+            calls.append(req.full_url)
+            if error:
+                raise error
+            return Resp(json.dumps(payload).encode())
+        return opener
+
+    monkeypatch.setattr(srv.urllib.request, 'urlopen',
+                        fake({'tag_name': 'v99.0.0', 'html_url': 'https://github.com/x/y/releases/v99'}))
+    r = client.get('/api/update', headers=H).json()
+    assert r['newer'] is True and r['latest'] == '99.0.0' and r['url'].startswith('https://github.com/')
+    assert calls == [srv.LATEST_RELEASE_URL]
+
+    monkeypatch.setattr(srv.urllib.request, 'urlopen', fake({'tag_name': 'v0.1.0', 'html_url': 'javascript:x'}))
+    r = client.get('/api/update', headers=H).json()
+    assert r['newer'] is False and r['url'] is None, 'only https://github.com links are passed on'
+
+    monkeypatch.setattr(srv.urllib.request, 'urlopen',
+                        fake(error=urllib.error.HTTPError(srv.LATEST_RELEASE_URL, 404, 'nf', {}, None)))
+    assert client.get('/api/update', headers=H).json() == {'current': srv.pngsvg.__version__, 'latest': None,
+                                                           'newer': False, 'url': None}
+    monkeypatch.setattr(srv.urllib.request, 'urlopen', fake(error=urllib.error.URLError('offline')))
+    assert client.get('/api/update', headers=H).status_code == 502
+
+
+def test_output_name_rules():
+    import datetime as dt
+
+    from pngsvg_app.server import output_name
+    d = dt.date(2026, 10, 18)
+    assert output_name('a.png', 'logo', '{tanggal}_{nama}', d) == '2026-10-18_a.svg'
+    assert output_name('a.png', 'logo', '../../{name}', d) == 'a.svg', 'no path traversal'
+    assert output_name('a.png', 'logo', 'x:y*z', d) == 'x-y-z.svg'
+    assert output_name('a.png', 'logo', '{oops}', d) == '{oops}.svg', 'unknown braces stay literal'

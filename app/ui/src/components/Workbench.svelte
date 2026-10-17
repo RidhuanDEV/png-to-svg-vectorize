@@ -62,7 +62,7 @@
         </button>
         <div class="meta">
           <span class="name" title={job.name}>{job.name}</span>
-          <span class="muted small">{job.width}×{job.height} · {mb(job.source_bytes)}</span>
+          <span class="muted small num">{job.width}×{job.height} · {mb(job.source_bytes)}</span>
         </div>
       </li>
     {/each}
@@ -104,7 +104,7 @@
   }
   h2 {
     margin: 0;
-    font-size: 18px;
+    font-size: calc(18px * var(--ts));
   }
   header p {
     margin: 2px 0 0;
@@ -216,7 +216,7 @@
     text-overflow: ellipsis;
   }
   .small {
-    font-size: 12px;
+    font-size: calc(12px * var(--ts));
   }
   footer {
     display: flex;

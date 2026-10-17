@@ -24,7 +24,7 @@ pengguna), angka kualitas dibuktikan dengan `bench/`, dan setiap fitur baru puny
 
 ---
 
-## 2. M8 — Identitas visual & Pengaturan (v1.2)
+## 2. M8 — Identitas visual & Pengaturan (v1.2) — ✅ 2026-10-18
 
 ### 2.1 Tema (tiga pilihan bebas)
 
@@ -69,6 +69,14 @@ Dibuka dari ikon roda gigi di header (juga `Ctrl+,`). Semua tersimpan lokal; bag
 - Kamus pindah dari kode ke `locales/<kode>.json` (en, id) + skema kunci; bahasa baru = tambah satu berkas.
 - Tes: semua bahasa punya kunci yang sama, placeholder `{n}` cocok, tidak ada teks hardcode di komponen.
 - Panduan kontribusi terjemahan di `CONTRIBUTING.md`.
+
+**Realisasi (2026-10-18, v1.2.0)** — semua butir di atas terpasang, dengan penyesuaian:
+- *Minify* tidak dijadikan opsi: SVG dari mesin sudah tanpa spasi berlebih dan memakai sintaks angka terpendek.
+- *Awalan ID* tidak dijadikan opsi: ID gradien tetap otomatis unik per foto (aman disisipkan banyak SVG di satu halaman).
+- *Hapus hasil saat ditutup* tidak perlu disetel: hasil memang hanya ada di memori, jadi ditampilkan sebagai keterangan.
+- *Kurangi animasi* punya dua pilihan (ikuti sistem / kurangi); "jangan pernah kurangi" sengaja tidak ada agar setelan
+  aksesibilitas sistem tetap dihormati.
+- Selain uji kontras, `npm run check` juga menolak warna literal di komponen (semua warna wajib lewat token tema).
 
 **Selesai bila**: tiga tema lolos tes kontras & tes e2e visual; Pengaturan lengkap dengan e2e per kelompok; opsi hasil
 berpengaruh nyata ke SVG (tes API); versi 1.2.0.

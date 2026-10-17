@@ -1,69 +1,28 @@
-/* Design tokens (M7). Components use these variables only; dark mode redefines them. */
+/* Design tokens. Colors come from src/theme/themes.json (applied to :root by lib/prefs.svelte.ts, checked for contrast
+   by scripts/check-themes.mjs); only theme-independent tokens live here. */
+@import '@fontsource-variable/ibm-plex-sans/wght.css';
+@import '@fontsource/ibm-plex-mono/latin-400.css';
+@import '@fontsource/ibm-plex-mono/latin-500.css';
+
 :root {
-  --bg: #f5f6fa;
-  --panel: #ffffff;
-  --panel-2: #f0f2f8;
-  --panel-3: #e6e9f2;
-  --line: #e1e5ee;
-  --line-strong: #c9cfdc;
-  --text: #172033;
-  --muted: #5b6577;
-  --accent: #4f46e5;
-  --accent-hover: #4338ca;
-  --accent-soft: #eceafe;
-  --accent-text: #ffffff;
-  --danger: #b42318;
-  --danger-soft: #fdecea;
-  --ok: #067647;
-  --ok-soft: #e6f6ee;
-  --warn: #b54708;
-  --checker-a: #ffffff;
-  --checker-b: #eef1f6;
-  --shadow-sm: 0 1px 2px rgb(16 24 40 / 6%);
-  --shadow: 0 1px 2px rgb(16 24 40 / 6%), 0 2px 6px rgb(16 24 40 / 8%);
-  --shadow-lg: 0 12px 32px rgb(16 24 40 / 16%), 0 2px 6px rgb(16 24 40 / 8%);
-  --scrim: rgb(15 20 32 / 45%);
-  --seg-on: #ffffff;
-  --radius-sm: 8px;
-  --radius: 12px;
-  --radius-lg: 16px;
-  --focus: 0 0 0 3px color-mix(in srgb, var(--accent) 35%, transparent);
+  --font: 'IBM Plex Sans Variable', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Mono', Menlo, monospace;
+  --ts: 1;
+  --d: 1;
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 14px;
+  --focus: 0 0 0 3px color-mix(in srgb, var(--node) 45%, transparent);
   --fast: 150ms;
   --medium: 240ms;
   --slow: 360ms;
   --ease: cubic-bezier(0.2, 0, 0, 1);
   --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-  color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0e1320;
-    --panel: #161c2b;
-    --panel-2: #1d2436;
-    --panel-3: #252e44;
-    --line: #2a3349;
-    --line-strong: #3a4561;
-    --text: #e6e9f2;
-    --muted: #a0aabd;
-    --accent: #8b85ff;
-    --accent-hover: #a29dff;
-    --accent-soft: #272a52;
-    --accent-text: #0e1320;
-    --danger: #ff8a7a;
-    --danger-soft: #3a1d1d;
-    --ok: #4ade80;
-    --ok-soft: #12301f;
-    --warn: #fbbf24;
-    --checker-a: #1b2232;
-    --checker-b: #222a3d;
-    --shadow-sm: none;
-    --shadow: 0 1px 2px rgb(0 0 0 / 40%);
-    --shadow-lg: 0 16px 40px rgb(0 0 0 / 55%);
-    --scrim: rgb(0 0 0 / 60%);
-    --seg-on: #343f5e;
-    color-scheme: dark;
-  }
+:root[data-density='compact'] {
+  /* 0.82 keeps the smallest icon buttons at ≥ 24 px (WCAG 2.2 target size) */
+  --d: 0.82;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -81,6 +40,19 @@
   }
 }
 
+:root[data-motion='reduce'] {
+  --fast: 1ms;
+  --medium: 1ms;
+  --slow: 1ms;
+}
+:root[data-motion='reduce'] *,
+:root[data-motion='reduce'] *::before,
+:root[data-motion='reduce'] *::after {
+  animation-duration: 1ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 1ms !important;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -89,10 +61,23 @@ html,
 body {
   margin: 0;
   height: 100%;
-  background: var(--bg);
+  /* a faint cutting-mat grid behind everything (transparent in themes without one) */
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 24px 24px;
   color: var(--text);
-  font: 14px/1.5 'Segoe UI Variable Text', 'Segoe UI', system-ui, -apple-system, 'SF Pro Text', Roboto, sans-serif;
+  font: calc(14px * var(--ts)) / 1.5 var(--font);
+  font-feature-settings: 'ss02';
   -webkit-font-smoothing: antialiased;
+}
+
+.num,
+code,
+kbd {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
 }
 
 #app {
@@ -146,17 +131,30 @@ button {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: var(--shadow-sm);
-  padding: 14px;
+  padding: calc(14px * var(--d));
 }
 
+/* section titles carry the pen-node motif: a small open circle on the line */
 .panel > h2,
 .section-title {
-  margin: 0 0 10px;
-  font-size: 12px;
-  font-weight: 650;
-  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 calc(10px * var(--d));
+  font-size: calc(11.5px * var(--ts));
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted);
+}
+.panel > h2::before,
+.section-title::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1.5px solid var(--node);
+  flex: none;
 }
 
 .muted {

@@ -111,9 +111,22 @@ Selalu periksa detail di perbesaran 200% atau lebih: satu angka bisa menyembunyi
 
 Foto yang diproses berikutnya selalu memakai pengaturan saat itu. **Kembalikan ke bawaan gaya** memulihkan nilai bawaan.
 
+### Pengaturan aplikasi
+
+Buka **Pengaturan** lewat ikon roda gigi di atas (atau `Ctrl+,`). Perubahan langsung berlaku dan diingat.
+
+| Bagian | Yang bisa diubah |
+|---|---|
+| Tampilan | bahasa · tema: *Ikuti sistem* (Kertas & tinta saat komputer terang, Lightbox saat gelap), *Kertas & tinta*, *Lightbox*, *Cetak biru* · kepadatan · ukuran teks (90–130%) · kurangi animasi · tampilkan panduan lagi |
+| Pemrosesan | kecepatan proses · ukuran foto terbesar yang diterima (3000–8000 px; turunkan di komputer bermemori kecil) · berapa foto yang boleh menunggu di meja kerja |
+| Hasil | gaya untuk foto baru · folder simpan dan apakah selalu ditanya (aplikasi desktop) · nama berkas dengan `{nama}`, `{gaya}`, `{tanggal}` · presisi koordinat (0–3 desimal: lebih sedikit = berkas lebih kecil) · tambahkan lebar dan tinggi ke SVG |
+| Privasi & data | log diagnostik nyala/mati dan foldernya (aplikasi desktop) |
+| Tentang | versi, lisensi, **Periksa pembaruan** (hanya saat ditekan; menanyakan nomor versi terbaru ke GitHub) |
+
 ## 5. Menyimpan
 
-- **Simpan SVG** menyimpan hasil yang dipilih (aplikasi menanyakan lokasinya).
+- **Simpan SVG** menyimpan hasil yang dipilih (aplikasi menanyakan lokasinya, atau langsung menyimpan ke folder simpan
+  yang dipilih di Pengaturan).
 - **Simpan semua** menyimpan semua hasil yang sudah selesai ke folder pilihan Anda; berkas yang sudah ada tidak pernah
   ditimpa (dipakai `nama-2.svg`).
 - **Salin kode SVG** menyalin markup SVG ke clipboard, siap ditempel ke kode atau aplikasi desain.
@@ -132,7 +145,8 @@ ID gradien unik per berkas, jadi banyak SVG bisa disisipkan di satu halaman web.
 
 Aplikasi menjalankan layanan kecil di dalam dirinya yang hanya menerima koneksi dari komputer yang sama (`127.0.0.1`)
 dan hanya dengan kunci acak yang dibuat setiap sesi. Gambar dan hasil disimpan di memori dan hilang saat aplikasi
-ditutup. Tidak ada telemetri dan tidak ada akses jaringan ke luar komputer Anda.
+ditutup. Tidak ada telemetri. Satu-satunya permintaan jaringan yang bisa dilakukan aplikasi adalah **Periksa
+pembaruan** di Pengaturan → Tentang, dan hanya saat tombol itu ditekan.
 
 ## 8. Pemecahan masalah
 

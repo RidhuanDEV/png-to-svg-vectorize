@@ -109,9 +109,22 @@ Always check details at 200 % or more: one number can hide a small local defect.
 
 Photos you process next always use the current settings. **Reset to style defaults** brings the defaults back.
 
+### App settings
+
+Open **Settings** with the gear at the top (or `Ctrl+,`). Changes apply at once and are remembered.
+
+| Section | What you can change |
+|---|---|
+| Appearance | language · theme: *Match system* (Paper & ink when the computer is light, Lightbox when it is dark), *Paper & ink*, *Lightbox*, *Blueprint* · density · text size (90–130 %) · reduce animation · show the guide again |
+| Processing | processing speed · largest photo accepted (3000–8000 px; lower it on computers with little memory) · how many photos may wait on the workbench |
+| Results | style for new photos · save folder and whether to ask each time (desktop app) · file name with `{name}`, `{style}`, `{date}` · coordinate precision (0–3 decimals: fewer = smaller files) · add width and height to the SVG |
+| Privacy and data | diagnostic log on/off and its folder (desktop app) |
+| About | version, licenses, **Check for updates** (only when pressed; asks GitHub for the latest version number) |
+
 ## 5. Save
 
-- **Save SVG** saves the selected result (the app asks where).
+- **Save SVG** saves the selected result (the app asks where, or saves straight into the save folder chosen in
+  Settings).
 - **Save all** saves every finished result into a folder you choose; existing files are never overwritten
   (`name-2.svg` is used instead).
 - **Copy SVG code** puts the SVG markup on the clipboard, ready to paste into code or a design tool.
@@ -129,7 +142,8 @@ Gradient ids are unique per file, so many SVGs can be inlined on one web page.
 
 The app starts a small service inside itself that only accepts connections from the same computer
 (`127.0.0.1`) and only with a random key created for each session. Images and results are kept in memory and are
-gone when you close the app. There is no telemetry and no network access to anything outside your computer.
+gone when you close the app. There is no telemetry. The only network request the app can make is **Check for
+updates** in Settings → About, and only when you press it.
 
 ## 8. Troubleshooting
 

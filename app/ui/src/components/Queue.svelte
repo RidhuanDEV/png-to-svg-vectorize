@@ -167,7 +167,7 @@
     background: var(--accent);
     color: var(--accent-text);
     font-weight: 700;
-    font-size: 13px;
+    font-size: calc(13px * var(--ts));
   }
   .grow {
     flex: 1;
@@ -176,7 +176,7 @@
     line-height: 1.3;
   }
   .small {
-    font-size: 12px;
+    font-size: calc(12px * var(--ts));
   }
   .group {
     padding: 12px;
@@ -285,7 +285,7 @@
     font-weight: 600;
   }
   .status {
-    font-size: 12px;
+    font-size: calc(12px * var(--ts));
     color: var(--muted);
   }
   .status-done {

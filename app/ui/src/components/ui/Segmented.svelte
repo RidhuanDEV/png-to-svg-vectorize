@@ -80,14 +80,14 @@
     padding: 6px 12px;
     border-radius: 8px;
     font-weight: 600;
-    font-size: 13px;
+    font-size: calc(13px * var(--ts));
     color: var(--muted);
     white-space: nowrap;
     transition: color var(--fast) var(--ease);
   }
   .sm button {
     padding: 4px 10px;
-    font-size: 12.5px;
+    font-size: calc(12.5px * var(--ts));
   }
   button:hover {
     color: var(--text);

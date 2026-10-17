@@ -45,7 +45,7 @@
         icon="download"
         wide
         disabled={!ready || saving}
-        onclick={() => job && media?.svgText && run(() => saveSvg(job.id, job.name, media.svgText!), (r) => isDesktop() && r && toast('success', t('t_saved')))}
+        onclick={() => job && run(() => saveSvg(job.id, job.filename), (r) => isDesktop() && r && toast('success', t('t_saved')))}
         data-testid="save-svg">{t('saveSvg')}</Button
       >
       <Button

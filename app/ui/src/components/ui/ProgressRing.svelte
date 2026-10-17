@@ -51,7 +51,8 @@
     animation: breathe 1.8s ease-in-out infinite;
   }
   b {
-    font-size: 10px;
+    font-family: var(--mono);
+    font-size: calc(10px * var(--ts));
     font-variant-numeric: tabular-nums;
     color: var(--muted);
   }

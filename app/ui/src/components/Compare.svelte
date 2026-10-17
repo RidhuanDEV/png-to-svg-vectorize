@@ -135,7 +135,7 @@
     </span>
     <div class="zoom">
       <Button variant="ghost" size="sm" iconOnly icon="zoomOut" title={t('zoomOut')} onclick={() => zoomAt(0.8, paneW / 2, paneH / 2)}>{t('zoomOut')}</Button>
-      <span class="pct" data-testid="zoom">{Math.round(view.s * 100)}%</span>
+      <span class="pct num" data-testid="zoom">{Math.round(view.s * 100)}%</span>
       <Button variant="ghost" size="sm" iconOnly icon="zoomIn" title={t('zoomIn')} onclick={() => zoomAt(1.25, paneW / 2, paneH / 2)}>{t('zoomIn')}</Button>
       <Button variant="secondary" size="sm" icon="fit" onclick={fit}>{t('fit')}</Button>
     </div>
@@ -317,7 +317,7 @@
     border: 1px solid var(--line);
     border-radius: 6px;
     padding: 1px 8px;
-    font-size: 12px;
+    font-size: calc(12px * var(--ts));
   }
   .label.right {
     left: auto;

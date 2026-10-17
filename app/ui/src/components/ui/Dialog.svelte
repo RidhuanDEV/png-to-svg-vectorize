@@ -95,7 +95,7 @@
   }
   h2 {
     margin: 0 0 6px;
-    font-size: 18px;
+    font-size: calc(18px * var(--ts));
   }
   p {
     margin: 0 0 18px;

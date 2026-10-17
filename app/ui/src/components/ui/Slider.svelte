@@ -92,9 +92,10 @@
     display: flex;
     justify-content: space-between;
     gap: 8px;
-    font-size: 13px;
+    font-size: calc(13px * var(--ts));
   }
   .val {
+    font-family: var(--mono);
     font-variant-numeric: tabular-nums;
     color: var(--accent);
   }

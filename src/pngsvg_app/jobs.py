@@ -23,7 +23,7 @@ from pngsvg import options_for, vectorize
 
 MAX_JOBS = 200                       # oldest finished jobs are dropped beyond these limits
 MAX_KEPT_BYTES = 512 * 1024 * 1024
-MAX_STAGED = 100                     # photos waiting on the workbench at once
+MAX_STAGED = 100                     # default limit of photos waiting on the workbench at once
 
 # Processing speed = how many images run at the same time. "auto" picks one from the machine at start-up.
 SPEEDS = ('auto', 'saver', 'balanced', 'fast')
@@ -148,6 +148,10 @@ class JobManager:
         self._ram = total_ram_gb()
         self._fixed = workers                     # tests / CLI: a fixed number of simultaneous jobs
         self._speed = speed if speed in SPEEDS else 'auto'
+        self.max_staged = MAX_STAGED
+        self.max_side = 8000                  # longest side accepted (px); see server.MAX_SIDE
+        self.name_pattern = '{name}'          # saved file names: {name} {style} {date} (or {nama} {gaya} {tanggal})
+        self.size_attrs = False               # add width/height to saved SVGs (else viewBox only)
         self._pool: ProcessPoolExecutor | None = None
         self._manager = None
         self._queue = None
@@ -169,7 +173,9 @@ class JobManager:
         return {'speed': self._speed, 'effective': self.effective_speed(), 'concurrency': self.concurrency(),
                 'auto': auto_speed(self._cpus, self._ram),
                 'cpus': self._cpus, 'ram_gb': round(self._ram, 1) if self._ram else None,
-                'speeds': {s: concurrency_for(s, self._cpus) for s in SPEEDS if s != 'auto'}}
+                'speeds': {s: concurrency_for(s, self._cpus) for s in SPEEDS if s != 'auto'},
+                'max_staged': self.max_staged, 'max_side': self.max_side, 'name_pattern': self.name_pattern,
+                'size_attrs': self.size_attrs}
 
     def set_speed(self, speed: str) -> None:
         if speed not in SPEEDS:
@@ -222,8 +228,8 @@ class JobManager:
         """Put a validated image on the workbench without processing it."""
         job = Job(uuid.uuid4().hex, name, 'cartoon', {}, source, width, height)
         with self._lock:
-            if sum(1 for j in self._jobs.values() if j.status == 'staged') >= MAX_STAGED:
-                raise WorkbenchFull(f'at most {MAX_STAGED} photos can wait on the workbench')
+            if sum(1 for j in self._jobs.values() if j.status == 'staged') >= self.max_staged:
+                raise WorkbenchFull(f'at most {self.max_staged} photos can wait on the workbench')
             self._jobs[job.id] = job
             self._trim()
         return job

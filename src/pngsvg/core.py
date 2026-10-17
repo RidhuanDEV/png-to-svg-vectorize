@@ -33,6 +33,7 @@ class Options:
     subpixel: bool = True             # place fill boundaries at their sub-pixel edge position (from anti-aliasing)
     seam: float = 0.5                 # stroke width (source px) painted with each fill to hide anti-aliasing seams
     id_prefix: str = 'v'              # prefix for gradient ids (unique per file -> safe to inline many SVGs)
+    decimals: int = 1                 # path coordinate decimals (0-3): fewer = smaller files
     outline: OutlineParams = field(default_factory=OutlineParams)
     regions: RegionParams = field(default_factory=RegionParams)
 
@@ -135,7 +136,7 @@ def vectorize(image: Image.Image, opts: Options | None = None, executor: Executo
         if grad:
             defs.append(grad)
             n_grad += 1
-        d = compact_path(loops_to_path(shapes[i][1], fitted))
+        d = compact_path(loops_to_path(shapes[i][1], fitted), decimals=opts.decimals)
         stroke = f' stroke="{fill}"' if opts.seam > 0 else ''
         fills.append(f'<path d="{d}" fill="{fill}"{stroke}/>')
 
@@ -147,7 +148,7 @@ def vectorize(image: Image.Image, opts: Options | None = None, executor: Executo
         loops = region_loops(ochains).get(1, [])
         n_out = len(loops)
         outline_svg = (f'<g id="outline" fill="{to_hex(ol.ink_rgb)}">'
-                       f'<path d="{compact_path(loops_to_path(loops, ofit), 0, 0, S)}"/></g>')
+                       f'<path d="{compact_path(loops_to_path(loops, ofit), 0, 0, S, opts.decimals)}"/></g>')
 
     svg = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}">'
            + (f'<defs>{"".join(defs)}</defs>' if defs else '')
