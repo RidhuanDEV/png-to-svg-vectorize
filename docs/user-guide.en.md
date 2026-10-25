@@ -218,7 +218,7 @@ updates** in Settings → About, and **Download** of an AI model in Settings →
 
 ## 9. Command line and Python
 
-The same engine is available without the app (Python 3.10+):
+The same engine is available without the app (Python 3.11+):
 `pip install "png-to-svg-vectorize @ git+https://github.com/RidhuanDEV/png-to-svg-vectorize"`, then
 `png2svg picture.png`. Studio options work there too, e.g. `png2svg logo.png -o logo.pdf --max-colors 4
 --remove-bg`, or `--profile brand.pngsvg-profile.json` for a style saved in the app (`png2svg --help` lists them all).

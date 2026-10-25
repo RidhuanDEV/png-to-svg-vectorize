@@ -221,7 +221,7 @@ Pengaturan → Tentang, dan **Unduh** model AI di Pengaturan → Pemrosesan.
 
 ## 9. Baris perintah dan Python
 
-Mesin yang sama tersedia tanpa aplikasi (Python 3.10+):
+Mesin yang sama tersedia tanpa aplikasi (Python 3.11+):
 `pip install "png-to-svg-vectorize @ git+https://github.com/RidhuanDEV/png-to-svg-vectorize"`, lalu
 `png2svg gambar.png`. Opsi studio juga tersedia, misalnya `png2svg logo.png -o logo.pdf --max-colors 4 --remove-bg`,
 atau `--profile merek.pngsvg-profile.json` untuk gaya yang disimpan dari aplikasi (`png2svg --help` menampilkan

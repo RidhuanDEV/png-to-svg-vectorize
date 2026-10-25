@@ -221,7 +221,7 @@ export const en = {
     requirements: "Requirements",
     req: ["Windows 10 or 11, 64-bit, with the WebView2 Runtime", "macOS 12 or newer (Apple Silicon or Intel)", "About 300 MB of disk space; 4 GB RAM or more recommended", "Optional AI enhancement: Windows (any GPU via DirectML or CPU) and Apple Silicon; not on Intel Macs"],
     cli: "Command line and Python",
-    cliBody: "The engine is also a Python package (3.10+):",
+    cliBody: "The engine is also a Python package (3.11+):",
   },
   guide: { title: "User guide", source: "This guide is generated from docs/user-guide.en.md in the repository." },
   changelog: { title: "Release notes", note: "" },

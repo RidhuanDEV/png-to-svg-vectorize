@@ -223,7 +223,7 @@ export const id: Dict = {
     requirements: "Persyaratan",
     req: ["Windows 10 atau 11, 64-bit, dengan WebView2 Runtime", "macOS 12 atau lebih baru (Apple Silicon atau Intel)", "Ruang disk sekitar 300 MB; RAM 4 GB atau lebih disarankan", "Penghalusan AI opsional: Windows (GPU apa pun lewat DirectML atau CPU) dan Apple Silicon; tidak di Mac Intel"],
     cli: "Baris perintah dan Python",
-    cliBody: "Mesinnya juga tersedia sebagai paket Python (3.10+):",
+    cliBody: "Mesinnya juga tersedia sebagai paket Python (3.11+):",
   },
   guide: { title: "Panduan pengguna", source: "Panduan ini dibuat dari docs/user-guide.id.md di repositori." },
   changelog: { title: "Catatan rilis", note: "Catatan rilis lengkap ditulis dalam bahasa Inggris; ringkasan Bahasa Indonesia ada di setiap rilis GitHub." },

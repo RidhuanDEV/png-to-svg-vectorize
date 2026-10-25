@@ -38,7 +38,7 @@ cd png-to-svg-vectorize
 pip install -e .            # add [dev] for tests
 ```
 
-Requirements: Python ≥ 3.10, numpy, scipy, Pillow. No native tracer: curve fitting is built in.
+Requirements: Python ≥ 3.11, numpy, scipy, Pillow. No native tracer: curve fitting is built in.
 
 ## Usage
 

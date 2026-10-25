@@ -2,6 +2,12 @@
 
 All notable changes. Benchmarks for every engine version are in [docs/bench.md](docs/bench.md).
 
+## Unreleased
+
+- **Python 3.11 or newer** is required for the package and command line (3.10 reached end of life in October 2026), so
+  every install gets **Pillow ≥ 13.0** with its security fixes for image decoding. The desktop app is unchanged
+  (it bundles Python 3.13).
+
 ## Website — 2026-10-25
 
 - Product website at <https://ridhuandev.github.io/png-to-svg-vectorize/> (`site/`, Next.js static export on GitHub
