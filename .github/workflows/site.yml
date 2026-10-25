@@ -27,7 +27,19 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # a published release runs on its tag, which the github-pages environment does not accept: rebuild from main
+  from-release:
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - run: gh workflow run site.yml --ref main --repo "$GITHUB_REPOSITORY"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
   build:
+    if: github.event_name != 'release'
     runs-on: ubuntu-latest
     defaults:
       run:
