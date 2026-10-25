@@ -1,8 +1,9 @@
-# Pinned direct dependencies for release builds (each version at least two weeks old when chosen, 2026-10-12).
+# Pinned direct dependencies for release builds (each version at least two weeks old when chosen, 2026-10-12;
+# exception approved by the owner 2026-10-25: Pillow 13.0.0 at 9 days old, for its security fixes).
 # Transitive dependencies are resolved by pip.
 numpy==2.5.3
 scipy==1.18.1
-Pillow==12.3.0
+Pillow==13.0.0
 fastapi==0.141.1
 pydantic==2.13.5
 uvicorn==0.54.0

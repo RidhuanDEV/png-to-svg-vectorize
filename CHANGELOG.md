@@ -21,6 +21,8 @@ All notable changes. Benchmarks for every engine version are in [docs/bench.md](
   undo/redo.
 - Benchmark set: Wikimedia re-encodes and sometimes re-renders its thumbnails; `bench/fetch_sets.py` now also accepts
   identical pixels (`pixels_sha256`) and known alternate renders (`also_sha256`).
+- Release builds use **Pillow 13.0.0** (security fixes for image decoding; owner-approved exception to the two-week
+  rule for dependency age). Benchmark output unchanged on all 27 E7 images.
 
 ## 1.4.0 — 2026-10-25 — studio options
 
