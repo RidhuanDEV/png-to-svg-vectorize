@@ -96,7 +96,10 @@
   "page": "https://commons.wikimedia.org/wiki/File%3APaulliu_girl_with_silver_hair.svg",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cd/Paulliu_girl_with_silver_hair.svg/1280px-Paulliu_girl_with_silver_hair.svg.png",
   "sha256": "4aa9980e5e9024e3cf10e299527513e6f83a281fee0800a0b345f72a5bb7a329",
-  "pixels_sha256": "6a885ceba16b671e204e24b54397f486e8de2f0a4086d694d15d7562eb23506e"
+  "pixels_sha256": "6a885ceba16b671e204e24b54397f486e8de2f0a4086d694d15d7562eb23506e",
+  "also_sha256": [
+   "319ce9a38fc19f42e4fa3cf02042957c76cc56242bad217069f23c19145b74bf"
+  ]
  },
  {
   "file": "caticorn.png",

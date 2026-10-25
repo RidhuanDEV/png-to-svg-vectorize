@@ -1,6 +1,6 @@
 """Download the license-free comparison set (E7) listed in bench/sets/sources.json into bench/sets/images.
 
-    python bench/fetch_sets.py                 # download missing files, verify SHA-256
+Images are not stored in git: they are downloaded on demand and checked against the recorded hash. Wikimedia
     python bench/fetch_sets.py --update        # (maintainers) record hashes of freshly downloaded files
     python bench/fetch_sets.py --sources-md    # regenerate bench/sets/SOURCES.md from the manifest
 
@@ -64,7 +64,8 @@ def fetch(update: bool) -> int:
         if update:
             row['sha256'] = digest
             row['pixels_sha256'] = pixels_sha256(data)
-        elif row.get('sha256') and row['sha256'] != digest:
+        elif row.get('sha256') and digest not in (row['sha256'], *row.get('also_sha256', [])):
+            # also_sha256: other renders Wikimedia serves for the same file (checked by hand, same bench result)
             if row.get('pixels_sha256') and row['pixels_sha256'] == pixels_sha256(data):
                 print(f'{row["file"]}: re-encoded upstream, pixels identical')
             else:
