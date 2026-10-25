@@ -121,7 +121,7 @@ def build_options(preset: str, overrides: dict[str, Any], id_prefix: str):
     """Options for a preset plus validated overrides (see server.OptionsIn for the allowed fields/ranges)."""
     o = options_for(preset, id_prefix=id_prefix)
     for key, value in overrides.items():
-        if value is None:
+        if value is None or key in ('ai', 'ai_auto'):   # handled before vectorizing (see _work)
             continue
         if key == 'merge_de':
             o.regions.merge_de = float(value)
@@ -130,16 +130,39 @@ def build_options(preset: str, overrides: dict[str, Any], id_prefix: str):
     return o
 
 
-def _work(job_id: str, source: bytes, preset: str, overrides: dict[str, Any], queue) -> dict[str, Any]:
-    """Runs in a worker process."""
+AI_TARGET = 2     # the AI result is traced at 2x the photo size (x4 model output, resized): see bench/ai_restore.py
+AI_SMALL = 1000   # "automatic" AI: only photos smaller than this (longest side, px) or JPEGs, where it helps most
+
+
+def wants_ai(options: dict[str, Any], source: bytes, width: int, height: int) -> bool:
+    if not options.get('ai'):
+        return False
+    if not options.get('ai_auto'):
+        return True
+    return max(width, height) < AI_SMALL or source[:3] == b'\xff\xd8\xff'
+
+
+def _work(job_id: str, source: bytes, preset: str, overrides: dict[str, Any], queue,
+          ai: tuple[str, str] | None = None) -> dict[str, Any]:
+    """Runs in a worker process. `ai` = (model file, accelerator) to clean/enlarge the photo first."""
     def stage(name: str, fraction: float) -> None:
         if queue is not None:
             queue.put((job_id, name, fraction))
     t = time.perf_counter()
     img = Image.open(io.BytesIO(source))
-    res = vectorize(img, build_options(preset, overrides, 'v' + job_id[:8]), on_stage=stage)
+    opts = build_options(preset, overrides, 'v' + job_id[:8])
+    if ai is not None:
+        from pathlib import Path
+
+        from pngsvg.ai import enhance
+        from pngsvg.core import flatten
+        stage('ai', 0.02)
+        img = enhance(flatten(img), Path(ai[0]), ai[1], AI_TARGET)
+        if 'decimals' not in overrides:      # coordinates are AI_TARGET x larger: one decimal less, same precision
+            opts.decimals = max(0, opts.decimals - 1)
+    res = vectorize(img, opts, on_stage=stage)
     return {'svg': res.svg, 'regions': res.regions, 'gradients': res.gradients, 'outline_paths': res.outline_paths,
-            'seconds': time.perf_counter() - t}
+            'seconds': time.perf_counter() - t, 'ai': bool(ai)}
 
 
 class JobManager:
@@ -152,6 +175,8 @@ class JobManager:
         self.max_side = 8000                  # longest side accepted (px); see server.MAX_SIDE
         self.name_pattern = '{name}'          # saved file names: {name} {style} {date} (or {nama} {gaya} {tanggal})
         self.size_attrs = False               # add width/height to saved SVGs (else viewBox only)
+        self.models = None                    # pngsvg_app.models.ModelStore, for jobs with options['ai']
+        self.ai_accel = 'auto'                # auto | gpu | cpu
         self._pool: ProcessPoolExecutor | None = None
         self._manager = None
         self._queue = None
@@ -175,7 +200,7 @@ class JobManager:
                 'cpus': self._cpus, 'ram_gb': round(self._ram, 1) if self._ram else None,
                 'speeds': {s: concurrency_for(s, self._cpus) for s in SPEEDS if s != 'auto'},
                 'max_staged': self.max_staged, 'max_side': self.max_side, 'name_pattern': self.name_pattern,
-                'size_attrs': self.size_attrs}
+                'size_attrs': self.size_attrs, 'ai_accel': self.ai_accel}
 
     def set_speed(self, speed: str) -> None:
         if speed not in SPEEDS:
@@ -267,9 +292,16 @@ class JobManager:
             job = self._jobs.get(self._pending.popleft())
             if job is None or job.status != 'queued':
                 continue
+            ai = None
+            if wants_ai(job.options, job.source, job.width, job.height):
+                model = self.models.path(job.options['ai']) if self.models else None
+                if model is None:                 # removed after the job was queued
+                    job.status, job.error, job.position = 'error', 'AI model not installed', None
+                    continue
+                ai = (str(model), self.ai_accel)
             job.status, job.stage, job.progress, job.started = 'running', 'start', 0.0, time.time()
             self._running.add(job.id)
-            job.future = self._pool.submit(_work, job.id, job.source, job.preset, job.options, self._queue)
+            job.future = self._pool.submit(_work, job.id, job.source, job.preset, job.options, self._queue, ai)
             job.future.add_done_callback(lambda f, j=job: self._finish(j, f))
         for i, jid in enumerate(self._pending):
             if (job := self._jobs.get(jid)) is not None:

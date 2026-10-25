@@ -3,7 +3,7 @@
 // Flow: photos are added to the workbench (status "staged", nothing processed) → the user ticks the ones to
 // process and picks a style → they wait in the service's queue → results are compared and saved.
 
-import { api, ApiError, type Job, type Overrides, type PresetInfo, type ServiceSettings, type ServicePrefs, type Speed } from './api';
+import { api, ApiError, type AiModelName, type AiStatus, type Job, type Overrides, type PresetInfo, type ServiceSettings, type ServicePrefs, type Speed } from './api';
 import { tf, t } from './i18n.svelte';
 import type { FileError } from './platform';
 import { prefs, servicePrefs } from './prefs.svelte';
@@ -42,6 +42,8 @@ export const store = $state({
   selected: null as string | null,
   info: null as PresetInfo | null,
   service: null as ServiceSettings | null,
+  /** optional AI step: runtime, graphics card, model files */
+  ai: null as AiStatus | null,
   settings: loadSettings(),
   media: {} as Record<string, Media>,
   /** Workbench ticks: staged job id → chosen for processing (new photos are ticked). */
@@ -85,6 +87,8 @@ export function explain(e: unknown, name?: string): string {
     if (e.status === 413) return tf('err_tooLarge', { name: name ?? '' });
     if (e.status === 415) return tf('err_notImage', { name: name ?? '' });
     if (e.status === 409 && /workbench/i.test(e.message)) return t('err_full');
+    if (e.status === 422 && /model not installed/i.test(e.message)) return t('aiNeedsModel');
+    if (e.status === 422 && /AI is not available/i.test(e.message)) return t('aiUnavailable');
     return tf('err_generic', { name: name ? ` (${name})` : '', detail: `${e.status}` });
   }
   if (e instanceof TypeError) return t('err_offline'); // fetch failed: the local service is gone
@@ -138,6 +142,7 @@ export async function init(): Promise<void> {
   try {
     // a fresh service (desktop restart) gets the user's saved limits and file-name settings
     [store.info, store.service] = await Promise.all([api.presets(), api.putSettings(servicePrefs())]);
+    void refreshAi();
     if (!store.info.presets.some((p) => p.name === store.settings.preset)) store.settings.preset = 'cartoon';
   } catch (e) {
     report(e);
@@ -249,11 +254,42 @@ export async function processPicked(): Promise<void> {
   await refresh();
 }
 
-/** Style overrides plus the output precision from Settings (decimals 1 is the engine default). */
+/** Style overrides plus the output precision and AI choice from Settings (decimals 1 is the engine default). */
 export function jobOptions(): Partial<Overrides> {
   const o: Partial<Overrides> = { ...store.settings.overrides };
   if (prefs.decimals !== 1) o.decimals = prefs.decimals;
+  if (aiReady() && prefs.aiMode !== 'off') {
+    o.ai = prefs.aiModel;
+    if (prefs.aiMode === 'auto') o.ai_auto = true;
+  }
   return o;
+}
+
+/** The chosen AI model is installed and the runtime works on this computer. */
+export const aiReady = (): boolean =>
+  !!store.ai?.runtime && store.ai.models.some((m) => m.name === prefs.aiModel && m.state === 'installed');
+
+let aiTimer: ReturnType<typeof setTimeout> | undefined;
+
+export async function refreshAi(): Promise<void> {
+  try {
+    store.ai = await api.ai();
+  } catch {
+    store.ai = null; // service without AI support
+  }
+  clearTimeout(aiTimer);
+  if (store.ai?.models.some((m) => m.state === 'downloading')) aiTimer = setTimeout(refreshAi, 400);
+}
+
+export async function aiModelAction(action: 'download' | 'cancel' | 'remove', name: AiModelName): Promise<void> {
+  try {
+    if (action === 'download') await api.aiDownload(name);
+    else if (action === 'cancel') await api.aiCancel(name);
+    else await api.aiRemove(name);
+  } catch (e) {
+    report(e);
+  }
+  await refreshAi();
 }
 
 export async function setSpeed(speed: Speed): Promise<void> {

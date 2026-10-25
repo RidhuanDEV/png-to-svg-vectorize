@@ -1,6 +1,6 @@
 [project]
 name = "png-to-svg-vectorize"
-version = "1.2.0"
+version = "1.3.0"
 description = "Turn raster cartoon illustrations into editable, library-free SVG: gradient fills and crisp outlines."
 readme = "README.md"
 license = "MIT"
@@ -22,7 +22,12 @@ classifiers = [
 [project.optional-dependencies]
 app = ["fastapi>=0.115", "uvicorn>=0.30"]
 desktop = ["png-to-svg-vectorize[app]", "pywebview>=6.2"]
-dev = ["pytest>=7", "httpx>=0.27"]
+# optional "Enhance with AI": DirectML (any GPU) on Windows, CoreML/CPU elsewhere; no wheel for macOS Intel
+ai = [
+  "onnxruntime-directml>=1.20; sys_platform == 'win32'",
+  "onnxruntime>=1.20; sys_platform != 'win32' and not (sys_platform == 'darwin' and platform_machine == 'x86_64')",
+]
+dev = ["pytest>=7", "httpx>=0.27", "onnx>=1.16"]
 
 [project.urls]
 Homepage = "https://github.com/RidhuanDEV/png-to-svg-vectorize"

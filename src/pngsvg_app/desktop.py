@@ -14,6 +14,7 @@ import io
 import json
 import multiprocessing
 import os
+import platform
 import secrets
 import subprocess
 import sys
@@ -235,7 +236,10 @@ def _start_service(port: int, token: str):
     from . import server
     from .jobs import JobManager
 
+    from .models import ModelStore
+
     jobs = JobManager()
+    jobs.models = ModelStore(data_dir() / 'models')
     jobs.start()
     app = server.create_app(jobs, token, {f'127.0.0.1:{port}', f'localhost:{port}'})
     srv = uvicorn.Server(uvicorn.Config(app, host='127.0.0.1', port=port, log_level='warning', access_log=False))
@@ -273,7 +277,12 @@ def smoke(port: int, token: str) -> None:
         job = _request(port, token, f'/api/jobs/{job["id"]}')
     if job['status'] != 'done':
         raise RuntimeError(f'smoke job failed: {job.get("error")}')
-    print(f'smoke ok: version {health["version"]}, {job["stats"]["regions"]} regions, {job["seconds"]} s', flush=True)
+    # the bundled AI runtime must load where a wheel exists (Windows, Apple Silicon); macOS Intel has none
+    ai = _request(port, token, '/api/ai')
+    if not ai['runtime'] and not (sys.platform == 'darwin' and platform.machine() == 'x86_64'):
+        raise RuntimeError('AI runtime missing from the bundle')
+    print(f'smoke ok: version {health["version"]}, {job["stats"]["regions"]} regions, {job["seconds"]} s, '
+          f'AI runtime {ai["runtime"]} {ai["gpu"]}', flush=True)
 
 
 def main(argv=None) -> int:

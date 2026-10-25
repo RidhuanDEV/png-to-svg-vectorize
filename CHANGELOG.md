@@ -2,6 +2,23 @@
 
 All notable changes. Benchmarks for every engine version are in [docs/bench.md](docs/bench.md).
 
+## 1.3.0 — 2026-10-25 — Enhance with AI (optional)
+
+- **Enhance with AI**: before vectorizing, an AI model (Real-ESRGAN, BSD-3-Clause, converted to ONNX) cleans and
+  enlarges the photo ×4; the result is traced at 2× the photo size. Biggest effect on small, blurry and JPEG pictures
+  (+0.47 similarity points median on damaged copies of E7 images, see [docs/bench.md](docs/bench.md)).
+- Off / **Automatic** (default: only photos under 1000 px or JPEGs) / Always — in the style panel. Two models:
+  *Illustrations* (default, 17 MB) and *General* (5 MB).
+- Models are **not bundled**: Settings → Processing → *Download*, once, from this repository's GitHub release
+  `models-v1`, verified by SHA-256 and kept in the user data folder; works offline afterwards. Cancel/remove at any
+  time. The ONNX Runtime ships in the installer (DirectML on Windows — any GPU — and CoreML on Apple Silicon, with CPU
+  fallback); *Run AI on*: Automatic / Graphics card / Processor only. Not available on macOS Intel (no runtime build).
+- API: `GET /api/ai`, `POST`/`DELETE /api/ai/models/{name}`, `POST /api/ai/models/{name}/cancel`; job options
+  `ai` (model name) and `ai_auto`; `PUT /api/settings` accepts `ai_accel`; results report `stats.ai`. An AI job whose
+  model is missing is refused with 422 instead of silently running without AI.
+- Maintainers: `tools/models/convert.py` converts the official weights (loaded with `weights_only=True`) and checks
+  the ONNX output against PyTorch; `bench/ai_restore.py` measures the gain. Python extra `[ai]`.
+
 ## 1.2.0 — 2026-10-18 — themes and Settings
 
 - **Three themes** to choose from — *Paper & ink*, *Lightbox*, *Blueprint* — or *Match system* (default). Colors live

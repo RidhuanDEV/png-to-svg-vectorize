@@ -19,6 +19,10 @@ export interface Prefs {
   namePattern: string;
   maxSide: number;
   maxStaged: number;
+  /** "Enhance with AI": off, only small/JPEG photos, or every photo */
+  aiMode: 'off' | 'auto' | 'always';
+  aiModel: 'illustration' | 'general';
+  aiAccel: 'auto' | 'gpu' | 'cpu';
 }
 
 export const THEMES = Object.keys(themes) as (keyof typeof themes)[];
@@ -35,6 +39,9 @@ const DEFAULTS: Prefs = {
   namePattern: '{name}',
   maxSide: 8000,
   maxStaged: 100,
+  aiMode: 'auto',
+  aiModel: 'illustration',
+  aiAccel: 'auto',
 };
 const KEY = 'pngsvg.prefs';
 
@@ -48,6 +55,9 @@ function load(): Prefs {
       if (!MAX_SIDES.includes(p.maxSide)) p.maxSide = DEFAULTS.maxSide;
       if (!MAX_STAGED.includes(p.maxStaged)) p.maxStaged = DEFAULTS.maxStaged;
       p.decimals = Math.min(3, Math.max(0, Math.round(Number(p.decimals) || 0)));
+      if (!['off', 'auto', 'always'].includes(p.aiMode)) p.aiMode = DEFAULTS.aiMode;
+      if (!['illustration', 'general'].includes(p.aiModel)) p.aiModel = DEFAULTS.aiModel;
+      if (!['auto', 'gpu', 'cpu'].includes(p.aiAccel)) p.aiAccel = DEFAULTS.aiAccel;
       return p;
     }
   } catch {
@@ -98,6 +108,7 @@ export function servicePrefs() {
     size_attrs: prefs.sizeAttrs,
     max_side: prefs.maxSide,
     max_staged: prefs.maxStaged,
+    ai_accel: prefs.aiAccel,
   };
 }
 

@@ -5,7 +5,7 @@
   import { i18n, languages, setLang, t, tf, tk, type Key } from '../lib/i18n.svelte';
   import { desktop, openExternal, setCloseMessage, type DesktopPrefs } from '../lib/platform';
   import { MAX_SIDES, MAX_STAGED, prefs, previewName, savePrefs, TEXT_SCALES, THEMES, type ThemeChoice } from '../lib/prefs.svelte';
-  import { saveSettings, setSpeed, store, updateService } from '../lib/store.svelte';
+  import { aiModelAction, refreshAi, saveSettings, setSpeed, store, updateService } from '../lib/store.svelte';
   import { startTour } from '../lib/tour.svelte';
   import themes from '../theme/themes.json';
   import Button from './ui/Button.svelte';
@@ -49,6 +49,7 @@
     pattern = prefs.namePattern;
     const d = desktop();
     if (d) void d.get_prefs().then((p) => (dprefs = p));
+    void refreshAi();
     return () => previous?.focus?.();
   });
 
@@ -123,6 +124,13 @@
     const k = themes[name].tokens;
     return [k.bg, k.panel, k.text, k.accent, k.node];
   };
+  // execution provider -> the name people know
+  const GPU_NAMES: Record<string, string> = {
+    DmlExecutionProvider: 'DirectML',
+    CoreMLExecutionProvider: 'Core ML',
+    CUDAExecutionProvider: 'NVIDIA CUDA',
+  };
+  const mb = (n: number) => `${(n / 1048576).toFixed(0)} MB`;
   const REPO = 'https://github.com/RidhuanDEV/png-to-svg-vectorize';
   const LICENSES = [
     ['numpy, SciPy', 'BSD-3-Clause'],
@@ -131,6 +139,8 @@
     ['Uvicorn, pywebview', 'BSD-3-Clause'],
     ['Svelte', 'MIT'],
     ['IBM Plex Sans / Mono', 'SIL OFL 1.1'],
+    ['ONNX Runtime', 'MIT'],
+    ['Real-ESRGAN (AI models)', 'BSD-3-Clause'],
   ];
 </script>
 
@@ -300,6 +310,63 @@
               />
               <p class="hint">{t('maxStagedHint')}</p>
             </div>
+
+            {#if store.ai?.runtime}
+              {@const ai = store.ai}
+              <div class="field" data-testid="ai-section">
+                <span class="lbl"><Icon name="sparkles" size={14} /> {t('aiModel')}</span>
+                <p class="hint">{t('aiHint')}</p>
+                <div class="models" role="radiogroup" aria-label={t('aiModel')}>
+                  {#each ai.models as m (m.name)}
+                    {@const on = prefs.aiModel === m.name}
+                    <div class="model" class:on data-testid="ai-model-{m.name}" data-state={m.state}>
+                      <button type="button" role="radio" aria-checked={on} class="pick" onclick={() => set('aiModel', m.name)}>
+                        <span class="radio" aria-hidden="true"></span>
+                        <span class="txt">
+                          <b>{tk('aiModel_' + m.name)}</b>
+                          <span class="muted">{tk('aiModelDesc_' + m.name)}</span>
+                        </span>
+                      </button>
+                      <div class="mstate">
+                        {#if m.state === 'installed'}
+                          <span class="ok"><Icon name="check" size={14} stroke={2.6} /> {t('aiInstalled')}</span>
+                          <Button variant="ghost" size="sm" iconOnly icon="trash" title={t('remove')} onclick={() => aiModelAction('remove', m.name)} data-testid="ai-remove-{m.name}">{t('remove')}</Button>
+                        {:else if m.state === 'downloading'}
+                          <span class="bar" aria-hidden="true"><span style="width:{Math.round(m.progress * 100)}%"></span></span>
+                          <span class="num" role="status">{tf('aiDownloading', { p: Math.round(m.progress * 100) })}</span>
+                          <Button variant="ghost" size="sm" iconOnly icon="x" title={t('cancel')} onclick={() => aiModelAction('cancel', m.name)} data-testid="ai-cancel-{m.name}">{t('cancel')}</Button>
+                        {:else}
+                          <Button variant="secondary" size="sm" icon="download" onclick={() => aiModelAction('download', m.name)} data-testid="ai-download-{m.name}">{tf('aiDownload', { size: mb(m.bytes) })}</Button>
+                        {/if}
+                      </div>
+                      {#if m.state === 'error'}
+                        <p class="err" role="alert">{m.error === 'checksum' ? t('aiFailedChecksum') : t('aiFailedNetwork')}</p>
+                      {/if}
+                    </div>
+                  {/each}
+                </div>
+                <p class="hint">{t('aiDownloadNote')}</p>
+              </div>
+              <div class="field">
+                <span class="lbl">{t('aiAccel')}</span>
+                <Segmented
+                  size="sm"
+                  label={t('aiAccel')}
+                  value={prefs.aiAccel}
+                  options={(['auto', 'gpu', 'cpu'] as const).map((a) => ({ value: a, label: tk('aiAccel_' + a) }))}
+                  onchange={(v) => {
+                    set('aiAccel', v);
+                    void updateService({ ai_accel: v });
+                  }}
+                  testid="ai-accel"
+                />
+                <p class="hint" data-testid="ai-gpu">
+                  {ai.gpu.length ? tf('aiGpuFound', { name: ai.gpu.map((g) => GPU_NAMES[g] ?? g).join(', ') }) : t('aiGpuNone')}
+                </p>
+              </div>
+            {:else if store.ai}
+              <p class="hint" data-testid="ai-unavailable">{t('aiUnavailable')}</p>
+            {/if}
           {:else if section === 'output'}
             <div class="row">
               <span class="lbl">{t('defaultStyle')}</span>
@@ -663,6 +730,88 @@
     display: flex;
     align-items: center;
     gap: 8px;
+  }
+  .models {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .model {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 6px 12px;
+    padding: 8px 10px;
+    border-radius: var(--radius);
+    border: 1.5px solid var(--line);
+    transition: border-color var(--fast) var(--ease);
+  }
+  .model.on {
+    border-color: var(--accent);
+  }
+  .pick {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0;
+    border: 0;
+    background: none;
+    text-align: left;
+    min-width: 0;
+  }
+  .radio {
+    flex: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1.5px solid var(--line-strong);
+    transition:
+      border-color var(--fast) var(--ease),
+      border-width var(--fast) var(--ease);
+  }
+  .on .radio {
+    border: 5px solid var(--accent);
+  }
+  .pick .txt {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.3;
+    min-width: 0;
+  }
+  .pick .muted {
+    font-size: calc(12px * var(--ts));
+  }
+  .mstate {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: calc(12.5px * var(--ts));
+  }
+  .mstate .ok {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--ok);
+    font-weight: 600;
+  }
+  .bar {
+    width: 90px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--panel-3);
+    overflow: hidden;
+  }
+  .bar span {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    transition: width var(--medium) var(--ease);
+  }
+  .model .err {
+    grid-column: 1 / -1;
+    margin: 0;
+    color: var(--danger);
+    font-size: calc(12.5px * var(--ts));
   }
   .licenses {
     display: grid;

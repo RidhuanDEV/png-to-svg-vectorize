@@ -30,6 +30,10 @@
         <dd>{kb(job.bytes)}</dd>
         <dt>{t('time')}</dt>
         <dd>{job.seconds?.toFixed(1)} s</dd>
+        {#if job.stats.ai !== undefined}
+          <dt>{t('aiUsed')}</dt>
+          <dd data-testid="stat-ai">{job.stats.ai ? t('yes') : t('no')}</dd>
+        {/if}
       </dl>
     {:else}
       <p class="err" role="alert"><Icon name="warning" size={16} /> {t('failedHelp')}</p>

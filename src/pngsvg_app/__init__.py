@@ -26,6 +26,8 @@ def serve(port: int = 0, token: str | None = None, open_browser: bool = True, wo
     port = port or free_port()
     token = token or secrets.token_urlsafe(32)
     jobs = JobManager(workers)
+    from .models import ModelStore
+    jobs.models = ModelStore()
     app = create_app(jobs, token, {f'127.0.0.1:{port}', f'localhost:{port}'})
     url = f'http://127.0.0.1:{port}/#t={token}'
     print(f'PNG to SVG Vectorize is running at {url}\n(the link contains this session\'s access token; '

@@ -7,5 +7,8 @@ fastapi==0.141.1
 pydantic==2.13.5
 uvicorn==0.54.0
 pywebview==6.2.1
+# optional AI step (bundled runtime; models are downloaded on request). macOS Intel has no wheel: AI is hidden there.
+onnxruntime-directml==1.24.4; sys_platform == "win32"
+onnxruntime==1.30.0; sys_platform == "darwin" and platform_machine == "arm64"
 pyinstaller==6.22.3
 pyinstaller-hooks-contrib==2026.7

@@ -83,7 +83,7 @@ berpengaruh nyata ke SVG (tes API); versi 1.2.0.
 
 ---
 
-## 3. M9 — AI pra-proses (v1.3)
+## 3. M9 — AI pra-proses (v1.3) — ✅ 2026-10-25
 
 Tujuan: hasil semulus PNG sumber, terutama untuk gambar kecil, buram, atau JPEG berartefak.
 
@@ -102,6 +102,20 @@ Tujuan: hasil semulus PNG sumber, terutama untuk gambar kecil, buram, atau JPEG 
 
 **Selesai bila**: unduh model + verifikasi + GPU/CPU fallback teruji (termasuk tanpa GPU), bench sebelum/sesudah
 dicatat, e2e alur AI, versi 1.3.0.
+
+**Realisasi (2026-10-25, v1.3.0)**:
+- Model: Real-ESRGAN `RealESRGAN_x4plus_anime_6B` → **Ilustrasi** (17 MB, bawaan) dan `realesr-general-x4v3` →
+  **Umum** (5 MB); bobot resmi BSD-3-Clause dikonversi ke ONNX opset 17 oleh `tools/models/convert.py` (selisih vs
+  PyTorch < 1e-6), diunggah ke rilis `models-v1` bersama `manifest.json`, `SHA256SUMS`, dan lisensi upstream.
+- Bench pemulihan (10 gambar E7 yang dirusak setengah ukuran + JPEG q60): Ilustrasi **+0,47** poin median (target
+  +0,3 tercapai), ukuran +7 %; Umum +0,27, ukuran +60 %. Detail di `docs/bench.md`.
+- Penyesuaian: ambang Otomatis **1000 px** (bukan 800) atau JPEG; sakelar global di panel gaya (bukan per gaya);
+  hasil AI ditelusuri di 2× ukuran foto dengan presisi koordinat dikurangi satu agar ukuran berkas terkendali.
+- Ditunda: perkiraan waktu, tampilan bandingkan "Setelah AI", uji singkat perangkat, dan target −20 % segmen (belum
+  diukur). macOS Intel: tidak ada build ONNX Runtime, jadi fitur AI disembunyikan di sana.
+- Teruji: unduh + checksum + batal/hapus (pytest dengan server lokal), API & job AI end to end dengan model ONNX mini,
+  fallback CPU (`providers_for` selalu diakhiri CPU), e2e UI (kartu model, akselerator, Mati/Otomatis/Selalu, baris
+  statistik).
 
 ---
 

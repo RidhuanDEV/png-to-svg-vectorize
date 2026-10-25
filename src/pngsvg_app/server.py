@@ -15,7 +15,7 @@ import urllib.request
 import warnings
 import zipfile
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse, JSONResponse, Response
@@ -51,6 +51,8 @@ class OptionsIn(BaseModel):
     merge_de: float | None = Field(None, ge=1.0, le=30.0)
     scale: int | None = Field(None, ge=1, le=4)
     decimals: int | None = Field(None, ge=0, le=3)
+    ai: Literal['illustration', 'general'] | None = None   # enhance with this AI model first
+    ai_auto: bool | None = None       # ...but only for small (< AI_SMALL px) or JPEG photos
 
 
 class StartIn(BaseModel):
@@ -69,6 +71,7 @@ class SettingsIn(BaseModel):
     size_attrs: bool | None = None
     max_side: int | None = Field(None, ge=500, le=MAX_SIDE)
     max_staged: int | None = Field(None, ge=1, le=500)
+    ai_accel: Literal['auto', 'gpu', 'cpu'] | None = None
 
 
 _PATTERN_TOKEN = re.compile(r'\{(name|nama|style|gaya|date|tanggal)\}')
@@ -152,6 +155,18 @@ def read_image(data: bytes, max_side: int = MAX_SIDE) -> tuple[int, int, str]:
     return w, h, fmt
 
 
+def check_ai(jobs, overrides: dict[str, Any]) -> None:
+    """An AI-enhanced job needs the runtime and the chosen model on this computer."""
+    name = overrides.get('ai')
+    if not name:
+        return
+    from pngsvg.ai import runtime_available
+    if not runtime_available():
+        raise HTTPException(422, 'AI is not available on this computer')
+    if jobs.models is None or jobs.models.path(name) is None:
+        raise HTTPException(422, 'AI model not installed')
+
+
 def parse_options(preset: str, options: str | None) -> dict[str, Any]:
     if preset not in PRESETS:
         raise HTTPException(422, f'unknown preset; choose one of: {", ".join(PRESETS)}')
@@ -219,6 +234,7 @@ def create_app(jobs: JobManager, token: str, allowed_hosts: set[str], static_dir
                          options: str | None = Query(None), start: bool = Query(True)):
         """start=false puts the image on the workbench (status 'staged') until POST /api/jobs/start."""
         overrides = parse_options(preset, options) if start else {}
+        check_ai(jobs, overrides)
         data = await read_body(request)
         w, h, _ = read_image(data, min(jobs.max_side, MAX_SIDE))   # Settings may only lower the ceiling
         if not start:
@@ -233,6 +249,7 @@ def create_app(jobs: JobManager, token: str, allowed_hosts: set[str], static_dir
         if body.preset not in PRESETS:
             raise HTTPException(422, f'unknown preset; choose one of: {", ".join(PRESETS)}')
         overrides = body.options.model_dump(exclude_none=True) if body.options else {}
+        check_ai(jobs, overrides)
         return {'jobs': [pub(j) for j in jobs.start_jobs(body.ids, body.preset, overrides)]}
 
     @app.post('/api/queue/cancel')
@@ -259,7 +276,46 @@ def create_app(jobs: JobManager, token: str, allowed_hosts: set[str], static_dir
             jobs.max_side = body.max_side
         if body.max_staged is not None:
             jobs.max_staged = body.max_staged
+        if body.ai_accel is not None:
+            jobs.ai_accel = body.ai_accel
         return jobs.settings()
+
+    # -- optional AI enhancement: runtime info and model files (downloaded only when the user asks) --------------
+    def _models():
+        if jobs.models is None:
+            raise HTTPException(404, 'AI models are not managed by this service')
+        return jobs.models
+
+    @app.get('/api/ai')
+    def ai_status():
+        from pngsvg.ai import gpu_providers, runtime_available
+        runtime = runtime_available()
+        return {'runtime': runtime, 'gpu': gpu_providers() if runtime else [], 'accel': jobs.ai_accel,
+                'models': jobs.models.status() if jobs.models else []}
+
+    @app.post('/api/ai/models/{name}', status_code=202)
+    def ai_download(name: str):
+        store = _models()
+        if name not in store.catalog:
+            raise HTTPException(404, 'unknown model')
+        store.download(name)
+        return {'models': store.status()}
+
+    @app.post('/api/ai/models/{name}/cancel')
+    def ai_cancel(name: str):
+        store = _models()
+        if name not in store.catalog:
+            raise HTTPException(404, 'unknown model')
+        store.cancel(name)
+        return {'models': store.status()}
+
+    @app.delete('/api/ai/models/{name}')
+    def ai_remove(name: str):
+        store = _models()
+        if name not in store.catalog:
+            raise HTTPException(404, 'unknown model')
+        store.remove(name)
+        return {'models': store.status()}
 
     @app.get('/api/update')
     def check_update():
@@ -320,6 +376,7 @@ def create_app(jobs: JobManager, token: str, allowed_hosts: set[str], static_dir
         job = _job(job_id)
         p = preset or job.preset
         overrides = parse_options(p, options) if (options is not None or preset is not None) else job.options
+        check_ai(jobs, overrides)
         return pub(jobs.submit(job.name, job.source, job.width, job.height, p, overrides))
 
     @app.post('/api/jobs/{job_id}/cancel')

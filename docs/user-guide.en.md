@@ -116,10 +116,25 @@ Open **Settings** with the gear at the top (or `Ctrl+,`). Changes apply at once 
 | Section | What you can change |
 |---|---|
 | Appearance | language · theme: *Match system* (Paper & ink when the computer is light, Lightbox when it is dark), *Paper & ink*, *Lightbox*, *Blueprint* · density · text size (90–130 %) · reduce animation · show the guide again |
-| Processing | processing speed · largest photo accepted (3000–8000 px; lower it on computers with little memory) · how many photos may wait on the workbench |
+| Processing | processing speed · largest photo accepted (3000–8000 px; lower it on computers with little memory) · how many photos may wait on the workbench · AI models (download/remove) and where AI runs |
 | Results | style for new photos · save folder and whether to ask each time (desktop app) · file name with `{name}`, `{style}`, `{date}` · coordinate precision (0–3 decimals: fewer = smaller files) · add width and height to the SVG |
 | Privacy and data | diagnostic log on/off and its folder (desktop app) |
 | About | version, licenses, **Check for updates** (only when pressed; asks GitHub for the latest version number) |
+
+### Enhance with AI (optional)
+
+An AI model can clean and enlarge a photo before it is vectorized, so edges come out smoother. It helps most with
+small, blurry or JPEG pictures; it makes processing slower (about 3–4×).
+
+1. **Settings → Processing → AI model**: press **Download** next to *Illustrations* (recommended, 17 MB; for drawings,
+   cartoons and flat art) or *General* (5 MB; photos and mixed pictures). The file comes once from this project's
+   GitHub release, is checked, and is kept on your computer — after that it works offline. **Remove** deletes it.
+2. In the style panel, **Enhance with AI**: *Off*, *Automatic* (default — only photos smaller than 1000 px or JPEGs)
+   or *Always*. The result panel shows whether AI was used.
+3. **Run AI on**: *Automatic* uses the graphics card when one is supported (DirectML on Windows, Core ML on Apple
+   Silicon Macs) and falls back to the processor; choose *Processor only* if the graphics card causes trouble.
+
+Not available on Intel Macs. Models: Real-ESRGAN by Xintao Wang et al., BSD-3-Clause.
 
 ## 5. Save
 
@@ -142,8 +157,8 @@ Gradient ids are unique per file, so many SVGs can be inlined on one web page.
 
 The app starts a small service inside itself that only accepts connections from the same computer
 (`127.0.0.1`) and only with a random key created for each session. Images and results are kept in memory and are
-gone when you close the app. There is no telemetry. The only network request the app can make is **Check for
-updates** in Settings → About, and only when you press it.
+gone when you close the app. There is no telemetry. The app only uses the network when you ask it to: **Check for
+updates** in Settings → About, and **Download** of an AI model in Settings → Processing.
 
 ## 8. Troubleshooting
 
@@ -154,6 +169,7 @@ updates** in Settings → About, and only when you press it.
 | macOS: "can't be opened" / "damaged" | See Install, steps 3–4. |
 | "Not accepted — 413" | The file is larger than 50 MB or 8000 px; scale it down. |
 | "Not accepted — 415" | Not a PNG, WebP or JPEG image (the file content is checked, not the name). |
+| AI model download failed | Check the internet connection and press Download again. A file that does not match the published checksum is deleted, never used. |
 | Something else went wrong | The app writes a log: Windows `%LOCALAPPDATA%\PNG to SVG Vectorize\app.log`, macOS `~/Library/Application Support/PNG to SVG Vectorize/app.log`. Please attach it to a [GitHub issue](https://github.com/RidhuanDEV/png-to-svg-vectorize/issues) (it contains no image data). |
 
 ## 9. Command line and Python

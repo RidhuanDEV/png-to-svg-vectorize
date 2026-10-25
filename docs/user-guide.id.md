@@ -118,10 +118,26 @@ Buka **Pengaturan** lewat ikon roda gigi di atas (atau `Ctrl+,`). Perubahan lang
 | Bagian | Yang bisa diubah |
 |---|---|
 | Tampilan | bahasa · tema: *Ikuti sistem* (Kertas & tinta saat komputer terang, Lightbox saat gelap), *Kertas & tinta*, *Lightbox*, *Cetak biru* · kepadatan · ukuran teks (90–130%) · kurangi animasi · tampilkan panduan lagi |
-| Pemrosesan | kecepatan proses · ukuran foto terbesar yang diterima (3000–8000 px; turunkan di komputer bermemori kecil) · berapa foto yang boleh menunggu di meja kerja |
+| Pemrosesan | kecepatan proses · ukuran foto terbesar yang diterima (3000–8000 px; turunkan di komputer bermemori kecil) · berapa foto yang boleh menunggu di meja kerja · model AI (unduh/hapus) dan tempat AI dijalankan |
 | Hasil | gaya untuk foto baru · folder simpan dan apakah selalu ditanya (aplikasi desktop) · nama berkas dengan `{nama}`, `{gaya}`, `{tanggal}` · presisi koordinat (0–3 desimal: lebih sedikit = berkas lebih kecil) · tambahkan lebar dan tinggi ke SVG |
 | Privasi & data | log diagnostik nyala/mati dan foldernya (aplikasi desktop) |
 | Tentang | versi, lisensi, **Periksa pembaruan** (hanya saat ditekan; menanyakan nomor versi terbaru ke GitHub) |
+
+### Perhalus dengan AI (opsional)
+
+Model AI bisa membersihkan dan memperbesar foto sebelum divektorisasi sehingga tepinya lebih halus. Paling terasa pada
+gambar kecil, buram, atau JPEG; prosesnya menjadi lebih lambat (sekitar 3–4×).
+
+1. **Pengaturan → Pemrosesan → Model AI**: tekan **Unduh** di samping *Ilustrasi* (disarankan, 17 MB; untuk gambar,
+   kartun, dan ilustrasi datar) atau *Umum* (5 MB; foto dan gambar campuran). Berkas diambil sekali dari rilis GitHub
+   proyek ini, diperiksa keasliannya, lalu disimpan di komputer — setelah itu bekerja tanpa internet. **Hapus**
+   menghapusnya.
+2. Di panel gaya, **Perhalus dengan AI**: *Mati*, *Otomatis* (bawaan — hanya foto di bawah 1000 px atau JPEG), atau
+   *Selalu*. Panel hasil menunjukkan apakah AI dipakai.
+3. **Jalankan AI di**: *Otomatis* memakai kartu grafis bila didukung (DirectML di Windows, Core ML di Mac Apple
+   Silicon) dan beralih ke prosesor bila tidak; pilih *Prosesor saja* bila kartu grafis bermasalah.
+
+Tidak tersedia di Mac Intel. Model: Real-ESRGAN oleh Xintao Wang dkk., BSD-3-Clause.
 
 ## 5. Menyimpan
 
@@ -145,8 +161,8 @@ ID gradien unik per berkas, jadi banyak SVG bisa disisipkan di satu halaman web.
 
 Aplikasi menjalankan layanan kecil di dalam dirinya yang hanya menerima koneksi dari komputer yang sama (`127.0.0.1`)
 dan hanya dengan kunci acak yang dibuat setiap sesi. Gambar dan hasil disimpan di memori dan hilang saat aplikasi
-ditutup. Tidak ada telemetri. Satu-satunya permintaan jaringan yang bisa dilakukan aplikasi adalah **Periksa
-pembaruan** di Pengaturan → Tentang, dan hanya saat tombol itu ditekan.
+ditutup. Tidak ada telemetri. Aplikasi hanya memakai jaringan bila Anda memintanya: **Periksa pembaruan** di
+Pengaturan → Tentang, dan **Unduh** model AI di Pengaturan → Pemrosesan.
 
 ## 8. Pemecahan masalah
 
@@ -157,6 +173,7 @@ pembaruan** di Pengaturan → Tentang, dan hanya saat tombol itu ditekan.
 | macOS: "can't be opened" / "damaged" | Lihat Instalasi, langkah 3–4. |
 | "Tidak diterima — 413" | Berkas lebih dari 50 MB atau 8000 px; perkecil dulu. |
 | "Tidak diterima — 415" | Bukan gambar PNG, WebP, atau JPEG (yang diperiksa isi berkas, bukan namanya). |
+| Unduhan model AI gagal | Periksa koneksi internet lalu tekan Unduh lagi. Berkas yang tidak cocok dengan checksum resmi dihapus, tidak pernah dipakai. |
 | Masalah lain | Aplikasi menulis log: Windows `%LOCALAPPDATA%\PNG to SVG Vectorize\app.log`, macOS `~/Library/Application Support/PNG to SVG Vectorize/app.log`. Lampirkan di [GitHub issue](https://github.com/RidhuanDEV/png-to-svg-vectorize/issues) (log tidak berisi data gambar). |
 
 ## 9. Baris perintah dan Python

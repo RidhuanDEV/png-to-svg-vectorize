@@ -18,6 +18,40 @@ the CLI and the app.
 
 Machine: Windows 11 laptop, Python 3.13, single process.
 
+## v1.3 — optional AI step (2026-10-25)
+
+`python bench/ai_restore.py MODELS_DIR --limit 10` — a **restoration** test: each clean E7 image is first degraded like
+a typical web picture (half size + JPEG quality 60), then vectorized without AI and with each AI model (x4 upscale,
+resized to 2× the photo, `decimals` one lower). The SVGs are rendered at the ORIGINAL size and compared with the
+CLEAN original, so a gain means detail was recovered, not that the damage was copied. Default preset, CPU
+(DirectML gives the same pixels), single process.
+
+| image | no AI | AI general | AI illustration |
+|---|---|---|---|
+| astronaut.png | 98.69% · 51 KB | 98.90% · 95 KB | 98.98% · 88 KB |
+| basketball-mascot.png | 99.42% · 52 KB | 99.75% · 54 KB | 99.72% · 46 KB |
+| caticorn.png | 98.82% · 80 KB | 99.13% · 131 KB | 99.20% · 94 KB |
+| cow.png | 99.28% · 20 KB | 99.34% · 39 KB | 99.33% · 33 KB |
+| cute-girl.png | 97.86% · 93 KB | 98.63% · 221 KB | 98.60% · 188 KB |
+| donkey.png | 99.43% · 11 KB | 99.52% · 19 KB | 99.52% · 20 KB |
+| earth-apollo17.jpg | 93.09% · 301 KB | 94.58% · 921 KB | 94.33% · 906 KB |
+| fish-mascot.png | 99.59% · 24 KB | 99.73% · 39 KB | 99.75% · 34 KB |
+| flag-brazil.png | 98.86% · 59 KB | 98.86% · 84 KB | 99.39% · 63 KB |
+| flag-kiribati.png | 98.23% · 65 KB | 98.57% · 158 KB | 98.71% · 46 KB |
+
+- **no AI**: median similarity 98.86%, median size 59 KB, median vectorize 2.5 s
+- **AI general**: median similarity 99.13%, median size 95 KB, median vectorize 8.2 s, AI 1.1 s
+- **AI illustration**: median similarity 99.33%, median size 63 KB, median vectorize 7.6 s, AI 2.9 s
+
+- Target of PLAN-v2 M9 (+0.3 points on small/damaged pictures) is met by the **illustration** model: **+0.47** median,
+  +7 % median size; it wins on 8 of 10 images. The *general* model gains less (+0.27) and makes files 60 % larger.
+- Cost: vectorizing the 2× picture takes ~3× longer, plus the model itself (2.9 s on a laptop CPU at these sizes).
+- Decision: AI stays **optional** (model downloaded on request). Default mode *Automatic* applies it only where it
+  helps — photos under 1000 px on the long side, or JPEGs; large clean PNGs skip it, so the E7/synthetic baselines
+  (no AI) are unchanged. The illustration model is the default.
+- Not measured: "Always" on large clean PNGs (expected: little gain for a large time cost), and the region-count
+  target (−20 % segments).
+
 ## v1.0 — comparison set E7 (2026-10-12)
 
 Default preset (`cartoon`) on every image, 4 worker processes:

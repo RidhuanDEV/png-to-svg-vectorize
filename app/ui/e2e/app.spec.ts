@@ -37,7 +37,7 @@ test.beforeEach(async ({ page, request }, info) => {
   for (const j of (await res.json()).jobs) await request.delete(`/api/jobs/${j.id}`, { headers: H });
   await request.put('/api/settings', {
     headers: H,
-    data: { speed: 'auto', name_pattern: '{name}', size_attrs: false, max_side: 8000, max_staged: 100 },
+    data: { speed: 'auto', name_pattern: '{name}', size_attrs: false, max_side: 8000, max_staged: 100, ai_accel: 'auto' },
   });
   const showTour = info.title.includes('tour');
   await page.addInitScript((tour) => {
@@ -408,4 +408,61 @@ test('about shows the version; the guide can be replayed from Settings', async (
   await page.getByTestId('nav-appearance').click();
   await page.getByTestId('replay-tour').click();
   await expect(page.getByTestId('tour')).toBeVisible();
+});
+
+// -- M9: optional AI step ----------------------------------------------------------------------------------------
+// The service runs with the real ONNX runtime but no model; nothing is downloaded in tests. The "installed" state is
+// shown by answering /api/ai in the page, the service itself still refuses AI jobs without the model.
+
+test('AI: model cards offer a download (nothing fetched until clicked), the accelerator is a service setting', async ({ page }) => {
+  await openApp(page);
+  await expect(page.getByTestId('ai-needs-model')).toBeVisible();
+  await openSettings(page, 'processing');
+  for (const name of ['illustration', 'general']) {
+    const card = page.getByTestId(`ai-model-${name}`);
+    await expect(card).toHaveAttribute('data-state', 'missing');
+    await expect(page.getByTestId(`ai-download-${name}`)).toContainText('MB');
+  }
+  await expect(page.getByTestId('ai-gpu')).not.toBeEmpty();
+  await page.getByTestId('ai-model-general').getByRole('radio').click();
+  await expect(page.getByTestId('ai-model-general')).toHaveClass(/on/);
+  await page.getByTestId('ai-accel-cpu').click();
+  await expect
+    .poll(async () => (await (await page.request.get('/api/settings', { headers: H })).json()).ai_accel)
+    .toBe('cpu');
+});
+
+test('AI: with a model installed, the style panel offers Off/Automatic/Always and processing asks for it', async ({ page }) => {
+  await page.route('**/api/ai', async (route) => {
+    const res = await route.fetch();
+    const body = await res.json();
+    body.models = body.models.map((m: { name: string }) =>
+      m.name === 'illustration' ? { ...m, state: 'installed', progress: 1 } : m,
+    );
+    await route.fulfill({ response: res, json: body });
+  });
+  await openApp(page);
+  const mode = page.getByTestId('ai-mode');
+  await expect(mode).toBeVisible();
+  await expect(page.getByTestId('ai-mode-auto')).toHaveAttribute('aria-checked', 'true');
+  await page.getByTestId('ai-mode-always').click();
+
+  await addPhotos(page, ['face.png']);
+  const start = page.waitForRequest((r) => r.url().endsWith('/api/jobs/start'));
+  await page.getByTestId('process').click();
+  const sent = (await start).postDataJSON();
+  expect(sent.options.ai).toBe('illustration');
+  expect(sent.options.ai_auto).toBeUndefined();
+  // the real service has no model file, so it refuses in plain words instead of running without AI
+  await expect(page.getByText(/Download an AI model|Unduh model AI/).first()).toBeVisible();
+
+  await page.getByTestId('ai-mode-off').click();
+  await page.reload();
+  await expect(page.getByTestId('ai-mode-off')).toHaveAttribute('aria-checked', 'true');
+});
+
+test('AI: a finished job shows whether AI was used', async ({ page }) => {
+  await openApp(page);
+  await uploadAndWait(page);
+  await expect(page.getByTestId('stat-ai')).toHaveText(/No|Tidak/);
 });

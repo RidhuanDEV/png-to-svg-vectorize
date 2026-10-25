@@ -20,7 +20,7 @@ export interface Job {
   /** Name the result is saved under (Settings → file name pattern). */
   filename: string;
   bytes: number | null;
-  stats: { regions?: number; gradients?: number; outline_paths?: number };
+  stats: { regions?: number; gradients?: number; outline_paths?: number; ai?: boolean };
   error: string | null;
 }
 
@@ -33,6 +33,27 @@ export interface Overrides {
   merge_de: number;
   scale: number | null;
   decimals: number;
+  ai: AiModelName;
+  ai_auto: boolean;
+}
+
+export type AiModelName = 'illustration' | 'general';
+export type AiAccel = 'auto' | 'gpu' | 'cpu';
+
+export interface AiModel {
+  name: AiModelName;
+  bytes: number;
+  source: string;
+  state: 'missing' | 'downloading' | 'installed' | 'error';
+  progress: number;
+  error: 'network' | 'checksum' | null;
+}
+
+export interface AiStatus {
+  runtime: boolean;
+  gpu: string[];
+  accel: AiAccel;
+  models: AiModel[];
 }
 
 export interface OptionSpec {
@@ -79,6 +100,7 @@ export interface ServicePrefs {
   size_attrs?: boolean;
   max_side?: number;
   max_staged?: number;
+  ai_accel?: AiAccel;
 }
 
 export interface UpdateInfo {
@@ -183,6 +205,16 @@ export const api = {
       })
     ).json(),
   health: async (): Promise<{ version: string }> => (await call('/api/health')).json(),
+  ai: async (): Promise<AiStatus> => (await call('/api/ai')).json(),
+  aiDownload: async (name: AiModelName): Promise<void> => {
+    await call(`/api/ai/models/${name}`, { method: 'POST' });
+  },
+  aiCancel: async (name: AiModelName): Promise<void> => {
+    await call(`/api/ai/models/${name}/cancel`, { method: 'POST' });
+  },
+  aiRemove: async (name: AiModelName): Promise<void> => {
+    await call(`/api/ai/models/${name}`, { method: 'DELETE' });
+  },
   checkUpdate: async (): Promise<UpdateInfo> => (await call('/api/update')).json(),
   /** The SVG as saved (with width/height when Settings ask for it). */
   svgDownload: async (id: string): Promise<Blob> => (await call(`/api/jobs/${id}/svg?download=true`)).blob(),

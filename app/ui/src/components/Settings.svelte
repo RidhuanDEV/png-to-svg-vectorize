@@ -2,7 +2,8 @@
   // Right column, top: the result style (visual cards + optional fine-tuning) and the processing speed.
   import type { OptionSpec, Overrides, Speed } from '../lib/api';
   import { t, tf, tk } from '../lib/i18n.svelte';
-  import { presetDefaults, retryJob, saveSettings, selectedJob, setSpeed, store } from '../lib/store.svelte';
+  import { prefs, savePrefs } from '../lib/prefs.svelte';
+  import { aiReady, presetDefaults, retryJob, saveSettings, selectedJob, setSpeed, store } from '../lib/store.svelte';
   import Button from './ui/Button.svelte';
   import Icon from './ui/Icon.svelte';
   import Segmented from './ui/Segmented.svelte';
@@ -131,6 +132,28 @@
     </div>
   {/if}
 
+  {#if store.ai?.runtime}
+    <div class="ai" data-testid="ai-mode-box">
+      <span class="lbl"><Icon name="sparkles" size={14} /> {t('ai')}</span>
+      {#if aiReady()}
+        <Segmented
+          size="sm"
+          label={t('ai')}
+          value={prefs.aiMode}
+          options={(['off', 'auto', 'always'] as const).map((m) => ({ value: m, label: tk('ai_' + m) }))}
+          onchange={(v) => {
+            prefs.aiMode = v;
+            savePrefs();
+          }}
+          testid="ai-mode"
+        />
+        <p class="note muted">{prefs.aiMode === 'auto' ? t('aiAutoHint') : t('aiHint')}</p>
+      {:else}
+        <p class="note muted" data-testid="ai-needs-model">{t('aiNeedsModel')}</p>
+      {/if}
+    </div>
+  {/if}
+
   <p class="note muted">{t('styleNote')}</p>
   {#if canReprocess && job}
     <Button variant="secondary" wide icon="retry" onclick={() => retryJob(job.id, true)} data-testid="apply-selected">{t('reprocess')}</Button>
@@ -172,6 +195,23 @@
     display: flex;
     align-items: center;
     gap: 6px;
+  }
+  .ai {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+  }
+  .ai .lbl {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+  }
+  .ai .note {
+    margin: 0;
   }
   .presets {
     display: flex;

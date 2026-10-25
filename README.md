@@ -13,6 +13,8 @@ Turn **raster cartoon illustrations** (PNG/WebP/JPEG — e.g. from image generat
   Figma/Illustrator/Inkscape, Flutter (`flutter_svg`), Android/iOS vector pipelines.
 - **Safe to inline** — gradient ids are prefixed per file, so many SVGs can share one page.
 - **Compact** — relative path commands with minimal number syntax (~50% smaller than absolute coordinates).
+- **Optional AI clean-up** (app, v1.3+) — small, blurry or JPEG pictures can be enhanced by a local Real-ESRGAN
+  model (downloaded on request, runs on the GPU or CPU) before tracing.
 
 ```text
 input.png ──► outline separation ──► fill layer (regions + gradients) ──► SVG
@@ -21,7 +23,7 @@ input.png ──► outline separation ──► fill layer (regions + gradients
                                                                           <g id="outline">
 ```
 
-> **Status:** v1.0 — desktop app for **Windows and macOS**, local web UI, command line and Python library.
+> **Status:** v1.3 — desktop app for **Windows and macOS**, local web UI, command line and Python library.
 > **[Download](https://github.com/RidhuanDEV/png-to-svg-vectorize/releases)** ·
 > [User guide](docs/user-guide.en.md) · [Panduan (ID)](docs/user-guide.id.md) · [Changelog](CHANGELOG.md)
 
