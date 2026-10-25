@@ -5,7 +5,9 @@
     python bench/fetch_sets.py --sources-md    # regenerate bench/sets/SOURCES.md from the manifest
 
 Every file is CC0 or public domain on Wikimedia Commons; title, author, license and page are in the manifest.
-Images are not stored in git: they are downloaded on demand and checked against the recorded hash.
+Images are not stored in git: they are downloaded on demand and checked against the recorded hash. Wikimedia
+re-encodes its rendered thumbnails from time to time (same pixels, different bytes), so a file whose bytes changed is
+still accepted when its decoded pixels match the recorded `pixels_sha256`.
 """
 from __future__ import annotations
 
@@ -36,6 +38,17 @@ def download(url: str) -> bytes:
     raise AssertionError('unreachable')
 
 
+def pixels_sha256(data: bytes) -> str:
+    """Hash of the decoded image (size, mode, pixels): what the benchmark actually reads."""
+    import io
+
+    from PIL import Image
+    with Image.open(io.BytesIO(data)) as im:
+        im.load()
+        head = f'{im.size[0]}x{im.size[1]} {im.mode};'.encode()
+        return hashlib.sha256(head + im.tobytes()).hexdigest()
+
+
 def fetch(update: bool) -> int:
     rows = json.loads(MANIFEST.read_text(encoding='utf-8'))
     IMAGES.mkdir(parents=True, exist_ok=True)
@@ -50,10 +63,15 @@ def fetch(update: bool) -> int:
         digest = hashlib.sha256(data).hexdigest()
         if update:
             row['sha256'] = digest
+            row['pixels_sha256'] = pixels_sha256(data)
         elif row.get('sha256') and row['sha256'] != digest:
-            print(f'HASH MISMATCH {row["file"]}: expected {row["sha256"][:12]}…, got {digest[:12]}…', file=sys.stderr)
-            bad += 1
-            continue
+            if row.get('pixels_sha256') and row['pixels_sha256'] == pixels_sha256(data):
+                print(f'{row["file"]}: re-encoded upstream, pixels identical')
+            else:
+                print(f'HASH MISMATCH {row["file"]}: expected {row["sha256"][:12]}…, got {digest[:12]}…',
+                      file=sys.stderr)
+                bad += 1
+                continue
         path.write_bytes(data)
         print(f'{row["file"]:28s} {len(data) / 1024:7.0f} KB  {row["license"]}')
     if update:

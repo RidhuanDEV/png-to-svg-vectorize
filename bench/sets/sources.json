@@ -7,7 +7,8 @@
   "artist": "OpenClipart",
   "page": "https://commons.wikimedia.org/wiki/File%3ACartoon-Astronaut.svg",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c7/Cartoon-Astronaut.svg/1280px-Cartoon-Astronaut.svg.png",
-  "sha256": "0789e053a18d4c8c8891ed1956cc1b03e8e8e635a6fe36052e509ef0211c93c7"
+  "sha256": "0789e053a18d4c8c8891ed1956cc1b03e8e8e635a6fe36052e509ef0211c93c7",
+  "pixels_sha256": "67e651a238d45e50fc462f5c7dfe21945237217f2e82d3fc3b343780f58e5814"
  },
  {
   "file": "robot.png",
@@ -17,7 +18,8 @@
   "artist": "Sirrob01",
   "page": "https://commons.wikimedia.org/wiki/File%3ACartoon_Robot.svg",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/56/Cartoon_Robot.svg/1280px-Cartoon_Robot.svg.png",
-  "sha256": "afb33e8985d827d4e23ae37cafc11c6932bf464f7b513e26ff0141c19a779822"
+  "sha256": "afb33e8985d827d4e23ae37cafc11c6932bf464f7b513e26ff0141c19a779822",
+  "pixels_sha256": "fb80543d3a009ae97bdb0bffd0067d2cc7020e263faf0f48e912d37a5f1c9897"
  },
  {
   "file": "cow.png",
@@ -27,7 +29,8 @@
   "artist": "lemmling",
   "page": "https://commons.wikimedia.org/wiki/File%3ALemmling-Cartoon-cow.svg",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5e/Lemmling-Cartoon-cow.svg/1280px-Lemmling-Cartoon-cow.svg.png",
-  "sha256": "78cc74bf8418ad9f4d371dae02c41f873f895d0579a1dd644fd2adcd3f4c8406"
+  "sha256": "78cc74bf8418ad9f4d371dae02c41f873f895d0579a1dd644fd2adcd3f4c8406",
+  "pixels_sha256": "4d16d48f3afed493b914068a4d1d2b0ef5bb8730202351df351de03657d5227f"
  },
  {
   "file": "penguin.png",
@@ -37,7 +40,8 @@
   "artist": "lemmling",
   "page": "https://commons.wikimedia.org/wiki/File%3ALemmling-Cartoon-penguin-1.svg",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/de/Lemmling-Cartoon-penguin-1.svg/1280px-Lemmling-Cartoon-penguin-1.svg.png",
-  "sha256": "5c3daa3e3bd514fbde92c394d7bedee10dc514a77589e3a975ec4d270c27705d"
+  "sha256": "5c3daa3e3bd514fbde92c394d7bedee10dc514a77589e3a975ec4d270c27705d",
+  "pixels_sha256": "4f9d5d27b6fb5b19bff72d7ecf7797070a26963cd6c20472d41845b392b54df1"
  },
  {
   "file": "donkey.png",
@@ -47,7 +51,8 @@
   "artist": "User:LadyofHats",
   "page": "https://commons.wikimedia.org/wiki/File%3ADonkey_cartoon_05.svg",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d8/Donkey_cartoon_05.svg/1280px-Donkey_cartoon_05.svg.png",
-  "sha256": "78e3283373d75595e564a3ae0f318c99c330c6d72d3c8906237ef11f1337310a"
+  "sha256": "78e3283373d75595e564a3ae0f318c99c330c6d72d3c8906237ef11f1337310a",
+  "pixels_sha256": "2d92f9f165822b0681bc523888a0349136fbb47cb51c7811b004ab080d86cedf"
  },
  {
   "file": "fish-mascot.png",
@@ -57,7 +62,8 @@
   "artist": "LeoBlanchette",
   "page": "https://commons.wikimedia.org/wiki/File%3AVector_Design_Mascot_Big_Fish_Orange.svg",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7a/Vector_Design_Mascot_Big_Fish_Orange.svg/1280px-Vector_Design_Mascot_Big_Fish_Orange.svg.png",
-  "sha256": "6118ab5db2d44b52b5cf4797b0093df302496737009199caeb845a5985c7be2b"
+  "sha256": "6118ab5db2d44b52b5cf4797b0093df302496737009199caeb845a5985c7be2b",
+  "pixels_sha256": "6dea61ce5592d9d6b7985b56332c76ac575276edecc1067e4c73f63a913513e3"
  },
  {
   "file": "basketball-mascot.png",
@@ -67,7 +73,8 @@
   "artist": "LeoBlanchette",
   "page": "https://commons.wikimedia.org/wiki/File%3AVector_Design_Mascot_Basketball_Player.svg",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/be/Vector_Design_Mascot_Basketball_Player.svg/1280px-Vector_Design_Mascot_Basketball_Player.svg.png",
-  "sha256": "30a5afcb248d5684e9c2eee718bdc81f05ab7ad27360c62265aea37993d24530"
+  "sha256": "30a5afcb248d5684e9c2eee718bdc81f05ab7ad27360c62265aea37993d24530",
+  "pixels_sha256": "b3fd66994dcaecb10bb880e6de84367277c7b680db872386668693c20de4c40f"
  },
  {
   "file": "cute-girl.png",
@@ -77,7 +84,8 @@
   "artist": "https://openclipart.org/user-detail/dcatcherex",
   "page": "https://commons.wikimedia.org/wiki/File%3ACute_girl.svg",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/58/Cute_girl.svg/1280px-Cute_girl.svg.png",
-  "sha256": "d1f3742839f64bf813ee7646d9865bd4e7bd36041ff6d82a2d42a737c46fc4a5"
+  "sha256": "d1f3742839f64bf813ee7646d9865bd4e7bd36041ff6d82a2d42a737c46fc4a5",
+  "pixels_sha256": "90d971f1a094efdd75dfbd3d03412ebeb8f741c7ae6ae3da18d65a597e4de642"
  },
  {
   "file": "silver-hair-girl.png",
@@ -87,7 +95,8 @@
   "artist": "Paulliu",
   "page": "https://commons.wikimedia.org/wiki/File%3APaulliu_girl_with_silver_hair.svg",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cd/Paulliu_girl_with_silver_hair.svg/1280px-Paulliu_girl_with_silver_hair.svg.png",
-  "sha256": "319ce9a38fc19f42e4fa3cf02042957c76cc56242bad217069f23c19145b74bf"
+  "sha256": "4aa9980e5e9024e3cf10e299527513e6f83a281fee0800a0b345f72a5bb7a329",
+  "pixels_sha256": "6a885ceba16b671e204e24b54397f486e8de2f0a4086d694d15d7562eb23506e"
  },
  {
   "file": "caticorn.png",
@@ -97,7 +106,8 @@
   "artist": "Schade",
   "page": "https://commons.wikimedia.org/wiki/File%3ARainbow_Caticorn.svg",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/58/Rainbow_Caticorn.svg/1280px-Rainbow_Caticorn.svg.png",
-  "sha256": "d77bb227b74cd5660531326f1f837ad80ef3f514ae79856965d952fcf5b167b1"
+  "sha256": "d77bb227b74cd5660531326f1f837ad80ef3f514ae79856965d952fcf5b167b1",
+  "pixels_sha256": "21d95c9fd3555f7a721fb676781eb6b97e69d3fc32b97abc18bb8624791bde3b"
  },
  {
   "file": "kazoo.png",
@@ -107,7 +117,8 @@
   "artist": "Ool570133",
   "page": "https://commons.wikimedia.org/wiki/File%3AAnthropomorphic_Kazoo_Cartoon_Character_Illustration_1.png",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/07/Anthropomorphic_Kazoo_Cartoon_Character_Illustration_1.png/1280px-Anthropomorphic_Kazoo_Cartoon_Character_Illustration_1.png",
-  "sha256": "865f61c457fb285d40523cf073aed165bba2f2274ef4e4199ddf97ab6a529d0f"
+  "sha256": "865f61c457fb285d40523cf073aed165bba2f2274ef4e4199ddf97ab6a529d0f",
+  "pixels_sha256": "2875f8540d3d59d1fb61d6eb1b7ef8797894f60357508367739e77d0204cb519"
  },
  {
   "file": "popcorn.png",
@@ -117,7 +128,8 @@
   "artist": "Ool570133",
   "page": "https://commons.wikimedia.org/wiki/File%3AAnthropomorphic_Popcorn_Bucket_Cartoon_Character_Illustration.png",
   "url": "https://upload.wikimedia.org/wikipedia/commons/c/cd/Anthropomorphic_Popcorn_Bucket_Cartoon_Character_Illustration.png",
-  "sha256": "4e4b38cc2498baef737120f0e446400934e12b121ec271cfb3c19385108b1d59"
+  "sha256": "4e4b38cc2498baef737120f0e446400934e12b121ec271cfb3c19385108b1d59",
+  "pixels_sha256": "aca277830b466e73d674fd41b41b90ea263f9c69d4c64d2637c291c85a0b402f"
  },
  {
   "file": "futuristic-mascot.png",
@@ -127,7 +139,8 @@
   "artist": "Ool570133",
   "page": "https://commons.wikimedia.org/wiki/File%3AAnthropomorphic_Futuristic_Mascot_Character_Illustration.png",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ae/Anthropomorphic_Futuristic_Mascot_Character_Illustration.png/1280px-Anthropomorphic_Futuristic_Mascot_Character_Illustration.png",
-  "sha256": "727408224181f8f8fb1b95fdbe43c4d8707c3e62d5b3aec713688b40c7cb299f"
+  "sha256": "727408224181f8f8fb1b95fdbe43c4d8707c3e62d5b3aec713688b40c7cb299f",
+  "pixels_sha256": "49cba202bce98704ca7ec8fe13138976cfdcc11c30830514270ae4ee5649342c"
  },
  {
   "file": "mountain-landscape.png",
@@ -137,7 +150,8 @@
   "artist": "Missaruthra",
   "page": "https://commons.wikimedia.org/wiki/File%3AVector_Illustration_of_a_Mountain_Landscape_with_Pine_Trees.svg",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/90/Vector_Illustration_of_a_Mountain_Landscape_with_Pine_Trees.svg/1280px-Vector_Illustration_of_a_Mountain_Landscape_with_Pine_Trees.svg.png",
-  "sha256": "5921499edfe1a27f72c72a193b372ca1a08daaf86741346e778535a420f52870"
+  "sha256": "5921499edfe1a27f72c72a193b372ca1a08daaf86741346e778535a420f52870",
+  "pixels_sha256": "f26a903252e1fcac0820f2c351cfc1b49baf5f776c333743e34d20199da86117"
  },
  {
   "file": "shipment.png",
@@ -147,7 +161,8 @@
   "artist": "Free Clip Art",
   "page": "https://commons.wikimedia.org/wiki/File%3ACartoon_Women_Handling_The_Shipment_Of_Boxes_WW2018IN.svg",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9b/Cartoon_Women_Handling_The_Shipment_Of_Boxes_WW2018IN.svg/1280px-Cartoon_Women_Handling_The_Shipment_Of_Boxes_WW2018IN.svg.png",
-  "sha256": "6eb566ebe36e920d0597ab4997282dc4ecab87659e8a47412a99d82bdbf22a46"
+  "sha256": "6eb566ebe36e920d0597ab4997282dc4ecab87659e8a47412a99d82bdbf22a46",
+  "pixels_sha256": "cf47793c44499981c830da97590973c1a65085b25deec4c35baf4cf6557c8eba"
  },
  {
   "file": "flying-plane.png",
@@ -157,7 +172,8 @@
   "artist": "LeoBlanchette",
   "page": "https://commons.wikimedia.org/wiki/File%3AVector_Design_Mascot_Flying_Plane_Orange.svg",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e0/Vector_Design_Mascot_Flying_Plane_Orange.svg/1280px-Vector_Design_Mascot_Flying_Plane_Orange.svg.png",
-  "sha256": "f5c20a0361b33d706e152c0aa1603f24d69cba696e77ffddd1038161b29549b1"
+  "sha256": "f5c20a0361b33d706e152c0aa1603f24d69cba696e77ffddd1038161b29549b1",
+  "pixels_sha256": "c224c46093cd0511fdfd9dd6561096c93961fdff5e31086f5a5464c4325a111b"
  },
  {
   "file": "flag-brazil.png",
@@ -167,7 +183,8 @@
   "artist": "Raimundo Teixeira Mendes",
   "page": "https://commons.wikimedia.org/wiki/File%3AFlag_of_Brazil.svg",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/05/Flag_of_Brazil.svg/1280px-Flag_of_Brazil.svg.png",
-  "sha256": "28b1a4233cfd55879774636d846bfd6db8abbcd3c21fd55d2dcb36e0713aab63"
+  "sha256": "28b1a4233cfd55879774636d846bfd6db8abbcd3c21fd55d2dcb36e0713aab63",
+  "pixels_sha256": "1cbb24ad983dcaa0ff9dcca2ae987442238f2742e281bfd46687efff7c846d25"
  },
  {
   "file": "flag-nepal.png",
@@ -177,7 +194,8 @@
   "artist": "Drawn by Pumbaa80, Achim1999",
   "page": "https://commons.wikimedia.org/wiki/File%3AFlag_of_Nepal.svg",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9b/Flag_of_Nepal.svg/1280px-Flag_of_Nepal.svg.png",
-  "sha256": "f9c570e3346c77eeb26bfc3e39ee7392424c884f19ee465d8661b0d6e2a866bc"
+  "sha256": "f9c570e3346c77eeb26bfc3e39ee7392424c884f19ee465d8661b0d6e2a866bc",
+  "pixels_sha256": "47b06d3b07ad34102ff95fcc26e465231c4c0b7b6bbc90f1a8f02464a781f891"
  },
  {
   "file": "flag-kiribati.png",
@@ -187,7 +205,8 @@
   "artist": "User:Hanzlan",
   "page": "https://commons.wikimedia.org/wiki/File%3AFlag_of_Kiribati.svg",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d3/Flag_of_Kiribati.svg/1280px-Flag_of_Kiribati.svg.png",
-  "sha256": "9aedc6f63462af1ea7b5a63d1d50d5844993e7191e1fa43a824309a2ca16a063"
+  "sha256": "9aedc6f63462af1ea7b5a63d1d50d5844993e7191e1fa43a824309a2ca16a063",
+  "pixels_sha256": "6baeef506c22b522f9e92a22935845096957aacd56a0941a93fb060c1d00f4ed"
  },
  {
   "file": "flag-south-africa.png",
@@ -197,7 +216,8 @@
   "artist": "Flag design by Frederick Brownell, image by Wikimedia Common",
   "page": "https://commons.wikimedia.org/wiki/File%3AFlag_of_South_Africa.svg",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/af/Flag_of_South_Africa.svg/1280px-Flag_of_South_Africa.svg.png",
-  "sha256": "e19721cf905d997c6d8f147bf8221e7427b42a9bbb33d9468a7db8c5c5d3b64e"
+  "sha256": "e19721cf905d997c6d8f147bf8221e7427b42a9bbb33d9468a7db8c5c5d3b64e",
+  "pixels_sha256": "a397ef22eecb7777a89126dce51f3b376833522785665623ce45f184bc650632"
  },
  {
   "file": "icon-exclamation.png",
@@ -207,7 +227,8 @@
   "artist": "User:Tomybrz",
   "page": "https://commons.wikimedia.org/wiki/File%3AExclamation_flat_icon_orange.svg",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c9/Exclamation_flat_icon_orange.svg/960px-Exclamation_flat_icon_orange.svg.png",
-  "sha256": "dd9e3809693609d57784687749cd71a3641c3f6559fa042bb019331cfd1e7a27"
+  "sha256": "dd9e3809693609d57784687749cd71a3641c3f6559fa042bb019331cfd1e7a27",
+  "pixels_sha256": "8838783d88e1d375c76886fed7b3c75228c1c1328af009e19b0bdccd643def18"
  },
  {
   "file": "icon-shop.png",
@@ -217,7 +238,8 @@
   "artist": "paomedia",
   "page": "https://commons.wikimedia.org/wiki/File%3APaomedia_small-n-flat_shop.svg",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fd/Paomedia_small-n-flat_shop.svg/960px-Paomedia_small-n-flat_shop.svg.png",
-  "sha256": "9662db6e16c9b5eccdb64bc8bb253af52c339eb5475eb51c14d7d45dd42bbe70"
+  "sha256": "9662db6e16c9b5eccdb64bc8bb253af52c339eb5475eb51c14d7d45dd42bbe70",
+  "pixels_sha256": "c9d9fa2bc768e86a1db9a89138d34baa06d9546568aacfd342b735522950df7a"
  },
  {
   "file": "icon-flask.png",
@@ -227,7 +249,8 @@
   "artist": "paomedia",
   "page": "https://commons.wikimedia.org/wiki/File%3APaomedia_small-n-flat_flask.svg",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7b/Paomedia_small-n-flat_flask.svg/960px-Paomedia_small-n-flat_flask.svg.png",
-  "sha256": "6ba7d8aadf0df010ba04c8d112d51a3d7eb539ff6ed6b1063e8806d95ab37322"
+  "sha256": "6ba7d8aadf0df010ba04c8d112d51a3d7eb539ff6ed6b1063e8806d95ab37322",
+  "pixels_sha256": "23242a85722d2398babb3f58614014c8d5ac7b89089739ae1f2a46210d8bcc25"
  },
  {
   "file": "icon-cat.png",
@@ -237,7 +260,8 @@
   "artist": "Maki contributors",
   "page": "https://commons.wikimedia.org/wiki/File%3ACat_sitting_Pinhead_icon.svg",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b8/Cat_sitting_Pinhead_icon.svg/960px-Cat_sitting_Pinhead_icon.svg.png",
-  "sha256": "242bef57781757acb33d3213019cf6b50f392cc3a83e0f53b88a0cb908dfc9c4"
+  "sha256": "242bef57781757acb33d3213019cf6b50f392cc3a83e0f53b88a0cb908dfc9c4",
+  "pixels_sha256": "632181efda23e94799491e89ffd2c23518b0f7df742c98b45dae96692384567e"
  },
  {
   "file": "great-wave.jpg",
@@ -247,7 +271,8 @@
   "artist": "Katsushika Hokusai",
   "page": "https://commons.wikimedia.org/wiki/File%3ATsunami_by_hokusai_19th_century.jpg",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a5/Tsunami_by_hokusai_19th_century.jpg/1280px-Tsunami_by_hokusai_19th_century.jpg",
-  "sha256": "54c3d6b7a70bd0bfe33b7fd1363a6974b2a763e81674d17cfa98fd6e6af9b3c2"
+  "sha256": "54c3d6b7a70bd0bfe33b7fd1363a6974b2a763e81674d17cfa98fd6e6af9b3c2",
+  "pixels_sha256": "f8c1b1fcb2b3a34da43ace88ad906bd75549cc4ed321c5ac54937c80ef884102"
  },
  {
   "file": "starry-night.jpg",
@@ -257,7 +282,8 @@
   "artist": "Vincent van Gogh",
   "page": "https://commons.wikimedia.org/wiki/File%3AVan_Gogh_-_Starry_Night_-_Google_Art_Project.jpg",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1280px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg",
-  "sha256": "a2759458dbc9cf1150ddc8b5d16453aba4790ed6fe826c29f4cf59471d07e629"
+  "sha256": "a2759458dbc9cf1150ddc8b5d16453aba4790ed6fe826c29f4cf59471d07e629",
+  "pixels_sha256": "67aed909619ae1afaf908842f59f80836979b6ae020bd146d01b742f85e6010a"
  },
  {
   "file": "earth-apollo17.jpg",
@@ -267,6 +293,7 @@
   "artist": "NASA/Apollo 17 crew; taken by either Harrison Schmitt or Ron",
   "page": "https://commons.wikimedia.org/wiki/File%3AThe_Earth_seen_from_Apollo_17.jpg",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/97/The_Earth_seen_from_Apollo_17.jpg/1280px-The_Earth_seen_from_Apollo_17.jpg",
-  "sha256": "3f55578a3c58509029c6a1ec88c683199f585ea9ffe974efd4265aec314156fb"
+  "sha256": "3f55578a3c58509029c6a1ec88c683199f585ea9ffe974efd4265aec314156fb",
+  "pixels_sha256": "1ce4319d0b8097f95b232a1eb009d5ff97cd473f8414dbd59c12208f82003835"
  }
 ]
