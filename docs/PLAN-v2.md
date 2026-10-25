@@ -181,7 +181,7 @@ halaman Bandingkan di website memakai angka nyata.
 
 ---
 
-## 5. M11 — Website produk (product marketing website)
+## 5. M11 — Website produk (product marketing website) — ✅ 2026-10-25
 
 Jenis: **product website / product marketing website** — seperti situs produk Android: memamerkan fitur dan
 teknologi, menjelaskan cara kerja, dan mengajak mengunduh. Bukan blog dan bukan aplikasi web.
@@ -219,6 +219,21 @@ teknologi, menjelaskan cara kerja, dan mengajak mengunduh. Bukan blog dan bukan 
 
 **Selesai bila**: situs terbit di GitHub Pages lewat CI, semua halaman EN/ID, penggeser sebelum/sesudah berjalan di HP
 dan desktop, tautan unduh selalu mengarah ke rilis terbaru, Lighthouse ≥ 95 (performa & aksesibilitas).
+
+---
+
+**Realisasi (2026-10-25)** — <https://ridhuandev.github.io/png-to-svg-vectorize/>, kode di `site/` (README di sana).
+- Keputusan pemilik: **Next.js + Tailwind + shadcn** (bukan Astro), terbit langsung ke GitHub Pages, nama tetap, tanpa
+  pelacak. Next 16.4.3 diambil sebagai pengecualian keamanan (16.4.0 terkena advisori critical dan build-nya menolak).
+- Semua halaman EN/ID: Beranda (penggeser sebelum/sesudah dengan zoom 4×), Fitur, Cara kerja, Galeri (8 gambar E7 +
+  angka terukur), Bandingkan (tabel umum + metode terbuka), Unduh (dari rilis terbaru: ukuran + SHA-256, deteksi OS
+  termasuk Apple Silicon), Panduan & Catatan rilis (Markdown repo), Open source, Privasi; sitemap, robots, Open Graph.
+- Lighthouse lokal dengan gzip: aksesibilitas / best practices / SEO **100** di semua halaman; performa desktop
+  **99–100**; ponsel **96–97**, kecuali Beranda **93** dan Galeri **92** (gambar hero + runtime React/Next di 4G lambat
+  simulasi). Target ≥ 95 belum tercapai di dua halaman itu.
+- Rilis `v1.5.0` diterbitkan (disetujui pemilik) sehingga tautan unduh selalu nyata; setiap rilis kini membawa
+  `SHA256SUMS.txt`.
+- Belum: demo coba-di-browser (WebAssembly), domain sendiri.
 
 ---
 

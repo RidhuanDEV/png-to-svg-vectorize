@@ -24,7 +24,8 @@ input.png ──► outline separation ──► fill layer (regions + gradients
 ```
 
 > **Status:** v1.5 — desktop app for **Windows and macOS**, local web UI, command line and Python library.
-> **[Download](https://github.com/RidhuanDEV/png-to-svg-vectorize/releases)** ·
+> **[Website](https://ridhuandev.github.io/png-to-svg-vectorize/)** ·
+> **[Download](https://github.com/RidhuanDEV/png-to-svg-vectorize/releases/latest)** ·
 > [User guide](docs/user-guide.en.md) · [Panduan (ID)](docs/user-guide.id.md) · [Changelog](CHANGELOG.md)
 
 ![PNG to SVG Vectorize](docs/images/app-overview.png)

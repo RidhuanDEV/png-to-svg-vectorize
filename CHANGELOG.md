@@ -2,6 +2,13 @@
 
 All notable changes. Benchmarks for every engine version are in [docs/bench.md](docs/bench.md).
 
+## Website — 2026-10-25
+
+- Product website at <https://ridhuandev.github.io/png-to-svg-vectorize/> (`site/`, Next.js static export on GitHub
+  Pages): features, how it works, gallery with measured numbers, honest comparison, downloads with SHA-256, guide and
+  release notes from this repository, in English and Bahasa Indonesia. No trackers.
+- Releases now include `SHA256SUMS.txt`.
+
 ## 1.5.0 — 2026-10-25 — center lines, editing, automation
 
 - **Center lines** (Shapes → *Center lines*, CLI `--centerline`): line drawings become one stroke along the middle of

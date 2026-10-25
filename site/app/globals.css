@@ -1,0 +1,161 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "../src/generated/theme.css";
+
+/* Colors come only from the app's theme tokens (--t-*, generated); Tailwind's default palette is switched off so no
+   literal color sneaks in. shadcn components read the mapped names below. */
+@theme {
+  --color-*: initial;
+}
+
+:root {
+  --background: var(--t-bg);
+  --foreground: var(--t-text);
+  --card: var(--t-panel);
+  --card-foreground: var(--t-text);
+  --popover: var(--t-panel);
+  --popover-foreground: var(--t-text);
+  --primary: var(--t-accent);
+  --primary-foreground: var(--t-accent-text);
+  --secondary: var(--t-panel-2);
+  --secondary-foreground: var(--t-text);
+  --muted: var(--t-panel-2);
+  --muted-foreground: var(--t-muted);
+  --accent: var(--t-panel-3);
+  --accent-foreground: var(--t-text);
+  --destructive: var(--t-danger);
+  --border: var(--t-line);
+  --input: var(--t-line-strong);
+  --ring: var(--t-node);
+  --radius: 0.75rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-node: var(--t-node);
+  --color-ok: var(--t-ok);
+  --color-ok-soft: var(--t-ok-soft);
+  --color-line-strong: var(--t-line-strong);
+  --color-panel-3: var(--t-panel-3);
+  --color-checker-a: var(--t-checker-a);
+  --color-checker-b: var(--t-checker-b);
+  --color-transparent: transparent;
+  --color-white: #fff;
+  --color-black: #000;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --font-sans: var(--font-plex-sans);
+  --font-mono: var(--font-plex-mono);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/60;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "ss02";
+  }
+  /* the drawing-board grid of the app, very faint */
+  .grid-paper {
+    background-image:
+      linear-gradient(var(--t-grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--t-grid) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+  .checker {
+    background: repeating-conic-gradient(var(--t-checker-a) 0% 25%, var(--t-checker-b) 0% 50%) 0 0 / 18px 18px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* rendered Markdown (guide, changelog) */
+.prose-doc {
+  @apply text-[15.5px] leading-7;
+}
+.prose-doc h1 {
+  @apply mt-2 mb-6 text-3xl font-semibold tracking-tight;
+}
+.prose-doc h2 {
+  @apply mt-12 mb-4 scroll-mt-24 border-b pb-2 text-2xl font-semibold tracking-tight;
+}
+.prose-doc h3 {
+  @apply mt-8 mb-3 scroll-mt-24 text-lg font-semibold;
+}
+.prose-doc p,
+.prose-doc ul,
+.prose-doc ol,
+.prose-doc table,
+.prose-doc pre,
+.prose-doc blockquote {
+  @apply my-4;
+}
+.prose-doc ul {
+  @apply list-disc pl-6;
+}
+.prose-doc ol {
+  @apply list-decimal pl-6;
+}
+.prose-doc li {
+  @apply my-1;
+}
+.prose-doc a {
+  @apply font-medium underline decoration-node underline-offset-4 hover:decoration-2;
+}
+.prose-doc code {
+  @apply rounded bg-muted px-1.5 py-0.5 font-mono text-[0.88em];
+}
+.prose-doc pre {
+  @apply overflow-x-auto rounded-lg border bg-card p-4 text-sm;
+}
+.prose-doc pre code {
+  @apply bg-transparent p-0;
+}
+.prose-doc table {
+  @apply block w-full overflow-x-auto text-sm;
+}
+.prose-doc th,
+.prose-doc td {
+  @apply border px-3 py-2 text-left align-top;
+}
+.prose-doc th {
+  @apply bg-muted font-semibold;
+}
+.prose-doc blockquote {
+  @apply border-l-4 border-node pl-4 text-muted-foreground;
+}
+.prose-doc img {
+  @apply my-6 rounded-lg border shadow-sm;
+}
