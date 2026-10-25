@@ -51,6 +51,9 @@
           <dd data-testid="stat-ai">{job.stats.ai ? t('yes') : t('no')}</dd>
         {/if}
       </dl>
+      {#if job.stats.warnings?.length}
+        <p class="warn" role="note" data-testid="result-warning"><Icon name="warning" size={14} /> {t('notFlatLogo')}</p>
+      {/if}
       {#if job.stats.palette?.length}
         <Button variant="ghost" size="sm" icon="sliders" onclick={() => usePalette(job.stats.palette ?? [])} data-testid="use-palette"
           >{t('paletteUse')}</Button
@@ -114,6 +117,13 @@
     height: 14px;
     border-radius: 4px;
     border: 1px solid var(--line-strong);
+  }
+  .warn {
+    display: flex;
+    gap: 6px;
+    margin: 8px 0 0;
+    font-size: calc(12.5px * var(--ts));
+    color: var(--warn);
   }
   .err {
     display: flex;

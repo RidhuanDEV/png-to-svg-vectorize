@@ -89,8 +89,8 @@
     press = null;
     if (!editing || !start || Math.hypot(e.clientX - start.x, e.clientY - start.y) > 4 || !media?.svgText || !job) return;
     const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const x = ((e.clientX - r.left - view.x) / (w * view.s)) * vb[0];
-    const y = ((e.clientY - r.top - view.y) / (h * view.s)) * vb[1];
+    const x = ((e.clientX - r.left - svgBox.x) / svgBox.w) * vb[0];
+    const y = ((e.clientY - r.top - svgBox.y) / svgBox.h) * vb[1];
     const hit = hitTest(media.svgText, x, y, layer);
     if (picking && sel !== null) {
       picking = false;
@@ -159,6 +159,10 @@
     `left:${view.x}px;top:${view.y}px;width:${w * view.s}px;height:${h * view.s}px;` +
       (view.s >= 2 ? 'image-rendering:pixelated;' : ''),
   );
+  // a trimmed SVG (logo engine) covers only its crop of the photo: place it there
+  const crop = $derived(job?.stats.crop ?? null);
+  const svgBox = $derived(crop ? { x: view.x + crop[0] * view.s, y: view.y + crop[1] * view.s, w: crop[2] * view.s, h: crop[3] * view.s } : { x: view.x, y: view.y, w: w * view.s, h: h * view.s });
+  const svgStyle = $derived(`left:${svgBox.x}px;top:${svgBox.y}px;width:${svgBox.w}px;height:${svgBox.h}px;`);
 </script>
 
 <div class="panel compare" data-tour="compare">
@@ -292,9 +296,9 @@
             {#if which === 'source' && media?.sourceUrl}
               <img src={media.sourceUrl} alt="" style={imgStyle} draggable="false" />
             {:else if which === 'svg' && svgUrl}
-              <img src={svgUrl} alt="" style={imgStyle} draggable="false" data-testid="svg-image" />
+              <img src={svgUrl} alt="" style={svgStyle} draggable="false" data-testid="svg-image" />
               {#if selInfo}
-                <svg class="overlay" viewBox="0 0 {vb[0]} {vb[1]}" style={imgStyle} aria-hidden="true" data-testid="edit-selection">
+                <svg class="overlay" viewBox="0 0 {vb[0]} {vb[1]}" style={svgStyle} aria-hidden="true" data-testid="edit-selection">
                   <path d={selInfo.d} class="sel-halo" vector-effect="non-scaling-stroke" />
                   <path d={selInfo.d} class="sel" vector-effect="non-scaling-stroke" />
                 </svg>
@@ -334,7 +338,7 @@
         <img src={media.sourceUrl} alt="" style={imgStyle} draggable="false" />
       {/if}
       {#if svgUrl}
-        <img src={svgUrl} alt="" draggable="false" style="{imgStyle}clip-path:inset(0 0 0 {split * paneW - view.x}px);" />
+        <img src={svgUrl} alt="" draggable="false" style="{svgStyle}clip-path:inset(0 0 0 {Math.max(0, split * paneW - svgBox.x)}px);" />
       {/if}
       <span class="label">{t('original')}</span>
       <span class="label right">{t('vector')}</span>

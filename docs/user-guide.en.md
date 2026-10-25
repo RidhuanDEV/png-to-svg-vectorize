@@ -94,8 +94,9 @@ Always check details at 200 % or more: one number can hide a small local defect.
 |---|---|
 | Cartoon | character art with dark ink outlines and soft shading (default) |
 | Flat illustration | solid shapes with few outlines; only clear gradients are kept |
-| Logo / icon | few flat colors and exact geometry; no gradients |
+| Logo / icon | logos and icons: flat colors, straight edges and sharp corners, one path per shape, no background; the SVG is trimmed to the artwork (fine-tune: corner rounding, straighten angles, split touching shapes) |
 | Photo → poster | photos or paintings turned into a poster-like vector with fewer, larger regions |
+| Pixel art | follows the pixel grid exactly: every edge is horizontal or vertical |
 
 **Fine-tune** (optional; a dot shows when something differs from the style). To apply new settings to a finished photo, select it and press **Process again with this style**:
 

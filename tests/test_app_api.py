@@ -74,7 +74,8 @@ def test_ui_page_needs_no_token_and_has_csp(client):
 
 def test_presets_endpoint(client):
     body = client.get('/api/presets', headers=H).json()
-    assert {p['name'] for p in body['presets']} == {'cartoon', 'flat', 'logo', 'poster'}
+    assert {p['name'] for p in body['presets']} == {'cartoon', 'flat', 'logo', 'poster', 'pixel'}
+    assert {p['name']: p['engine'] for p in body['presets']}['logo'] == 'flat'
     assert {o['name'] for o in body['options']} >= {'tolerance', 'outlines', 'scale'}
 
 

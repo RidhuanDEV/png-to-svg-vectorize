@@ -13,6 +13,8 @@
   import Switch from './ui/Switch.svelte';
 
   const defaults = $derived(presetDefaults(store.settings.preset));
+  const engine = $derived(store.info?.presets.find((p) => p.name === store.settings.preset)?.engine ?? 'regions');
+  const specs = $derived((store.info?.options ?? []).filter((s) => s.engines.includes(engine)));
   const job = $derived(selectedJob());
   const canReprocess = $derived(!!job && store.focus === 'result' && (job.status === 'done' || job.status === 'error'));
 
@@ -22,6 +24,7 @@
     flat: 'M4 16l5-6 4 4 3-3 4 5z',
     logo: 'M12 4l7 4v8l-7 4-7-4V8z',
     poster: 'M5 5h14v14H5zM5 15l4-4 3 3 3-2 4 3',
+    pixel: 'M5 5h5v5H5zM10 10h5v5h-5zM14 5h5v5h-5zM5 14h5v5H5z',
   };
 
   /** The value in effect: the user's override, else the style's default. */
@@ -112,7 +115,7 @@
 
   {#if store.settings.advanced}
     <div class="opts">
-      {#each store.info?.options ?? [] as spec (spec.name)}
+      {#each specs as spec (spec.name)}
         {@const v = value(spec)}
         {#if spec.type === 'bool'}
           <Switch checked={!!v} label={tk('opt_' + spec.name)} onchange={(c) => set(spec.name, c)} testid="opt-{spec.name}" />
@@ -194,18 +197,22 @@
           <Switch checked={!!current('remove_bg')} label={t('removeBg')} onchange={(c) => set('remove_bg', c)} testid="opt-remove_bg" />
           <Switch checked={!!current('layers')} label={t('layers_design')} onchange={(c) => set('layers', c)} testid="opt-layers" />
         {/if}
-        <div class="row">
-          <span class="lbl">{t('layout')}</span>
-          <Segmented
-            size="sm"
-            label={t('layout')}
-            value={current('layout') ?? 'stacked'}
-            options={(['stacked', 'cutout', 'centerline'] as Layout[]).map((m) => ({ value: m, label: tk('layout_' + m) }))}
-            onchange={(m) => set('layout', m)}
-            testid="opt-layout"
-          />
-        </div>
-        <p class="hint muted">{current('layout') === 'centerline' ? t('layoutHint_centerline') : t('layoutHint')}</p>
+        {#if engine === 'regions'}
+          <div class="row">
+            <span class="lbl">{t('layout')}</span>
+            <Segmented
+              size="sm"
+              label={t('layout')}
+              value={current('layout') ?? 'stacked'}
+              options={(['stacked', 'cutout', 'centerline'] as Layout[]).map((m) => ({ value: m, label: tk('layout_' + m) }))}
+              onchange={(m) => set('layout', m)}
+              testid="opt-layout"
+            />
+          </div>
+          <p class="hint muted">{current('layout') === 'centerline' ? t('layoutHint_centerline') : t('layoutHint')}</p>
+        {:else}
+          <p class="hint muted" data-testid="flat-hint">{t('flatHint')}</p>
+        {/if}
       </div>
 
       <Button variant="ghost" size="sm" icon="retry" disabled={!changed} onclick={() => {

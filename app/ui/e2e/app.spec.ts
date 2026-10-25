@@ -545,7 +545,7 @@ test('profiles: save a style, apply it again, export and import a file', async (
   await openApp(page);
   await page.getByTestId('preset-logo').click();
   await page.getByTestId('advanced-toggle').click();
-  await page.getByTestId('opt-layout-cutout').click();
+  await page.getByTestId('opt-layers').click();
   await page.getByTestId('profile-new').click();
   await page.getByTestId('profile-name').fill('Brand');
   await page.getByTestId('profile-save').click();
@@ -556,12 +556,12 @@ test('profiles: save a style, apply it again, export and import a file', async (
   await page.getByTestId('profile-select').click();
   await page.getByTestId('profile-select-Brand').click();
   await expect(page.getByTestId('preset-logo')).toHaveAttribute('aria-checked', 'true');
-  await expect(page.getByTestId('opt-layout-cutout')).toHaveAttribute('aria-checked', 'true');
+  await expect(page.getByTestId('opt-layers')).toHaveAttribute('aria-checked', 'true');
 
   const [file] = await Promise.all([page.waitForEvent('download'), page.getByTestId('profile-export').click()]);
   expect(file.suggestedFilename()).toBe('Brand.pngsvg-profile.json');
   const saved = JSON.parse(readFileSync(await file.path(), 'utf-8'));
-  expect(saved).toMatchObject({ format: 'pngsvg-profile', version: 1, preset: 'logo', options: { layout: 'cutout' } });
+  expect(saved).toMatchObject({ format: 'pngsvg-profile', version: 1, preset: 'logo', options: { layers: true } });
 
   saved.name = 'Team';
   saved.options = { max_colors: 3 };
@@ -650,3 +650,33 @@ test('watch folder is a desktop feature; the web page explains it', async ({ pag
   await expect(page.getByTestId('settings-dialog')).toContainText(/desktop app|aplikasi desktop/i);
   await expect(page.getByTestId('settings-dialog')).toContainText('png2svg watch');
 });
+
+// -- logo engine ---------------------------------------------------------------------------------------------------
+
+test('logo style: clean shapes, logo options only, trimmed SVG placed on the photo', async ({ page }) => {
+  await openApp(page);
+  await page.getByTestId('preset-logo').click();
+  await page.getByTestId('advanced-toggle').click();
+  await expect(page.getByTestId('flat-hint')).toBeVisible();
+  await expect(page.getByTestId('opt-corner_radius')).toBeVisible();
+  await expect(page.getByTestId('opt-gradients')).toHaveCount(0);
+  await expect(page.getByTestId('opt-layout')).toHaveCount(0);
+  await uploadAndWait(page, 'badge.png');
+  const job = (await serviceJobs(page))[0];
+  const full = await (await page.request.get(`/api/jobs/${job.id}`, { headers: H })).json();
+  expect(full.stats.crop).toHaveLength(4);
+  const svg = await (await page.request.get(`/api/jobs/${job.id}/svg`, { headers: H })).text();
+  expect(svg).not.toContain('<rect');
+  expect(svg).not.toContain('stroke');
+  expect(svg).toMatch(/<path id="shape-0-\d+" class="color-0"/);
+  // the trimmed SVG sits where the artwork is: left/top offset by the crop
+  const img = page.getByTestId('svg-image');
+  const box = await img.boundingBox();
+  const vp = await page.getByTestId('viewport-svg').boundingBox();
+  if (!box || !vp) throw new Error('no layout');
+  expect(box.width).toBeLessThan(vp.width);
+  await expect(page.getByTestId('score')).toContainText('%');
+  const score = Number((await page.getByTestId('score').textContent())?.replace(/[^0-9.]/g, ''));
+  expect(score).toBeGreaterThan(90);
+});
+

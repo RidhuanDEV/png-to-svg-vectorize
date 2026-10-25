@@ -57,8 +57,9 @@ png2svg watch inbox/ out/ -f pdf               # convert pictures as they appear
 |---|---|
 | `cartoon` (default) | character art with ink outlines and soft shading |
 | `flat` | flat illustration: solid shapes, only clear gradients |
-| `logo` | logos and icons: few flat colors, exact shapes, no gradients |
+| `logo` | logos and icons: one path per shape, straight edges, sharp corners, transparent background ([logo engine](docs/logo-engine.md)) |
 | `poster` | photos/paintings → poster look: fewer, larger regions |
+| `pixel` | pixel art: follows the pixel grid exactly |
 
 ```python
 from PIL import Image

@@ -18,6 +18,13 @@ the CLI and the app.
 
 Machine: Windows 11 laptop, Python 3.13, single process.
 
+## v1.6 — logo engine (2026-10-25)
+
+The `logo` (and new `pixel`) preset uses the flat engine; all other presets are unchanged (the E7 and synthetic
+baselines use `cartoon`). On the Turion logo fixture: 4 paths, 468 B, IoU 0.9984 / 0.9973, mean ΔE 0.06 away from
+edges, ~1.4 s — see [logo-engine.md](logo-engine.md) for the before/after table. In the gallery, `flag-brazil` and
+`icon-shop` (logo style) were regenerated.
+
 ## v1.5 — center lines, layers, editing (2026-10-25)
 
 Default output is byte-identical to v1.4 (same check). New modes are opt-in and verified by tests rather than the

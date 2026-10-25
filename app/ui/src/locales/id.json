@@ -63,7 +63,7 @@
   "preset_poster": "Foto → poster",
   "desc_cartoon": "Gambar dengan garis tinta gelap",
   "desc_flat": "Warna datar tanpa garis",
-  "desc_logo": "Sedikit warna, tepi tajam",
+  "desc_logo": "Tepi lurus, satu path per bentuk",
   "desc_poster": "Foto menjadi poster sederhana",
   "advanced": "Atur lebih detail",
   "opt_outlines": "Pisahkan garis tinta",
@@ -305,5 +305,14 @@
   "watchStop": "Berhenti",
   "watchRunning": "Memantau… {n} diubah, {w} diproses, {f} gagal.",
   "watchStopped": "Berhenti. {n} diubah, {f} gagal.",
-  "watchCli": "Tanpa aplikasi: png2svg watch MASUK KELUAR --profile gaya.pngsvg-profile.json"
+  "watchCli": "Tanpa aplikasi: png2svg watch MASUK KELUAR --profile gaya.pngsvg-profile.json",
+  "preset_pixel": "Pixel art",
+  "desc_pixel": "Mengikuti grid piksel persis",
+  "opt_trim": "Potong ke batas gambar",
+  "opt_snap_angles": "Rapikan sudut (0°/90°, sisi sejajar)",
+  "opt_split_shapes": "Pisahkan bentuk yang tersambung tipis",
+  "opt_corner_radius": "Pembulatan sudut (px)",
+  "opt_corner_angle": "Sudut tajam di atas (°)",
+  "flatHint": "Mesin logo: satu path per bentuk, tepi lurus, sudut tajam, tanpa latar.",
+  "notFlatLogo": "Gambar ini punya bayangan atau banyak warna — gaya Kartun atau Ilustrasi datar menyimpan lebih banyak detail."
 }

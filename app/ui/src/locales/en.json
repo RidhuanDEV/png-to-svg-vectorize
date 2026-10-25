@@ -63,7 +63,7 @@
   "preset_poster": "Photo → poster",
   "desc_cartoon": "Drawings with dark outlines",
   "desc_flat": "Flat colors, no outlines",
-  "desc_logo": "Few colors, sharp edges",
+  "desc_logo": "Straight edges, one path per shape",
   "desc_poster": "Photos as a simplified poster",
   "advanced": "Fine-tune",
   "opt_outlines": "Separate ink outlines",
@@ -305,5 +305,14 @@
   "watchStop": "Stop",
   "watchRunning": "Watching… {n} converted, {w} in progress, {f} failed.",
   "watchStopped": "Stopped. {n} converted, {f} failed.",
-  "watchCli": "Without the app: png2svg watch IN OUT --profile style.pngsvg-profile.json"
+  "watchCli": "Without the app: png2svg watch IN OUT --profile style.pngsvg-profile.json",
+  "preset_pixel": "Pixel art",
+  "desc_pixel": "Follows the pixel grid exactly",
+  "opt_trim": "Trim to the artwork",
+  "opt_snap_angles": "Straighten angles (0°/90°, parallel sides)",
+  "opt_split_shapes": "Split shapes joined by a thin neck",
+  "opt_corner_radius": "Corner rounding (px)",
+  "opt_corner_angle": "Sharp corner above (°)",
+  "flatHint": "Logo engine: one path per shape, straight edges, sharp corners, no background.",
+  "notFlatLogo": "This picture has shading or many colors — the Cartoon or Flat illustration style keeps more detail."
 }

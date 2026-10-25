@@ -96,7 +96,7 @@ export const en = {
       {
         title: "Control",
         items: [
-          ["Styles", "Cartoon, flat illustration, logo/icon and photo → poster, plus fine-tune sliders for tolerance, smoothing and color merging."],
+          ["Styles", "Cartoon, flat illustration, photo → poster, logo/icon (one clean path per shape, straight edges, sharp corners) and pixel art, plus fine-tune controls."],
           ["Palette", "Limit the result to 2–32 flat colors, or lock a palette and change, add or remove colors. Grayscale and black & white with a threshold."],
           ["Background and shapes", "Transparent background, stacked or cut-out shapes (nothing overlaps), gap filler and speck removal."],
           ["Center lines", "Line drawings become one stroke along the middle of each line — for plotters, laser engraving and embroidery."],

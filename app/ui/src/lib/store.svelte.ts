@@ -166,7 +166,7 @@ export async function setResultSvg(job: Job, svg: string): Promise<void> {
     outlineUrl: blob(svg.replace('<g id="fill"', '<g id="fill" display="none"')),
   };
   store.media[job.id] = media;
-  const score = await similarity(sourceUrl, media.svgUrl!, job.width, job.height);
+  const score = await similarity(sourceUrl, media.svgUrl!, job.width, job.height, job.stats.crop);
   store.media[job.id] = { ...store.media[job.id], score };
 }
 

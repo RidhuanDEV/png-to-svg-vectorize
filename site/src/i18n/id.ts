@@ -98,7 +98,7 @@ export const id: Dict = {
       {
         title: "Kendali",
         items: [
-          ["Gaya", "Kartun, ilustrasi datar, logo/ikon, dan foto → poster, ditambah penggeser penyesuaian untuk toleransi, penghalusan, dan penggabungan warna."],
+          ["Gaya", "Kartun, ilustrasi datar, foto → poster, logo/ikon (satu path rapi per bentuk, tepi lurus, sudut tajam), dan pixel art, ditambah kontrol penyesuaian."],
           ["Palet", "Batasi hasil menjadi 2–32 warna datar, atau kunci palet lalu ubah, tambah, atau hapus warna. Abu-abu dan hitam-putih dengan ambang."],
           ["Latar dan bentuk", "Latar transparan, bentuk bertumpuk atau berlubang (tidak saling menumpuk), pengisi celah, dan penghapus bintik."],
           ["Garis tengah", "Gambar garis menjadi satu goresan di tengah setiap garis — untuk plotter, ukir laser, dan bordir."],

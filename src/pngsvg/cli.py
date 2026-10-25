@@ -144,6 +144,12 @@ def main(argv=None) -> int:
     st.add_argument('--centerline', action='store_true', help='line art: one stroked line along the middle of each '
                     'line, no fills (plotters, laser); --threshold sets what counts as ink')
     st.add_argument('--layers', action='store_true', help='group fills per color for design tools (implies --cutout)')
+    lg = ap.add_argument_group('logo / pixel options (-p logo, -p pixel)')
+    lg.add_argument('--corner-radius', type=float, help='round every sharp corner by N px (default 0 = sharp)')
+    lg.add_argument('--corner-angle', type=float, help='a turn sharper than N degrees stays a corner (default 35)')
+    lg.add_argument('--no-trim', action='store_true', help='keep the full picture as viewBox')
+    lg.add_argument('--no-snap', action='store_true', help='do not straighten angles to 0/90 degrees and parallels')
+    lg.add_argument('--no-split', action='store_true', help='do not split shapes joined by a thin neck')
     st.add_argument('--seam', type=float, help='gap filler: stroke width painted around each fill (0-2, default .5)')
     st.add_argument('--speckle', type=int, help='merge spots smaller than N px into their neighbour (default 10)')
     a = ap.parse_args(argv)
@@ -157,6 +163,9 @@ def main(argv=None) -> int:
             'speckle': a.speckle, 'remove_bg': True if a.remove_bg else None,
             'layout': 'centerline' if a.centerline else 'cutout' if a.cutout else None,
             'layers': True if a.layers else None,
+            'corner_radius': a.corner_radius, 'corner_angle': a.corner_angle,
+            'trim': False if a.no_trim else None, 'snap_angles': False if a.no_snap else None,
+            'split_shapes': False if a.no_split else None,
             'palette': [c.strip() for c in a.palette.split(',')] if a.palette else None})
     except (ProfileError, OSError) as e:
         ap.error(str(e))

@@ -14,9 +14,10 @@ MAX_BYTES = 64 * 1024 * 1024
 
 ATTRS = {
     'svg': {'viewBox', 'width', 'height'},
+    'title': set(),
     'defs': set(),
-    'g': {'id', 'fill', 'stroke', 'stroke-width', 'stroke-linejoin', 'stroke-linecap', 'display'},
-    'path': {'id', 'd', 'fill', 'fill-rule', 'stroke', 'stroke-width'},
+    'g': {'id', 'class', 'fill', 'stroke', 'stroke-width', 'stroke-linejoin', 'stroke-linecap', 'display'},
+    'path': {'id', 'class', 'd', 'fill', 'fill-rule', 'stroke', 'stroke-width'},
     'rect': {'width', 'height', 'x', 'y', 'fill'},
     'linearGradient': {'id', 'gradientUnits', 'x1', 'y1', 'x2', 'y2'},
     'radialGradient': {'id', 'gradientUnits', 'cx', 'cy', 'r', 'gradientTransform'},
@@ -42,7 +43,7 @@ def _check_value(tag: str, name: str, value: str) -> None:
         ok = bool(_PAINT.match(value)) and not (name == 'stop-color' and not value.startswith('#'))
     elif name == 'd':
         ok = bool(_PATH.match(value))
-    elif name == 'id':
+    elif name in ('id', 'class'):
         ok = bool(_ID.match(value))
     elif name == 'gradientTransform':
         ok = bool(_MATRIX.match(value))
@@ -78,8 +79,10 @@ def check_edited_svg(text: str, original: str) -> str:
         allowed = ATTRS.get(tag)
         if allowed is None:
             raise EditError(f'element not allowed: {tag}')
-        if (el.text or '').strip() or (el.tail or '').strip():
+        if (tag != 'title' and (el.text or '').strip()) or (el.tail or '').strip():
             raise EditError('text content is not allowed')
+        if tag == 'title' and len(el) > 0:
+            raise EditError('a title holds text only')
         for name, value in el.attrib.items():
             if name not in allowed:
                 raise EditError(f'attribute not allowed: {tag} {name}')

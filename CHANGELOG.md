@@ -2,11 +2,22 @@
 
 All notable changes. Benchmarks for every engine version are in [docs/bench.md](docs/bench.md).
 
-## Unreleased
+## 1.6.0 — 2026-10-25 — logo engine
 
+- **Logo / icon** now uses a new flat engine ([docs/logo-engine.md](docs/logo-engine.md)): one `<path>` per shape
+  with a stable `id` and color `class`, straight edges and sharp corners (lines snapped to 0°/90° and parallel sides
+  aligned), shared boundaries between neighbours (no `stroke` gap filler), transparent background (no `<rect>`),
+  anti-aliasing absorbed instead of traced, shapes touching through a thin neck split, `viewBox` trimmed to the
+  artwork. The Turion logo: 4 paths in 468 bytes (before: 5 paths, 3.9 KB with the logo style; 7 paths, 19.7 KB with
+  the cartoon style), IoU ≥ 0.997 per color.
+- New **Pixel art** style: edges follow the pixel grid.
+- Logo options in Fine-tune, profiles and the CLI: corner rounding (`--corner-radius`), sharp-corner angle, straighten
+  angles (`--no-snap`), split touching shapes (`--no-split`), trim (`--no-trim`); the fine-tune panel only shows the
+  options of the chosen style's engine. Results report where a trimmed SVG sits (`stats.crop`) and a warning when a
+  picture is not flat artwork (`stats.warnings`).
+- `pngsvg.color.delta_e2000` (CIEDE2000, checked against Sharma et al.'s reference pairs).
 - **Python 3.11 or newer** is required for the package and command line (3.10 reached end of life in October 2026), so
-  every install gets **Pillow ≥ 13.0** with its security fixes for image decoding. The desktop app is unchanged
-  (it bundles Python 3.13).
+  every install gets **Pillow ≥ 13.0** with its security fixes for image decoding. The desktop app bundles Python 3.13.
 
 ## Website — 2026-10-25
 

@@ -62,6 +62,11 @@ class OptionsIn(BaseModel):
     remove_bg: bool | None = None
     layout: Literal['stacked', 'cutout', 'centerline'] | None = None
     layers: bool | None = None
+    trim: bool | None = None                       # flat engine (logo, pixel): viewBox = content
+    snap_angles: bool | None = None
+    split_shapes: bool | None = None
+    corner_radius: float | None = Field(None, ge=0.0, le=50.0)
+    corner_angle: float | None = Field(None, ge=10.0, le=90.0)
     seam: float | None = Field(None, ge=0.0, le=2.0)
     speckle: int | None = Field(None, ge=0, le=5000)
 
@@ -116,16 +121,22 @@ def svg_output(svg: str, width: int, height: int, size_attrs: bool) -> str:
     return svg.replace('<svg ', f'<svg width="{width}" height="{height}" ', 1)
 
 
+# `engines`: which engine an option applies to ('regions' = cartoon/flat/poster, 'flat' = logo/pixel)
 OPTION_SCHEMA = [
-    {'name': 'outlines', 'type': 'bool'},
-    {'name': 'gradients', 'type': 'bool'},
-    {'name': 'radial', 'type': 'bool'},
-    {'name': 'tolerance', 'type': 'float', 'min': 0.1, 'max': 3.0, 'step': 0.05},
-    {'name': 'smooth', 'type': 'float', 'min': 0.0, 'max': 5.0, 'step': 0.1},
-    {'name': 'merge_de', 'type': 'float', 'min': 1.0, 'max': 30.0, 'step': 0.5},
-    {'name': 'scale', 'type': 'int', 'min': 1, 'max': 4, 'step': 1},
-    {'name': 'speckle', 'type': 'int', 'min': 0, 'max': 500, 'step': 5},
-    {'name': 'seam', 'type': 'float', 'min': 0.0, 'max': 2.0, 'step': 0.1},
+    {'name': 'outlines', 'type': 'bool', 'engines': ['regions']},
+    {'name': 'gradients', 'type': 'bool', 'engines': ['regions']},
+    {'name': 'radial', 'type': 'bool', 'engines': ['regions']},
+    {'name': 'snap_angles', 'type': 'bool', 'engines': ['flat']},
+    {'name': 'split_shapes', 'type': 'bool', 'engines': ['flat']},
+    {'name': 'trim', 'type': 'bool', 'engines': ['flat']},
+    {'name': 'tolerance', 'type': 'float', 'min': 0.1, 'max': 3.0, 'step': 0.05, 'engines': ['regions']},
+    {'name': 'smooth', 'type': 'float', 'min': 0.0, 'max': 5.0, 'step': 0.1, 'engines': ['regions']},
+    {'name': 'merge_de', 'type': 'float', 'min': 1.0, 'max': 30.0, 'step': 0.5, 'engines': ['regions']},
+    {'name': 'scale', 'type': 'int', 'min': 1, 'max': 4, 'step': 1, 'engines': ['regions']},
+    {'name': 'corner_angle', 'type': 'float', 'min': 10.0, 'max': 90.0, 'step': 1.0, 'engines': ['flat']},
+    {'name': 'corner_radius', 'type': 'float', 'min': 0.0, 'max': 50.0, 'step': 0.5, 'engines': ['flat']},
+    {'name': 'speckle', 'type': 'int', 'min': 0, 'max': 500, 'step': 5, 'engines': ['regions', 'flat']},
+    {'name': 'seam', 'type': 'float', 'min': 0.0, 'max': 2.0, 'step': 0.1, 'engines': ['regions']},
 ]
 
 
@@ -134,7 +145,9 @@ def _preset_defaults(name: str) -> dict[str, Any]:
     return {'outlines': o.outlines, 'gradients': o.gradients, 'radial': o.radial, 'tolerance': o.tolerance,
             'smooth': o.smooth, 'merge_de': o.regions.merge_de, 'scale': o.scale, 'speckle': o.regions.speckle,
             'seam': o.seam, 'max_colors': o.max_colors, 'color_mode': o.color_mode, 'threshold': o.threshold,
-            'remove_bg': o.remove_bg, 'layout': o.layout, 'layers': o.layers}
+            'remove_bg': o.remove_bg, 'layout': o.layout, 'layers': o.layers, 'trim': o.logo.trim,
+            'snap_angles': o.logo.snap_angles, 'split_shapes': o.logo.split_shapes,
+            'corner_radius': o.logo.corner_radius, 'corner_angle': o.logo.corner_angle}
 
 
 def clean_name(name: str | None) -> str:
@@ -243,7 +256,8 @@ def create_app(jobs: JobManager, token: str, allowed_hosts: set[str], static_dir
 
     @app.get('/api/presets')
     def presets():
-        return {'presets': [{'name': k, 'description': v, 'defaults': _preset_defaults(k)} for k, v in PRESETS.items()],
+        return {'presets': [{'name': k, 'description': v, 'engine': pngsvg.options_for(k).engine,
+                             'defaults': _preset_defaults(k)} for k, v in PRESETS.items()],
                 'options': OPTION_SCHEMA, 'limits': {'max_upload': MAX_UPLOAD, 'max_side': MAX_SIDE,
                                                      'formats': sorted(FORMATS)}}
 

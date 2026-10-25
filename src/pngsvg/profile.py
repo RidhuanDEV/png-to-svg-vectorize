@@ -21,6 +21,8 @@ _HEX = re.compile(r'^#[0-9A-Fa-f]{6}$')
 # name: (type, min, max) or (type, choices)
 OPTIONS: dict[str, tuple] = {
     'outlines': (bool,), 'gradients': (bool,), 'radial': (bool,), 'remove_bg': (bool,), 'layers': (bool,),
+    'trim': (bool,), 'snap_angles': (bool,), 'split_shapes': (bool,),
+    'corner_radius': (float, 0.0, 50.0), 'corner_angle': (float, 10.0, 90.0),
     'tolerance': (float, 0.1, 3.0), 'smooth': (float, 0.0, 5.0), 'merge_de': (float, 1.0, 30.0),
     'seam': (float, 0.0, 2.0), 'scale': (int, 1, 4), 'decimals': (int, 0, 3), 'max_colors': (int, 2, 64),
     'threshold': (int, 1, 254), 'speckle': (int, 0, 5000),

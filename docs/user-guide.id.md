@@ -95,8 +95,9 @@ Selalu periksa detail di perbesaran 200% atau lebih: satu angka bisa menyembunyi
 |---|---|
 | Kartun | karakter dengan garis tinta gelap dan bayangan halus (bawaan) |
 | Ilustrasi datar | bentuk warna solid dengan sedikit garis; hanya gradien yang jelas dipertahankan |
-| Logo / ikon | sedikit warna datar dan geometri tepat; tanpa gradien |
+| Logo / ikon | logo dan ikon: warna datar, tepi lurus dan sudut tajam, satu path per bentuk, tanpa latar; SVG dipotong ke batas gambar (penyesuaian: pembulatan sudut, rapikan sudut, pisahkan bentuk yang bersentuhan) |
 | Foto → poster | foto atau lukisan menjadi vektor bergaya poster dengan wilayah lebih sedikit dan besar |
+| Pixel art | mengikuti grid piksel persis: setiap tepi horizontal atau vertikal |
 
 **Atur lebih detail** (opsional; titik muncul bila ada yang berbeda dari gaya). Untuk menerapkan pengaturan baru ke foto yang sudah selesai, pilih fotonya lalu tekan **Proses ulang dengan gaya ini**:
 

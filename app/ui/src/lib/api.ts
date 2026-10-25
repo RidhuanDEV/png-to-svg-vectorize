@@ -21,7 +21,17 @@ export interface Job {
   filename: string;
   bytes: number | null;
   /** `palette`: the colors used, largest area first (palette and black & white modes only). */
-  stats: { regions?: number; gradients?: number; outline_paths?: number; ai?: boolean; palette?: string[]; edited?: boolean };
+  stats: {
+    regions?: number;
+    gradients?: number;
+    outline_paths?: number;
+    ai?: boolean;
+    palette?: string[];
+    edited?: boolean;
+    /** logo engine: where the trimmed SVG sits on the photo (x, y, width, height in photo pixels) */
+    crop?: [number, number, number, number] | null;
+    warnings?: string[];
+  };
   error: string | null;
 }
 
@@ -48,7 +58,16 @@ export interface Overrides {
   layout: Layout;
   /** fills grouped per color for design tools (implies cut-out shapes) */
   layers: boolean;
+  /** logo engine */
+  trim: boolean;
+  snap_angles: boolean;
+  split_shapes: boolean;
+  corner_radius: number;
+  corner_angle: number;
 }
+
+/** 'regions': illustrations (cartoon, flat, poster); 'flat': logos and pixel art (one path per shape) */
+export type Engine = 'regions' | 'flat';
 
 export type ColorMode = 'color' | 'grayscale' | 'bw';
 export type Layout = 'stacked' | 'cutout' | 'centerline';
@@ -86,11 +105,13 @@ export interface OptionSpec {
   min?: number;
   max?: number;
   step?: number;
+  engines: Engine[];
 }
 
 export interface Preset {
   name: string;
   description: string;
+  engine: Engine;
   /** what the preset sets (decimals, AI and the palette are not part of a preset) */
   defaults: Partial<Overrides>;
 }

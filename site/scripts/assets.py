@@ -34,6 +34,7 @@ PICKS = [  # file, style
     ('kazoo.png', 'cartoon'),
     ('great-wave.jpg', 'poster'),
 ]
+KEEP_BACKGROUND = {'flag-brazil.png'}   # full-bleed artwork: its green is not a background
 HERO = 'caticorn.png'          # also exported at full size: the home page zooms into it
 WIDTHS = (480, 720, 960)       # gallery preview widths (srcset)
 SHOT_WIDTHS = (680, 1360)      # screenshot widths (srcset)
@@ -59,7 +60,11 @@ def main() -> int:
         src = Image.open(src_path)
         stem = src_path.stem
         t = time.perf_counter()
-        res = vectorize(src, options_for(style, id_prefix=stem))
+        # the website overlays the SVG on the original: keep the logo engine's SVG in the picture's frame
+        extra = {'trim': False} if options_for(style).engine == 'flat' else {}
+        if file in KEEP_BACKGROUND:
+            extra['remove_bg'] = False
+        res = vectorize(src, options_for(style, id_prefix=stem, **extra))
         seconds = time.perf_counter() - t
         ref = flatten(src)
         shown = render(res.svg, *src.size)
@@ -81,7 +86,7 @@ def main() -> int:
         })
         print(f'{file:24s} {style:8s} {sim:.2f}% {len(res.svg) // 1024} KB {seconds:.1f}s', flush=True)
     DATA.write_text(json.dumps(items, indent=1, ensure_ascii=False) + '\n', encoding='utf-8')
-    for png in sorted((ROOT / 'docs' / 'images').glob('*.png')):
+    for png in sorted((ROOT / 'docs' / 'images').glob('app-*.png')):     # the app screenshots only
         img = Image.open(png).convert('RGB')
         for w in SHOT_WIDTHS:
             webp(img, w, SHOTS / f'{png.stem}-{w}.webp', 86)

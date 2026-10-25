@@ -62,3 +62,38 @@ def reduce_palette(rgb: np.ndarray, max_colors: int = 256, merge_de: float = 3.0
 def to_hex(rgb) -> str:
     r, g, b = (int(round(float(v))) for v in np.clip(rgb, 0, 255))
     return f'#{r:02X}{g:02X}{b:02X}'
+
+
+def delta_e2000(lab_a: np.ndarray, lab_b: np.ndarray) -> np.ndarray:
+    """CIEDE2000 color difference (Sharma, Wu & Dalal 2005), vectorized over the leading axes."""
+    a = np.asarray(lab_a, np.float64)
+    b = np.asarray(lab_b, np.float64)
+    L1, a1, b1 = a[..., 0], a[..., 1], a[..., 2]
+    L2, a2, b2 = b[..., 0], b[..., 1], b[..., 2]
+    c_mean = (np.hypot(a1, b1) + np.hypot(a2, b2)) / 2
+    g = 0.5 * (1 - np.sqrt(c_mean ** 7 / (c_mean ** 7 + 25.0 ** 7)))
+    a1p, a2p = (1 + g) * a1, (1 + g) * a2
+    c1p, c2p = np.hypot(a1p, b1), np.hypot(a2p, b2)
+    h1p = np.degrees(np.arctan2(b1, a1p)) % 360
+    h2p = np.degrees(np.arctan2(b2, a2p)) % 360
+    dL = L2 - L1
+    dC = c2p - c1p
+    dh = h2p - h1p
+    dh = np.where(dh > 180, dh - 360, np.where(dh < -180, dh + 360, dh))
+    dh = np.where(c1p * c2p == 0, 0, dh)
+    dH = 2 * np.sqrt(c1p * c2p) * np.sin(np.radians(dh / 2))
+    L_mean = (L1 + L2) / 2
+    cp_mean = (c1p + c2p) / 2
+    hsum = h1p + h2p
+    hp_mean = np.where(c1p * c2p == 0, hsum,
+                       np.where(np.abs(h1p - h2p) <= 180, hsum / 2,
+                                np.where(hsum < 360, (hsum + 360) / 2, (hsum - 360) / 2)))
+    t = (1 - 0.17 * np.cos(np.radians(hp_mean - 30)) + 0.24 * np.cos(np.radians(2 * hp_mean))
+         + 0.32 * np.cos(np.radians(3 * hp_mean + 6)) - 0.20 * np.cos(np.radians(4 * hp_mean - 63)))
+    d_theta = 30 * np.exp(-(((hp_mean - 275) / 25) ** 2))
+    rc = 2 * np.sqrt(cp_mean ** 7 / (cp_mean ** 7 + 25.0 ** 7))
+    sl = 1 + 0.015 * (L_mean - 50) ** 2 / np.sqrt(20 + (L_mean - 50) ** 2)
+    sc = 1 + 0.045 * cp_mean
+    sh = 1 + 0.015 * cp_mean * t
+    rt = -np.sin(np.radians(2 * d_theta)) * rc
+    return np.sqrt((dL / sl) ** 2 + (dC / sc) ** 2 + (dH / sh) ** 2 + rt * (dC / sc) * (dH / sh))

@@ -15,7 +15,7 @@
   "similarity": 99.81,
   "svgBytes": 94987,
   "sourceBytes": 296346,
-  "seconds": 7.4,
+  "seconds": 8.1,
   "regions": 69,
   "gradients": 43
  },
@@ -35,7 +35,7 @@
   "similarity": 99.62,
   "svgBytes": 58415,
   "sourceBytes": 160385,
-  "seconds": 11.3,
+  "seconds": 11.9,
   "regions": 58,
   "gradients": 3
  },
@@ -55,7 +55,7 @@
   "similarity": 99.53,
   "svgBytes": 70776,
   "sourceBytes": 176873,
-  "seconds": 7.4,
+  "seconds": 7.9,
   "regions": 64,
   "gradients": 4
  },
@@ -75,7 +75,7 @@
   "similarity": 99.75,
   "svgBytes": 42486,
   "sourceBytes": 106523,
-  "seconds": 6.1,
+  "seconds": 6.2,
   "regions": 45,
   "gradients": 23
  },
@@ -92,11 +92,11 @@
   "height": 896,
   "previewWidth": 960,
   "previewHeight": 672,
-  "similarity": 99.87,
-  "svgBytes": 26741,
+  "similarity": 99.08,
+  "svgBytes": 1707,
   "sourceBytes": 62089,
-  "seconds": 3.9,
-  "regions": 49,
+  "seconds": 1.3,
+  "regions": 4,
   "gradients": 0
  },
  {
@@ -112,11 +112,11 @@
   "height": 960,
   "previewWidth": 960,
   "previewHeight": 960,
-  "similarity": 99.67,
-  "svgBytes": 22369,
+  "similarity": 97.99,
+  "svgBytes": 5437,
   "sourceBytes": 17911,
-  "seconds": 1.8,
-  "regions": 52,
+  "seconds": 2.5,
+  "regions": 31,
   "gradients": 0
  },
  {
@@ -135,7 +135,7 @@
   "similarity": 99.88,
   "svgBytes": 11913,
   "sourceBytes": 97442,
-  "seconds": 5.5,
+  "seconds": 5.7,
   "regions": 19,
   "gradients": 1
  },
@@ -155,7 +155,7 @@
   "similarity": 92.73,
   "svgBytes": 298133,
   "sourceBytes": 444875,
-  "seconds": 7.5,
+  "seconds": 8.0,
   "regions": 319,
   "gradients": 64
  }

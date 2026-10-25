@@ -15,6 +15,7 @@ from .curves import fit_chain
 from .outline import Outline, OutlineParams, outline_mask, separate
 from .planar import build_chains, loop_area, loops_to_path, region_loops, subpixel_offsets
 from .gradients import fit_fill
+from .logo import LogoParams
 from .regions import RegionParams, refine_boundaries, segment
 from .pathdata import compact_path
 
@@ -43,8 +44,11 @@ class Options:
                                       # 'cutout': every shape has its holes cut out, nothing overlaps (cutters, editing)
                                       # 'centerline': line art as stroked center lines, no fills (plotters, laser)
     layers: bool = False              # design tools: fills grouped per color (<g id="color-RRGGBB">), implies cut-out
+    engine: str = 'regions'           # 'regions': illustrations (gradients, ink layer); 'flat': logos and icons
+                                      # (one path per shape, straight edges, sharp corners; see logo.py)
     outline: OutlineParams = field(default_factory=OutlineParams)
     regions: RegionParams = field(default_factory=RegionParams)
+    logo: LogoParams = field(default_factory=LogoParams)
 
 
 @dataclass
@@ -54,6 +58,8 @@ class Result:
     gradients: int
     outline_paths: int
     palette: list[str] = field(default_factory=list)   # colors used, largest area first (palette modes only)
+    crop: tuple[float, float, float, float] | None = None   # flat engine: where the trimmed viewBox sits (x, y, w, h)
+    warnings: list[str] = field(default_factory=list)
 
 
 def flatten(image: Image.Image, background=(255, 255, 255)) -> Image.Image:
@@ -178,8 +184,10 @@ def vectorize(image: Image.Image, opts: Options | None = None, executor: Executo
     `if __name__ == '__main__':`). `on_stage(name, fraction)` reports progress: ink, regions, curves, svg."""
     opts = opts or Options()
     stage = on_stage or (lambda name, fraction: None)
-    if opts.layout == 'centerline':
+    if opts.layout == 'centerline':        # an explicit choice: wins over the preset's engine
         return _centerline(image, opts, stage)
+    if opts.engine == 'flat':
+        return _flat(image, opts, stage)
     stage('ink', 0.05)
     alpha = _alpha(image) if opts.remove_bg else None
     rgb = _tone(np.asarray(flatten(image)), opts.color_mode, opts.threshold)
@@ -295,6 +303,22 @@ def vectorize(image: Image.Image, opts: Options | None = None, executor: Executo
         used[ink_hex] = used.get(ink_hex, 0.0)
     return Result(svg, len(fills), n_grad, n_out,
                   sorted(used, key=lambda c: -used[c]) if quantized else [])
+
+
+def _flat(image: Image.Image, opts: Options, stage: Callable[[str, float], None]) -> Result:
+    """Logos and icons (see logo.py). Palette, color mode, background, precision and layers come from Options."""
+    from .logo import vectorize_logo
+
+    def tone(rgb: np.ndarray) -> np.ndarray:
+        return _tone(np.clip(rgb + 0.5, 0, 255).astype(np.uint8), opts.color_mode, opts.threshold).astype(np.float64)
+
+    fixed = tuple(opts.palette) if opts.palette else None
+    if fixed is None and opts.color_mode == 'bw':
+        fixed = ('#000000',) if opts.remove_bg else ('#000000', '#FFFFFF')
+    r = vectorize_logo(image, opts.logo, max_colors=opts.max_colors, palette=fixed, keep_background=not opts.remove_bg,
+                       decimals=opts.decimals, color_groups=opts.layers, min_area=max(1, opts.regions.speckle),
+                       tone=tone if opts.color_mode != 'color' else None, stage=stage)
+    return Result(r.svg, r.shapes, 0, 0, r.palette, r.crop, r.warnings)
 
 
 def _centerline(image: Image.Image, opts: Options, stage: Callable[[str, float], None]) -> Result:

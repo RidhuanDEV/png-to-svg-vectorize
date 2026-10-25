@@ -157,7 +157,10 @@ def _work(job_id: str, source: bytes, preset: str, overrides: dict[str, Any], qu
         opts.regions.speckle *= AI_TARGET * AI_TARGET     # areas are in traced pixels
     res = vectorize(img, opts, on_stage=stage)
     return {'svg': res.svg, 'regions': res.regions, 'gradients': res.gradients, 'outline_paths': res.outline_paths,
-            'palette': res.palette, 'seconds': time.perf_counter() - t, 'ai': bool(ai)}
+            'palette': res.palette, 'seconds': time.perf_counter() - t, 'ai': bool(ai),
+            # flat engine: where the trimmed SVG sits on the photo (photo pixels), for the side-by-side view
+            'crop': [round(v / (AI_TARGET if ai else 1), 2) for v in res.crop] if res.crop else None,
+            'warnings': res.warnings}
 
 
 class JobManager:
