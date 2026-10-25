@@ -66,7 +66,7 @@ export function saveSettings(): void {
   }
 }
 
-export function presetDefaults(name: string): Overrides | undefined {
+export function presetDefaults(name: string): Partial<Overrides> | undefined {
   return store.info?.presets.find((p) => p.name === name)?.defaults;
 }
 

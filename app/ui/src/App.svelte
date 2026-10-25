@@ -65,6 +65,16 @@
       settingsOpen = true;
     }
   }}
+  onpaste={(e) => {
+    // Ctrl+V: pictures from the clipboard go on the workbench (not while typing in a field)
+    const target = e.target;
+    if (!authed || (target instanceof HTMLElement && target.closest('input, textarea, [contenteditable]'))) return;
+    const files = Array.from(e.clipboardData?.files ?? []).filter((f) => /^image\/(png|jpeg|webp)$/.test(f.type));
+    if (!files.length) return;
+    e.preventDefault();
+    const stamp = new Date().toISOString().slice(0, 19).replace(/[-:T]/g, '');
+    void addFiles(files.map((f, i) => (f.name && f.name !== 'image.png' ? f : new File([f], `pasted-${stamp}${i ? '-' + i : ''}.png`, { type: f.type }))));
+  }}
   ondragenter={(e) => {
     if (!isFileDrag(e)) return;
     depth++;

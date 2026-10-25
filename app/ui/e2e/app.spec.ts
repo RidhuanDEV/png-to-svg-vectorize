@@ -466,3 +466,107 @@ test('AI: a finished job shows whether AI was used', async ({ page }) => {
   await uploadAndWait(page);
   await expect(page.getByTestId('stat-ai')).toHaveText(/No|Tidak/);
 });
+
+// -- M10: studio features ----------------------------------------------------------------------------------------
+
+async function serviceJob(page: Page): Promise<{ options: Record<string, unknown>; status: string }> {
+  const res = await page.request.get('/api/jobs', { headers: H });
+  const jobs = (await res.json()).jobs;
+  return jobs[jobs.length - 1];
+}
+
+test('studio: colors, transparent background and cut-out shapes reach the service; a palette can be locked and edited', async ({ page }) => {
+  await openApp(page);
+  await page.getByTestId('advanced-toggle').click();
+  await page.getByTestId('opt-max_colors').click();
+  await page.getByTestId('opt-max_colors-4').click();
+  await page.getByTestId('opt-remove_bg').click();
+  await page.getByTestId('opt-layout-cutout').click();
+  await uploadAndWait(page, 'badge.png');
+  expect((await serviceJob(page)).options).toMatchObject({ max_colors: 4, remove_bg: true, layout: 'cutout' });
+
+  const swatches = page.getByTestId('result-palette').locator('i');
+  const n = await swatches.count();
+  expect(n).toBeGreaterThan(1);
+  expect(n).toBeLessThanOrEqual(4);
+  await page.getByTestId('use-palette').click();
+  await expect(page.getByTestId('palette-color')).toHaveCount(n);
+  await expect(page.getByTestId('opt-max_colors')).toHaveCount(0);
+  await page.getByTestId('palette-color').first().hover();
+  await page.getByRole('button', { name: /Remove this color/ }).first().click();
+  await expect(page.getByTestId('palette-color')).toHaveCount(n - 1);
+  await page.getByTestId('apply-selected').click();
+  await expect.poll(async () => (await serviceJob(page)).status).toBe('done');
+  const palette = (await serviceJob(page)).options.palette;
+  expect(Array.isArray(palette) && palette.length).toBe(n - 1);
+
+  await page.getByTestId('opt-color_mode-bw').click();
+  await expect(page.getByTestId('opt-threshold')).toBeVisible();
+  await expect(page.getByTestId('palette-editor')).toHaveCount(0);
+});
+
+test('export: PDF, EPS, DXF and a PNG rendered at 2x', async ({ page }) => {
+  await openApp(page);
+  await uploadAndWait(page);
+  for (const f of ['pdf', 'eps', 'dxf']) {
+    await page.getByTestId(`export-format-${f}`).click();
+    await expect(page.getByTestId('save-svg')).toContainText(f.toUpperCase());
+    const [download] = await Promise.all([page.waitForEvent('download'), page.getByTestId('save-svg').click()]);
+    expect(download.suggestedFilename()).toBe(`face.${f}`);
+  }
+  const [zip] = await Promise.all([page.waitForEvent('download'), page.getByTestId('save-all').click()]);
+  expect(zip.suggestedFilename()).toBe('png2svg-results.zip');
+
+  await page.getByTestId('export-format-png').click();
+  await page.getByTestId('png-scale-2').click();
+  await expect(page.getByTestId('save-all')).toBeDisabled();
+  const [png] = await Promise.all([page.waitForEvent('download'), page.getByTestId('save-svg').click()]);
+  expect(png.suggestedFilename()).toBe('face.png');
+  const bytes = readFileSync(await png.path());
+  const job = (await serviceJobs(page))[0];
+  const res = await page.request.get(`/api/jobs/${job.id}`, { headers: H });
+  const { width, height } = await res.json();
+  expect([bytes.readUInt32BE(16), bytes.readUInt32BE(20)]).toEqual([width * 2, height * 2]);
+});
+
+test('paste: a picture on the clipboard goes on the workbench (Ctrl+V)', async ({ page }) => {
+  await openApp(page);
+  const data = readFileSync(fixture('badge.png')).toString('base64');
+  await page.evaluate((b64) => {
+    const bin = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+    const dt = new DataTransfer();
+    dt.items.add(new File([bin], 'image.png', { type: 'image/png' }));
+    window.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt }));
+  }, data);
+  await expect(page.locator('[data-testid="staged"][data-name^="pasted-"]')).toBeVisible();
+});
+
+test('profiles: save a style, apply it again, export and import a file', async ({ page }) => {
+  await openApp(page);
+  await page.getByTestId('preset-logo').click();
+  await page.getByTestId('advanced-toggle').click();
+  await page.getByTestId('opt-layout-cutout').click();
+  await page.getByTestId('profile-new').click();
+  await page.getByTestId('profile-name').fill('Brand');
+  await page.getByTestId('profile-save').click();
+  await expect(page.getByTestId('profile-select')).toContainText('Brand');
+
+  await page.getByTestId('preset-cartoon').click();
+  await expect(page.getByTestId('profile-select')).not.toContainText('Brand');
+  await page.getByTestId('profile-select').click();
+  await page.getByTestId('profile-select-Brand').click();
+  await expect(page.getByTestId('preset-logo')).toHaveAttribute('aria-checked', 'true');
+  await expect(page.getByTestId('opt-layout-cutout')).toHaveAttribute('aria-checked', 'true');
+
+  const [file] = await Promise.all([page.waitForEvent('download'), page.getByTestId('profile-export').click()]);
+  expect(file.suggestedFilename()).toBe('Brand.pngsvg-profile.json');
+  const saved = JSON.parse(readFileSync(await file.path(), 'utf-8'));
+  expect(saved).toMatchObject({ format: 'pngsvg-profile', version: 1, preset: 'logo', options: { layout: 'cutout' } });
+
+  saved.name = 'Team';
+  saved.options = { max_colors: 3 };
+  await page.getByTestId('profile-file').setInputFiles({ name: 'team.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(saved)) });
+  await expect(page.getByTestId('profile-select')).toContainText('Team');
+  await page.getByTestId('profile-file').setInputFiles({ name: 'bad.json', mimeType: 'application/json', buffer: Buffer.from('{"format":"x"}') });
+  await expect(page.getByText(/not a valid style profile/)).toBeVisible();
+});

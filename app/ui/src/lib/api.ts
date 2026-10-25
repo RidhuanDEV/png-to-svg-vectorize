@@ -20,7 +20,8 @@ export interface Job {
   /** Name the result is saved under (Settings → file name pattern). */
   filename: string;
   bytes: number | null;
-  stats: { regions?: number; gradients?: number; outline_paths?: number; ai?: boolean };
+  /** `palette`: the colors used, largest area first (palette and black & white modes only). */
+  stats: { regions?: number; gradients?: number; outline_paths?: number; ai?: boolean; palette?: string[] };
   error: string | null;
 }
 
@@ -35,6 +36,27 @@ export interface Overrides {
   decimals: number;
   ai: AiModelName;
   ai_auto: boolean;
+  speckle: number;
+  seam: number;
+  /** at most this many flat colors (null = free colors and gradients) */
+  max_colors: number | null;
+  /** fixed colors '#RRGGBB'; every fill and the ink take the nearest one */
+  palette: string[];
+  color_mode: ColorMode;
+  threshold: number;
+  remove_bg: boolean;
+  layout: Layout;
+}
+
+export type ColorMode = 'color' | 'grayscale' | 'bw';
+export type Layout = 'stacked' | 'cutout';
+export type ExportFormat = 'svg' | 'pdf' | 'eps' | 'dxf';
+
+/** A validated style profile (see /api/profiles/check). */
+export interface StyleProfile {
+  name: string;
+  preset: string;
+  options: Partial<Overrides>;
 }
 
 export type AiModelName = 'illustration' | 'general';
@@ -67,7 +89,8 @@ export interface OptionSpec {
 export interface Preset {
   name: string;
   description: string;
-  defaults: Overrides;
+  /** what the preset sets (decimals, AI and the palette are not part of a preset) */
+  defaults: Partial<Overrides>;
 }
 
 export interface PresetInfo {
@@ -228,5 +251,10 @@ export const api = {
   },
   svgText: async (id: string): Promise<string> => (await call(`/api/jobs/${id}/svg`)).text(),
   source: async (id: string): Promise<Blob> => (await call(`/api/jobs/${id}/source`)).blob(),
-  zip: async (ids: string[]): Promise<Blob> => (await call(`/api/export.zip?${query({ ids: ids.join(',') })}`)).blob(),
+  zip: async (ids: string[], format: ExportFormat = 'svg'): Promise<Blob> =>
+    (await call(`/api/export.zip?${query({ ids: ids.join(','), format })}`)).blob(),
+  exportFile: async (id: string, format: ExportFormat): Promise<Blob> =>
+    (await call(`/api/jobs/${id}/export?${query({ format })}`)).blob(),
+  checkProfile: async (text: string): Promise<StyleProfile> =>
+    (await call('/api/profiles/check', { method: 'POST', body: text, headers: { 'Content-Type': 'application/json' } })).json(),
 };

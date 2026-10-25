@@ -141,3 +141,30 @@ def test_open_url_only_allows_the_project(jobs, monkeypatch):
     assert b.open_url('https://example.com/phish') is False
     assert b.open_url('https://github.com/RidhuanDEV/png-to-svg-vectorize/releases') is True
     assert opened == ['https://github.com/RidhuanDEV/png-to-svg-vectorize/releases']
+
+
+def test_save_other_formats_and_rendered_png(jobs, tmp_path):
+    import base64
+    j = jobs.submit('scene.png', png_bytes(), 120, 90, 'cartoon', {})
+    wait_done(jobs, j.id)
+    assert bridge(jobs, {'SAVE': str(tmp_path / 'print')}).save_svg(j.id, 'pdf') is True
+    assert (tmp_path / 'print.pdf').read_bytes().startswith(b'%PDF')
+    assert bridge(jobs, {'SAVE': str(tmp_path / 'x')}).save_svg(j.id, 'exe') is False
+    folder = tmp_path / 'dxf'
+    folder.mkdir()
+    assert bridge(jobs, {'FOLDER': str(folder)}).save_all([j.id, j.id], 'dxf') == 2
+    assert sorted(p.name for p in folder.iterdir()) == ['scene-2.dxf', 'scene.dxf']
+
+    data = base64.b64encode(png_bytes()).decode()
+    assert bridge(jobs, {'SAVE': str(tmp_path / 'big')}).save_png('scene.png', data) is True
+    assert (tmp_path / 'big.png').read_bytes() == png_bytes()
+    not_png = base64.b64encode(b'MZ\x90\x00 not a png').decode()
+    assert bridge(jobs, {'SAVE': str(tmp_path / 'bad')}).save_png('scene.png', not_png) is False
+    assert bridge(jobs, {'SAVE': str(tmp_path / 'bad')}).save_png('scene.png', '%%%') is False
+
+
+def test_save_profile_validates(jobs, tmp_path):
+    good = '{"format":"pngsvg-profile","version":1,"name":"Brand","preset":"logo","options":{"max_colors":4}}'
+    assert bridge(jobs, {'SAVE': str(tmp_path / 'brand.pngsvg-profile.json')}).save_profile('Brand', good) is True
+    assert (tmp_path / 'brand.pngsvg-profile.json').read_text(encoding='utf-8') == good
+    assert bridge(jobs, {'SAVE': str(tmp_path / 'x')}).save_profile('x', '{"format":"other"}') is False

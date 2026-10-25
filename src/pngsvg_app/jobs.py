@@ -20,6 +20,7 @@ from typing import Any
 from PIL import Image
 
 from pngsvg import options_for, vectorize
+from pngsvg.presets import apply_overrides
 
 MAX_JOBS = 200                       # oldest finished jobs are dropped beyond these limits
 MAX_KEPT_BYTES = 512 * 1024 * 1024
@@ -105,7 +106,7 @@ class Job:
     started: float | None = None
     seconds: float | None = None
     svg: str | None = None
-    stats: dict[str, int] = field(default_factory=dict)
+    stats: dict[str, Any] = field(default_factory=dict)
     error: str | None = None
     future: Future | None = None
 
@@ -120,14 +121,8 @@ class Job:
 def build_options(preset: str, overrides: dict[str, Any], id_prefix: str):
     """Options for a preset plus validated overrides (see server.OptionsIn for the allowed fields/ranges)."""
     o = options_for(preset, id_prefix=id_prefix)
-    for key, value in overrides.items():
-        if value is None or key in ('ai', 'ai_auto'):   # handled before vectorizing (see _work)
-            continue
-        if key == 'merge_de':
-            o.regions.merge_de = float(value)
-        else:
-            setattr(o, key, value)
-    return o
+    # 'ai' / 'ai_auto' are handled before vectorizing (see _work)
+    return apply_overrides(o, {k: v for k, v in overrides.items() if k not in ('ai', 'ai_auto')})
 
 
 AI_TARGET = 2     # the AI result is traced at 2x the photo size (x4 model output, resized): see bench/ai_restore.py
@@ -155,14 +150,14 @@ def _work(job_id: str, source: bytes, preset: str, overrides: dict[str, Any], qu
         from pathlib import Path
 
         from pngsvg.ai import enhance
-        from pngsvg.core import flatten
         stage('ai', 0.02)
-        img = enhance(flatten(img), Path(ai[0]), ai[1], AI_TARGET)
+        img = enhance(img, Path(ai[0]), ai[1], AI_TARGET)   # keeps transparency (remove background)
         if 'decimals' not in overrides:      # coordinates are AI_TARGET x larger: one decimal less, same precision
             opts.decimals = max(0, opts.decimals - 1)
+        opts.regions.speckle *= AI_TARGET * AI_TARGET     # areas are in traced pixels
     res = vectorize(img, opts, on_stage=stage)
     return {'svg': res.svg, 'regions': res.regions, 'gradients': res.gradients, 'outline_paths': res.outline_paths,
-            'seconds': time.perf_counter() - t, 'ai': bool(ai)}
+            'palette': res.palette, 'seconds': time.perf_counter() - t, 'ai': bool(ai)}
 
 
 class JobManager:

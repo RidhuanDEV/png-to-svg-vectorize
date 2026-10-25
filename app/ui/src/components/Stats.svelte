@@ -1,13 +1,23 @@
 <script lang="ts">
   import type { Job } from '../lib/api';
   import { t } from '../lib/i18n.svelte';
-  import type { Media } from '../lib/store.svelte';
+  import { saveSettings, store, type Media } from '../lib/store.svelte';
+  import { toast } from '../lib/toast.svelte';
+  import Button from './ui/Button.svelte';
   import Icon from './ui/Icon.svelte';
 
   let { job, media }: { job: Job | undefined; media: Media | undefined } = $props();
 
   const kb = (n: number | null) => (n === null ? '—' : n < 1024 * 1024 ? `${(n / 1024).toFixed(0)} KB` : `${(n / 1048576).toFixed(2)} MB`);
   const score = $derived(media?.score);
+
+  /** Lock the colors of this result: they become the palette of the next runs, ready to edit. */
+  function usePalette(colors: string[]) {
+    store.settings.overrides = { ...store.settings.overrides, palette: [...colors] };
+    store.settings.advanced = true;
+    saveSettings();
+    toast('info', t('t_paletteLocked'));
+  }
 </script>
 
 {#if job && (job.status === 'done' || job.status === 'error')}
@@ -30,11 +40,22 @@
         <dd>{kb(job.bytes)}</dd>
         <dt>{t('time')}</dt>
         <dd>{job.seconds?.toFixed(1)} s</dd>
+        {#if job.stats.palette?.length}
+          <dt>{t('palette')}</dt>
+          <dd class="swatches" data-testid="result-palette">
+            {#each job.stats.palette as c (c)}<i style="background:{c}" title={c}></i>{/each}
+          </dd>
+        {/if}
         {#if job.stats.ai !== undefined}
           <dt>{t('aiUsed')}</dt>
           <dd data-testid="stat-ai">{job.stats.ai ? t('yes') : t('no')}</dd>
         {/if}
       </dl>
+      {#if job.stats.palette?.length}
+        <Button variant="ghost" size="sm" icon="sliders" onclick={() => usePalette(job.stats.palette ?? [])} data-testid="use-palette"
+          >{t('paletteUse')}</Button
+        >
+      {/if}
     {:else}
       <p class="err" role="alert"><Icon name="warning" size={16} /> {t('failedHelp')}</p>
     {/if}
@@ -81,6 +102,18 @@
     text-align: right;
     font-family: var(--mono);
     font-variant-numeric: tabular-nums;
+  }
+  .swatches {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 3px;
+  }
+  .swatches i {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    border: 1px solid var(--line-strong);
   }
   .err {
     display: flex;

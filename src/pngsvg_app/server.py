@@ -15,16 +15,17 @@ import urllib.request
 import warnings
 import zipfile
 from pathlib import Path
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from PIL import Image
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints, ValidationError
 
 import pngsvg
 from pngsvg import PRESETS
+from pngsvg.export import MEDIA_TYPES, convert
 
 from .jobs import SPEEDS, JobManager, WorkbenchFull
 
@@ -53,6 +54,15 @@ class OptionsIn(BaseModel):
     decimals: int | None = Field(None, ge=0, le=3)
     ai: Literal['illustration', 'general'] | None = None   # enhance with this AI model first
     ai_auto: bool | None = None       # ...but only for small (< AI_SMALL px) or JPEG photos
+    max_colors: int | None = Field(None, ge=2, le=64)
+    palette: list[Annotated[str, StringConstraints(pattern=r'^#[0-9A-Fa-f]{6}$')]] | None = Field(None, min_length=1,
+                                                                                                 max_length=64)
+    color_mode: Literal['color', 'grayscale', 'bw'] | None = None
+    threshold: int | None = Field(None, ge=1, le=254)
+    remove_bg: bool | None = None
+    layout: Literal['stacked', 'cutout'] | None = None
+    seam: float | None = Field(None, ge=0.0, le=2.0)
+    speckle: int | None = Field(None, ge=0, le=5000)
 
 
 class StartIn(BaseModel):
@@ -90,6 +100,14 @@ def output_name(name: str, preset: str, pattern: str = '{name}', today: datetime
     return (out or stem or 'image') + '.svg'
 
 
+def export_file(job, fmt: str, jobs) -> tuple[str, bytes]:
+    """(file name, content) of a finished job in one of the export formats."""
+    name = output_name(job.name, job.preset, jobs.name_pattern)[:-4] + '.' + fmt
+    if fmt == 'svg':
+        return name, svg_output(job.svg, job.width, job.height, jobs.size_attrs).encode('utf-8')
+    return name, convert(job.svg, fmt)
+
+
 def svg_output(svg: str, width: int, height: int, size_attrs: bool) -> str:
     """The SVG as saved: optionally with explicit width/height (the engine writes a viewBox only)."""
     if not size_attrs or ' width=' in svg.split('>', 1)[0]:
@@ -105,13 +123,17 @@ OPTION_SCHEMA = [
     {'name': 'smooth', 'type': 'float', 'min': 0.0, 'max': 5.0, 'step': 0.1},
     {'name': 'merge_de', 'type': 'float', 'min': 1.0, 'max': 30.0, 'step': 0.5},
     {'name': 'scale', 'type': 'int', 'min': 1, 'max': 4, 'step': 1},
+    {'name': 'speckle', 'type': 'int', 'min': 0, 'max': 500, 'step': 5},
+    {'name': 'seam', 'type': 'float', 'min': 0.0, 'max': 2.0, 'step': 0.1},
 ]
 
 
 def _preset_defaults(name: str) -> dict[str, Any]:
     o = pngsvg.options_for(name)
     return {'outlines': o.outlines, 'gradients': o.gradients, 'radial': o.radial, 'tolerance': o.tolerance,
-            'smooth': o.smooth, 'merge_de': o.regions.merge_de, 'scale': o.scale}
+            'smooth': o.smooth, 'merge_de': o.regions.merge_de, 'scale': o.scale, 'speckle': o.regions.speckle,
+            'seam': o.seam, 'max_colors': o.max_colors, 'color_mode': o.color_mode, 'threshold': o.threshold,
+            'remove_bg': o.remove_bg, 'layout': o.layout}
 
 
 def clean_name(name: str | None) -> str:
@@ -119,11 +141,6 @@ def clean_name(name: str | None) -> str:
     base = re.split(r'[\\/]', name or '')[-1]
     base = ''.join(ch for ch in unicodedata.normalize('NFC', base) if unicodedata.category(ch)[0] != 'C')
     return base.strip()[:120] or 'image'
-
-
-def svg_filename(name: str) -> str:
-    stem = name.rsplit('.', 1)[0] if '.' in name else name
-    return (stem or 'image') + '.svg'
 
 
 def _disposition(filename: str, attachment: bool) -> str:
@@ -365,6 +382,28 @@ def create_app(jobs: JobManager, token: str, allowed_hosts: set[str], static_dir
                                                                                  jobs.name_pattern), download),
                                  'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'"})
 
+    @app.post('/api/profiles/check')
+    async def check_profile(request: Request):
+        """Validate an imported style profile (the same rules as the CLI) and return it normalized."""
+        from pngsvg.profile import ProfileError, parse
+        body = await request.body()
+        if len(body) > 64 * 1024:
+            raise HTTPException(413, 'profile file too large')
+        try:
+            preset, options, name = parse(json.loads(body))
+        except (ValueError, UnicodeDecodeError) as e:    # ProfileError and JSONDecodeError are ValueErrors
+            raise HTTPException(422, str(e)[:200] if isinstance(e, ProfileError) else 'not valid JSON')
+        return {'preset': preset, 'options': options, 'name': name}
+
+    @app.get('/api/jobs/{job_id}/export')
+    def export_one(job_id: str, format: Literal['svg', 'pdf', 'eps', 'dxf'] = 'svg'):
+        """The result in another format (always a download)."""
+        job = _job(job_id)
+        if job.status != 'done' or job.svg is None:
+            raise HTTPException(409, 'result not ready')
+        name, body = export_file(job, format, jobs)
+        return Response(body, media_type=MEDIA_TYPES[format], headers={'Content-Disposition': _disposition(name, True)})
+
     @app.get('/api/jobs/{job_id}/source')
     def get_source(job_id: str):
         job = _job(job_id)
@@ -392,20 +431,21 @@ def create_app(jobs: JobManager, token: str, allowed_hosts: set[str], static_dir
         return {'deleted': job_id}
 
     @app.get('/api/export.zip')
-    def export_zip(ids: str = Query(..., max_length=20000)):
+    def export_zip(ids: str = Query(..., max_length=20000), format: Literal['svg', 'pdf', 'eps', 'dxf'] = 'svg'):
         buf, used = io.BytesIO(), set()
         with zipfile.ZipFile(buf, 'w', zipfile.ZIP_DEFLATED) as z:
             for jid in ids.split(','):
                 job = jobs.get(jid.strip())
                 if job is None or job.status != 'done' or job.svg is None:
                     continue
-                base = output_name(job.name, job.preset, jobs.name_pattern)
+                base, body = export_file(job, format, jobs)
                 fname, k = base, 1
+                stem, ext = base.rsplit('.', 1)
                 while fname.lower() in used:
                     k += 1
-                    fname = base[:-4] + f'-{k}.svg'
+                    fname = f'{stem}-{k}.{ext}'
                 used.add(fname.lower())
-                z.writestr(fname, svg_output(job.svg, job.width, job.height, jobs.size_attrs))
+                z.writestr(fname, body)
         if not used:
             raise HTTPException(409, 'no finished results to export')
         return Response(buf.getvalue(), media_type='application/zip',

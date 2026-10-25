@@ -44,7 +44,8 @@ Prefer no installer? Use `PNG-to-SVG-Vectorize-x.y.z-windows-x64-portable.zip`: 
 The first time you open the app, a short **guide** walks through the four steps. Skip it with **Skip** (or Esc);
 open it again any time with **Guide** at the top. The steps at the top of the window show where you are.
 
-1. **Add photos** — drag one or more PNG, WebP or JPEG files anywhere into the window, or press **Choose photos**.
+1. **Add photos** — drag one or more PNG, WebP or JPEG files anywhere into the window, press **Choose photos**, or
+   paste a copied picture with `Ctrl+V`.
    Add as many as you like (up to 100 waiting at once): **nothing is processed yet**. Limits: 50 MB per file, at most
    8000 px on the longest side; a photo that cannot be used is explained in a short message.
 2. **Choose & set up** — the photos wait on the **workbench**. All of them are ticked; untick the ones you want to
@@ -106,6 +107,17 @@ Always check details at 200 % or more: one number can hide a small local defect.
 | Smoothing | larger = smoother boundaries between colors |
 | Merge similar colors (ΔE) | larger = fewer regions (simpler), smaller = more detail |
 | Outline detail | resolution used to trace the outlines (auto is usually right) |
+| Remove specks smaller than | tiny spots (in pixels) merge into their neighbour |
+| Gap filler | thin stroke around each shape that hides hairline gaps when zoomed in (0 = none) |
+| Colors | *Color*, *Grayscale* or *Black & white* (with the gray level that splits black from white) |
+| Number of colors | *Free* (with gradients) or 2–32 flat colors, the ink included |
+| Palette | after **Use these colors** on a result: change a color (click it), add one, or remove one — its areas take the nearest color |
+| Transparent background | leave the background out: transparent pixels, or else the area that covers most of the picture's border |
+| Shapes | *Stacked* (smallest files) or *Cut out*: every shape has its holes cut out and nothing overlaps (cutting machines, editing) |
+
+**Style profiles** — save the current style and fine-tune choices under a name (**+**), pick it again from the list,
+**export** it as `<name>.pngsvg-profile.json` to share with your team, or **import** one. The command line reads the
+same file: `png2svg pictures/*.png --profile brand.pngsvg-profile.json`.
 
 Photos you process next always use the current settings. **Reset to style defaults** brings the defaults back.
 
@@ -138,11 +150,21 @@ Not available on Intel Macs. Models: Real-ESRGAN by Xintao Wang et al., BSD-3-Cl
 
 ## 5. Save
 
-- **Save SVG** saves the selected result (the app asks where, or saves straight into the save folder chosen in
-  Settings).
-- **Save all** saves every finished result into a folder you choose; existing files are never overwritten
-  (`name-2.svg` is used instead).
-- **Copy SVG code** puts the SVG markup on the clipboard, ready to paste into code or a design tool.
+Choose the format first:
+
+| Format | For |
+|---|---|
+| SVG | the web, Figma, Illustrator, Inkscape, Flutter — editable vector |
+| PDF | print and documents; vector with real gradients, opens in Illustrator |
+| EPS | print shops and older design tools (PostScript level 3) |
+| DXF | CAD, laser cutters and plotters: outlines only, one layer per color |
+| PNG | a sharp picture drawn from the vector at 1×, 2×, 4× or 8× the photo size |
+
+- **Save** saves the selected result in that format (the app asks where, or saves straight into the save folder
+  chosen in Settings).
+- **Save all** saves every finished result into a folder you choose (SVG, PDF, EPS or DXF); existing files are never
+  overwritten (`name-2.svg` is used instead).
+- **Copy SVG code** / **Copy PNG** put the result on the clipboard, ready to paste into code or a design tool.
 
 Gradient ids are unique per file, so many SVGs can be inlined on one web page.
 
@@ -176,5 +198,6 @@ updates** in Settings → About, and **Download** of an AI model in Settings →
 
 The same engine is available without the app (Python 3.10+):
 `pip install "png-to-svg-vectorize @ git+https://github.com/RidhuanDEV/png-to-svg-vectorize"`, then
-`png2svg picture.png`. See the [README](../README.md) for options, the browser UI (`png2svg serve`) and the
-Python API.
+`png2svg picture.png`. Studio options work there too, e.g. `png2svg logo.png -o logo.pdf --max-colors 4
+--remove-bg`, or `--profile brand.pngsvg-profile.json` for a style saved in the app (`png2svg --help` lists them all).
+See the [README](../README.md) for the browser UI (`png2svg serve`) and the Python API.

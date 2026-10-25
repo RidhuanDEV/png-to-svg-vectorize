@@ -1,11 +1,13 @@
 <script lang="ts">
   // Right column, top: the result style (visual cards + optional fine-tuning) and the processing speed.
-  import type { OptionSpec, Overrides, Speed } from '../lib/api';
+  import type { ColorMode, Layout, OptionSpec, Overrides, Speed } from '../lib/api';
   import { t, tf, tk } from '../lib/i18n.svelte';
-  import { prefs, savePrefs } from '../lib/prefs.svelte';
+  import { NEW_PALETTE_COLOR, prefs, savePrefs } from '../lib/prefs.svelte';
   import { aiReady, presetDefaults, retryJob, saveSettings, selectedJob, setSpeed, store } from '../lib/store.svelte';
   import Button from './ui/Button.svelte';
   import Icon from './ui/Icon.svelte';
+  import Profiles from './Profiles.svelte';
+  import Select from './ui/Select.svelte';
   import Segmented from './ui/Segmented.svelte';
   import Slider from './ui/Slider.svelte';
   import Switch from './ui/Switch.svelte';
@@ -22,17 +24,31 @@
     poster: 'M5 5h14v14H5zM5 15l4-4 3 3 3-2 4 3',
   };
 
-  function value(spec: OptionSpec): boolean | number | null {
-    const o = store.settings.overrides[spec.name];
-    return (o ?? defaults?.[spec.name] ?? null) as boolean | number | null;
+  /** The value in effect: the user's override, else the style's default. */
+  function current<K extends keyof Overrides>(name: K): Overrides[K] | undefined {
+    const o = store.settings.overrides[name];
+    return o !== undefined ? o : defaults?.[name];
   }
 
-  function set(name: keyof Overrides, v: boolean | number | null) {
-    const next = { ...store.settings.overrides } as Record<string, unknown>;
-    if (defaults && defaults[name] === v) delete next[name];
+  function value(spec: OptionSpec): Overrides[keyof Overrides] | null {
+    return current(spec.name) ?? null;
+  }
+
+  /** Set an override; a value equal to the style's default (or undefined) removes it. */
+  function set<K extends keyof Overrides>(name: K, v: Overrides[K] | undefined) {
+    const next: Partial<Overrides> = { ...store.settings.overrides };
+    if (v === undefined || (defaults && defaults[name] === v)) delete next[name];
     else next[name] = v;
-    store.settings.overrides = next as Partial<Overrides>;
+    store.settings.overrides = next;
     saveSettings();
+  }
+
+  const colorMode = $derived(current('color_mode') ?? 'color');
+  const palette = $derived(store.settings.overrides.palette ?? []);
+  const MAX_COLORS = [2, 3, 4, 6, 8, 12, 16, 24, 32];
+
+  function setPalette(colors: string[]) {
+    set('palette', colors.length ? colors : undefined);
   }
 
   function choosePreset(name: string) {
@@ -119,18 +135,84 @@
             max={spec.max ?? 1}
             step={spec.step ?? 0.1}
             value={Number(v ?? 0)}
-            format={(x) => x.toFixed(spec.step && spec.step < 0.1 ? 2 : 1)}
+            format={(x) => x.toFixed(spec.type === 'int' ? 0 : spec.step && spec.step < 0.1 ? 2 : 1)}
             onchange={(x) => set(spec.name, x)}
             testid="opt-{spec.name}"
           />
         {/if}
       {/each}
+
+      <div class="studio" data-testid="studio">
+        <div class="row">
+          <span class="lbl">{t('colorMode')}</span>
+          <Segmented
+            size="sm"
+            label={t('colorMode')}
+            value={colorMode}
+            options={(['color', 'grayscale', 'bw'] as ColorMode[]).map((m) => ({ value: m, label: tk('colorMode_' + m) }))}
+            onchange={(m) => set('color_mode', m)}
+            testid="opt-color_mode"
+          />
+        </div>
+        {#if colorMode === 'bw'}
+          <Slider label={t('threshold')} min={1} max={254} step={1} value={current('threshold') ?? 128} format={(x) => x.toFixed(0)}
+            onchange={(x) => set('threshold', x)} testid="opt-threshold" />
+        {:else if palette.length}
+          <div class="palette" data-testid="palette-editor">
+            <span class="lbl">{t('palette')}</span>
+            <div class="chips">
+              {#each palette as c, i (i)}
+                <span class="chip">
+                  <input type="color" value={c.toLowerCase()} aria-label={tf('paletteColor', { n: i + 1 })}
+                    onchange={(e) => setPalette(palette.map((x, k) => (k === i ? e.currentTarget.value.toUpperCase() : x)))}
+                    data-testid="palette-color" />
+                  <button type="button" class="chip-x" title={t('paletteRemove')} aria-label={t('paletteRemove')}
+                    onclick={() => setPalette(palette.filter((_, k) => k !== i))}><Icon name="x" size={11} stroke={2.6} /></button>
+                </span>
+              {/each}
+              {#if palette.length < 64}
+                <button type="button" class="chip-add" title={t('paletteAdd')} aria-label={t('paletteAdd')}
+                  onclick={() => setPalette([...palette, NEW_PALETTE_COLOR])} data-testid="palette-add"><Icon name="plus" size={14} /></button>
+              {/if}
+            </div>
+            <p class="hint muted">{t('paletteHint')}</p>
+            <Button variant="ghost" size="sm" icon="x" onclick={() => setPalette([])} data-testid="palette-unlock">{t('paletteUnlock')}</Button>
+          </div>
+        {:else}
+          <div class="row">
+            <span class="lbl">{t('maxColors')}</span>
+            <Select
+              label={t('maxColors')}
+              value={String(current('max_colors') ?? '')}
+              options={[{ value: '', label: t('maxColors_free') }, ...MAX_COLORS.map((n) => ({ value: String(n), label: String(n) }))]}
+              onchange={(v) => set('max_colors', v ? Number(v) : null)}
+              testid="opt-max_colors"
+            />
+          </div>
+        {/if}
+        <Switch checked={!!current('remove_bg')} label={t('removeBg')} onchange={(c) => set('remove_bg', c)} testid="opt-remove_bg" />
+        <div class="row">
+          <span class="lbl">{t('layout')}</span>
+          <Segmented
+            size="sm"
+            label={t('layout')}
+            value={current('layout') ?? 'stacked'}
+            options={(['stacked', 'cutout'] as Layout[]).map((m) => ({ value: m, label: tk('layout_' + m) }))}
+            onchange={(m) => set('layout', m)}
+            testid="opt-layout"
+          />
+        </div>
+        <p class="hint muted">{t('layoutHint')}</p>
+      </div>
+
       <Button variant="ghost" size="sm" icon="retry" disabled={!changed} onclick={() => {
         store.settings.overrides = {};
         saveSettings();
       }}>{t('resetPreset')}</Button>
     </div>
   {/if}
+
+  <Profiles />
 
   {#if store.ai?.runtime}
     <div class="ai" data-testid="ai-mode-box">
@@ -195,6 +277,80 @@
     display: flex;
     align-items: center;
     gap: 6px;
+  }
+  .studio {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--line);
+  }
+  .studio .row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .studio .lbl {
+    font-weight: 600;
+    font-size: calc(13px * var(--ts));
+  }
+  .studio .hint {
+    margin: 0;
+    font-size: calc(12px * var(--ts));
+  }
+  .palette {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .chip {
+    position: relative;
+    display: inline-flex;
+  }
+  .chip input {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1.5px solid var(--line-strong);
+    border-radius: 8px;
+    background: none;
+    cursor: pointer;
+  }
+  .chip-x {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 18px;
+    height: 18px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    background: var(--panel-3);
+    color: var(--text);
+    opacity: 0;
+    transition: opacity var(--fast) var(--ease);
+  }
+  .chip:hover .chip-x,
+  .chip:focus-within .chip-x {
+    opacity: 1;
+  }
+  .chip-add {
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border: 1.5px dashed var(--line-strong);
+    border-radius: 8px;
+    background: none;
+    color: var(--muted);
   }
   .ai {
     display: flex;

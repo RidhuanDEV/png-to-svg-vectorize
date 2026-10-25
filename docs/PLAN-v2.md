@@ -119,7 +119,7 @@ dicatat, e2e alur AI, versi 1.3.0.
 
 ---
 
-## 4. M10 — Fitur lengkap "kelas studio" (v1.4–v1.5)
+## 4. M10 — Fitur lengkap "kelas studio" (v1.4–v1.5) — P1 ✅ v1.4 (2026-10-25)
 
 Daftar diambil dari fitur yang umum ada di aplikasi vektorisasi komersial dan alat tracing populer. Prioritas P1 dulu.
 
@@ -147,6 +147,23 @@ paket di winget/Homebrew (gratis), PyPI untuk mesin.
 
 **Selesai bila**: setiap fitur P1 punya tes API + e2e dan dibuktikan di bench (untuk yang memengaruhi kualitas);
 halaman Bandingkan di website memakai angka nyata.
+
+**Realisasi P1 (2026-10-25, v1.4.0)** — F1–F6, F9, F12 terpasang, plus CLI dengan profil (bagian F10):
+- F1: jumlah warna (k-means berbobot luas di Lab, wilayah bersentuhan berwarna sama digabung) dan palet terkunci yang
+  bisa diubah/ditambah/dihapus ("gabung warna" = hapus satu warna → areanya ke warna terdekat). Pilih warna langsung
+  di pratinjau (klik area) ditunda ke F8 edit ringan.
+- F2: PDF/EPS/DXF ditulis sendiri dari SVG mesin (tanpa dependensi baru); PNG dirender di halaman dari vektor.
+- F3: *bertumpuk* vs *berlubang* (`fill-rule="evenodd"`), pengisi celah = opsi `seam` yang sudah ada.
+- F4: piksel transparan (juga setelah AI), atau wilayah yang menutup ≥ 40 % tepi gambar. "Abaikan putih" tercakup bila
+  putih adalah latar; putih di dalam gambar tetap dipertahankan (disengaja).
+- F5/F6: `speckle` (luas minimum) di penyesuaian; abu-abu & hitam-putih dengan ambang.
+- F9: profil di browser + berkas `.pngsvg-profile.json`, divalidasi server (`/api/profiles/check`) dengan aturan yang
+  sama dengan CLI (`pngsvg.profile`).
+- F12: tempel `Ctrl+V`, salin PNG.
+- Bukti: keluaran bawaan identik byte; tabel mode di `docs/bench.md`; PDF dirender mesin PDF Windows cocok 99,9 %
+  dengan SVG. EPS diverifikasi struktural (belum dirender — tidak ada interpreter PostScript di mesin build).
+- Sisa M10 (v1.5): F7 centerline, F8 edit ringan, F10 folder pantau, F11 laporan batch, F13 SVG ramah aplikasi desain,
+  F15 pintasan; F14 (P3) riwayat.
 
 ---
 

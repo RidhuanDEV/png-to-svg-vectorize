@@ -46,7 +46,7 @@ Saat pertama kali membuka aplikasi, **panduan** singkat menjelaskan empat langka
 Esc); buka lagi kapan saja lewat **Panduan** di bagian atas. Langkah di bagian atas jendela menunjukkan posisi Anda.
 
 1. **Tambah foto** — seret satu atau beberapa berkas PNG, WebP, atau JPEG ke mana saja di jendela, atau tekan
-   **Pilih foto**. Tambahkan sebanyak yang Anda mau (hingga 100 menunggu sekaligus): **belum ada yang diproses**.
+   **Pilih foto**, atau tempel gambar yang disalin dengan `Ctrl+V`. Tambahkan sebanyak yang Anda mau (hingga 100 menunggu sekaligus): **belum ada yang diproses**.
    Batas: 50 MB per berkas, sisi terpanjang maksimal 8000 px; foto yang tidak bisa dipakai dijelaskan dengan pesan
    singkat.
 2. **Pilih & atur** — foto menunggu di **meja kerja**. Semuanya tercentang; hapus centang pada foto yang mau ditunda
@@ -108,6 +108,17 @@ Selalu periksa detail di perbesaran 200% atau lebih: satu angka bisa menyembunyi
 | Penghalusan | lebih besar = batas antar-warna lebih halus |
 | Gabung warna mirip (ΔE) | lebih besar = wilayah lebih sedikit (lebih sederhana); lebih kecil = lebih detail |
 | Detail garis | resolusi untuk menelusuri garis (otomatis biasanya sudah tepat) |
+| Hapus bintik lebih kecil dari | bintik kecil (dalam piksel) digabung ke tetangganya |
+| Pengisi celah | garis tipis di sekeliling setiap bentuk yang menutup celah rambut saat diperbesar (0 = tanpa) |
+| Warna | *Warna*, *Abu-abu*, atau *Hitam-putih* (dengan tingkat abu pemisah hitam dan putih) |
+| Jumlah warna | *Bebas* (dengan gradien) atau 2–32 warna datar, termasuk tinta |
+| Palet | setelah **Pakai warna ini** pada hasil: ubah warna (klik), tambah, atau hapus — areanya memakai warna terdekat |
+| Latar transparan | latar tidak disertakan: piksel transparan, atau area yang menutupi sebagian besar tepi gambar |
+| Bentuk | *Bertumpuk* (berkas terkecil) atau *Berlubang*: setiap bentuk dilubangi dan tidak ada yang menumpuk (mesin potong, penyuntingan) |
+
+**Profil gaya** — simpan gaya dan penyesuaian saat ini dengan sebuah nama (**+**), pilih lagi dari daftar, **ekspor**
+sebagai `<nama>.pngsvg-profile.json` untuk dibagikan ke tim, atau **impor**. Baris perintah membaca berkas yang sama:
+`png2svg gambar/*.png --profile merek.pngsvg-profile.json`.
 
 Foto yang diproses berikutnya selalu memakai pengaturan saat itu. **Kembalikan ke bawaan gaya** memulihkan nilai bawaan.
 
@@ -141,11 +152,21 @@ Tidak tersedia di Mac Intel. Model: Real-ESRGAN oleh Xintao Wang dkk., BSD-3-Cla
 
 ## 5. Menyimpan
 
-- **Simpan SVG** menyimpan hasil yang dipilih (aplikasi menanyakan lokasinya, atau langsung menyimpan ke folder simpan
-  yang dipilih di Pengaturan).
-- **Simpan semua** menyimpan semua hasil yang sudah selesai ke folder pilihan Anda; berkas yang sudah ada tidak pernah
-  ditimpa (dipakai `nama-2.svg`).
-- **Salin kode SVG** menyalin markup SVG ke clipboard, siap ditempel ke kode atau aplikasi desain.
+Pilih formatnya dulu:
+
+| Format | Untuk |
+|---|---|
+| SVG | web, Figma, Illustrator, Inkscape, Flutter — vektor yang bisa diedit |
+| PDF | cetak dan dokumen; vektor dengan gradien asli, bisa dibuka di Illustrator |
+| EPS | percetakan dan aplikasi desain lama (PostScript level 3) |
+| DXF | CAD, mesin laser, dan plotter: garis saja, satu lapisan per warna |
+| PNG | gambar tajam yang digambar dari vektor di 1×, 2×, 4×, atau 8× ukuran foto |
+
+- **Simpan** menyimpan hasil yang dipilih dalam format itu (aplikasi menanyakan lokasinya, atau langsung menyimpan ke
+  folder simpan yang dipilih di Pengaturan).
+- **Simpan semua** menyimpan semua hasil yang sudah selesai ke folder pilihan Anda (SVG, PDF, EPS, atau DXF); berkas
+  yang sudah ada tidak pernah ditimpa (dipakai `nama-2.svg`).
+- **Salin kode SVG** / **Salin PNG** menyalin hasil ke clipboard, siap ditempel ke kode atau aplikasi desain.
 
 ID gradien unik per berkas, jadi banyak SVG bisa disisipkan di satu halaman web.
 
@@ -180,4 +201,6 @@ Pengaturan → Tentang, dan **Unduh** model AI di Pengaturan → Pemrosesan.
 
 Mesin yang sama tersedia tanpa aplikasi (Python 3.10+):
 `pip install "png-to-svg-vectorize @ git+https://github.com/RidhuanDEV/png-to-svg-vectorize"`, lalu
-`png2svg gambar.png`. Lihat [README](../README.md) untuk opsi, UI browser (`png2svg serve`), dan API Python.
+`png2svg gambar.png`. Opsi studio juga tersedia, misalnya `png2svg logo.png -o logo.pdf --max-colors 4 --remove-bg`,
+atau `--profile merek.pngsvg-profile.json` untuk gaya yang disimpan dari aplikasi (`png2svg --help` menampilkan
+semuanya). Lihat [README](../README.md) untuk UI browser (`png2svg serve`) dan API Python.

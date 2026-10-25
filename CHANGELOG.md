@@ -2,6 +2,26 @@
 
 All notable changes. Benchmarks for every engine version are in [docs/bench.md](docs/bench.md).
 
+## 1.4.0 — 2026-10-25 — studio options
+
+- **Colors**: *Number of colors* (2–32 flat colors, ink included) or a **locked palette**: *Use these colors* on a
+  result, then change, add or remove colors (a removed color merges into the nearest); **Grayscale** and
+  **Black & white** (with threshold). Results report the colors used (`stats.palette`).
+- **Transparent background**: transparent pixels, or else the region covering most of the border, are left out.
+  Transparency survives the AI step.
+- **Shapes: stacked or cut out** — cut-out shapes keep their holes and never overlap (cutting machines, editing);
+  **gap filler** (seam width) and **speck removal** (minimum area) are now fine-tune options.
+- **Export formats**: SVG, **PDF** (vector, real gradients), **EPS** (level 3), **DXF** (R12 polylines, one layer per
+  color) for the selected result or *Save all*; **PNG** rendered from the vector at 1–8×; **Copy PNG**.
+- **Paste** a picture with `Ctrl+V`.
+- **Style profiles**: save the current style under a name, pick it again, export/import
+  `<name>.pngsvg-profile.json`; the command line reads the same file (`png2svg --profile`).
+- CLI: `--format`, `--max-colors`, `--palette`, `--color-mode`, `--threshold`, `--remove-bg`, `--cutout`, `--seam`,
+  `--speckle`, `--profile`; `-o out.pdf` picks the format from the extension.
+- API: `GET /api/jobs/{id}/export?format=`, `GET /api/export.zip?format=`, `POST /api/profiles/check`; new job
+  options `max_colors`, `palette`, `color_mode`, `threshold`, `remove_bg`, `layout`, `seam`, `speckle`.
+- Default output is unchanged (byte-identical); Vite 8.3.4 (security fixes in the dev server).
+
 ## 1.3.0 — 2026-10-25 — Enhance with AI (optional)
 
 - **Enhance with AI**: before vectorizing, an AI model (Real-ESRGAN, BSD-3-Clause, converted to ONNX) cleans and

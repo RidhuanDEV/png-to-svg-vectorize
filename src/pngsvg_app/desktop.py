@@ -25,6 +25,9 @@ from pathlib import Path
 
 from . import free_port
 
+EXPORT_FORMATS = ('svg', 'pdf', 'eps', 'dxf')
+PNG_SIGNATURE = bytes([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])
+
 TITLE = 'PNG to SVG Vectorize'
 IMAGE_TYPES = ('Images (*.png;*.webp;*.jpg;*.jpeg)',)
 PREFERRED_PORT = 47821   # a stable origin keeps the page's saved settings/language between runs
@@ -76,10 +79,11 @@ def load_prefs(folder: Path | None = None) -> dict:
 
 def unique_path(folder: Path, filename: str) -> Path:
     """`folder/filename`, or name-2.svg, name-3.svg, ... so an existing file is never overwritten."""
+    stem, dot, ext = filename.rpartition('.')
     path, k = folder / filename, 1
     while path.exists():
         k += 1
-        path = folder / f'{filename[:-4]}-{k}.svg'
+        path = folder / (f'{stem}-{k}.{ext}' if dot else f'{filename}-{k}')
     return path
 
 
@@ -181,9 +185,8 @@ class Bridge:
                                'detail': str(getattr(e, 'detail', None) or e)[:200]})
         return {'ids': ids, 'errors': errors}
 
-    def _output(self, job) -> tuple[str, str]:
-        name = self._server.output_name(job.name, job.preset, self._jobs.name_pattern)
-        return name, self._server.svg_output(job.svg, job.width, job.height, self._jobs.size_attrs)
+    def _output(self, job, fmt: str = 'svg') -> tuple[str, bytes]:
+        return self._server.export_file(job, fmt, self._jobs)
 
     def _direct_dir(self) -> Path | None:
         """The save folder when the user chose one and does not want to be asked each time."""
@@ -192,27 +195,57 @@ class Bridge:
             return Path(folder)
         return None
 
-    def save_svg(self, job_id: str) -> bool:
+    def save_svg(self, job_id: str, fmt: str = 'svg') -> bool:
+        """Save one result as SVG, PDF, EPS or DXF."""
         job = self._jobs.get(str(job_id))
-        if job is None or job.svg is None:
+        if job is None or job.svg is None or fmt not in EXPORT_FORMATS:
             return False
-        name, text = self._output(job)
+        name, body = self._output(job, fmt)
+        return self._save_bytes(name, body)
+
+    def save_png(self, name: str, data_b64: str) -> bool:
+        """Save a PNG the page rendered from the SVG (any resolution); the bytes must really be a PNG."""
+        import base64
+        import binascii
+        try:
+            body = base64.b64decode(data_b64, validate=True)
+        except (binascii.Error, ValueError, TypeError):
+            return False
+        if not body.startswith(PNG_SIGNATURE) or len(body) > 200 * 1024 * 1024:
+            return False
+        stem = self._server.output_name(self._server.clean_name(str(name)), '', '{name}')[:-4]
+        return self._save_bytes(stem + '.png', body)
+
+    def save_profile(self, name: str, text: str) -> bool:
+        """Save a style profile the page built; it is validated like an imported one."""
+        from pngsvg.profile import SUFFIX, ProfileError, parse
+        try:
+            parse(json.loads(text))
+        except (ValueError, TypeError, ProfileError):
+            return False
+        stem = self._server.output_name(self._server.clean_name(str(name)), '', '{name}')[:-4]
+        return self._save_bytes(stem + SUFFIX, text.encode('utf-8'))
+
+    def _save_bytes(self, name: str, body: bytes) -> bool:
+        ext = 'json' if name.endswith('.json') else name.rsplit('.', 1)[-1].lower()
         folder = self._direct_dir()
         if folder:
-            unique_path(folder, name).write_text(text, encoding='utf-8')
+            unique_path(folder, name).write_bytes(body)
             return True
         target = self._dialog('SAVE', directory=self._prefs['save_dir'] or '', save_filename=name,
-                              file_types=('SVG (*.svg)',))
+                              file_types=(f'{ext.upper()} (*.{ext})',))
         if not target:
             return False
         path = Path(target if isinstance(target, str) else target[0])
-        if path.suffix.lower() != '.svg':
-            path = path.with_suffix('.svg')
-        path.write_text(text, encoding='utf-8')
+        if path.suffix.lower() != '.' + ext:
+            path = path.with_suffix('.' + ext)
+        path.write_bytes(body)
         return True
 
-    def save_all(self, job_ids: list) -> int:
-        """Write every finished SVG into one folder; existing files are never overwritten (name-2.svg, ...)."""
+    def save_all(self, job_ids: list, fmt: str = 'svg') -> int:
+        """Write every finished result into one folder; existing files are never overwritten (name-2.svg, ...)."""
+        if fmt not in EXPORT_FORMATS:
+            return 0
         folder = self._direct_dir()
         if folder is None:
             chosen = self._dialog('FOLDER', directory=self._prefs['save_dir'] or '')
@@ -224,8 +257,8 @@ class Bridge:
             job = self._jobs.get(str(jid))
             if job is None or job.svg is None:
                 continue
-            name, text = self._output(job)
-            unique_path(folder, name).write_text(text, encoding='utf-8')
+            name, body = self._output(job, fmt)
+            unique_path(folder, name).write_bytes(body)
             written += 1
         return written
 

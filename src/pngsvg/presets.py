@@ -43,3 +43,21 @@ def options_for(preset: str = 'cartoon', **overrides) -> Options:
             raise AttributeError(f'Options has no field {k!r}')
         setattr(o, k, v)
     return o
+
+
+def apply_overrides(o: Options, overrides: dict) -> Options:
+    """Apply fine-tune overrides by their public names (app, API, profiles); nested parameters are mapped."""
+    for key, value in overrides.items():
+        if value is None:
+            continue
+        if key == 'merge_de':
+            o.regions.merge_de = float(value)
+        elif key == 'speckle':
+            o.regions.speckle = int(value)
+        elif key == 'palette':
+            o.palette = tuple(value)
+        elif hasattr(o, key):
+            setattr(o, key, value)
+        else:
+            raise AttributeError(f'unknown option {key!r}')
+    return o

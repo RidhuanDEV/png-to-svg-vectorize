@@ -81,9 +81,13 @@ def upscale(image: Image.Image, model: Path, accel: str = 'auto', tile: int = 19
 
 
 def enhance(image: Image.Image, model: Path, accel: str = 'auto', target: int = 2) -> Image.Image:
-    """AI-cleaned copy at `target` × the original size (the model works at x4; the result is resized down)."""
-    up = upscale(image, model, accel)
+    """AI-cleaned copy at `target` × the original size (the model works at x4; the result is resized down).
+    Transparency is kept: the model sees the picture on white, the opacity is enlarged separately."""
+    from .core import _alpha, flatten
+    up = upscale(flatten(image), model, accel)
     w, h = image.size
-    if target == 4:
-        return up
-    return up.resize((w * target, h * target), Image.Resampling.LANCZOS)
+    out = up if target == 4 else up.resize((w * target, h * target), Image.Resampling.LANCZOS)
+    if _alpha(image) is not None:
+        out = out.convert('RGBA')
+        out.putalpha(image.convert('RGBA').getchannel('A').resize(out.size, Image.Resampling.LANCZOS))
+    return out

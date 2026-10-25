@@ -23,7 +23,13 @@ export interface Prefs {
   aiMode: 'off' | 'auto' | 'always';
   aiModel: 'illustration' | 'general';
   aiAccel: 'auto' | 'gpu' | 'cpu';
+  /** format of Save / Save all; PNG is rendered from the vector at `pngScale` × */
+  exportFormat: 'svg' | 'pdf' | 'eps' | 'dxf' | 'png';
+  pngScale: number;
 }
+
+export const EXPORT_CHOICES: Prefs['exportFormat'][] = ['svg', 'pdf', 'eps', 'dxf', 'png'];
+export const PNG_SCALES = [1, 2, 4, 8];
 
 export const THEMES = Object.keys(themes) as (keyof typeof themes)[];
 export const TEXT_SCALES = [0.9, 1, 1.15, 1.3];
@@ -42,6 +48,8 @@ const DEFAULTS: Prefs = {
   aiMode: 'auto',
   aiModel: 'illustration',
   aiAccel: 'auto',
+  exportFormat: 'svg',
+  pngScale: 2,
 };
 const KEY = 'pngsvg.prefs';
 
@@ -58,6 +66,8 @@ function load(): Prefs {
       if (!['off', 'auto', 'always'].includes(p.aiMode)) p.aiMode = DEFAULTS.aiMode;
       if (!['illustration', 'general'].includes(p.aiModel)) p.aiModel = DEFAULTS.aiModel;
       if (!['auto', 'gpu', 'cpu'].includes(p.aiAccel)) p.aiAccel = DEFAULTS.aiAccel;
+      if (!EXPORT_CHOICES.includes(p.exportFormat)) p.exportFormat = DEFAULTS.exportFormat;
+      if (!PNG_SCALES.includes(p.pngScale)) p.pngScale = DEFAULTS.pngScale;
       return p;
     }
   } catch {
@@ -124,3 +134,6 @@ export function previewName(pattern: string, name: string, style: string): strin
     .trim();
   return `${out || stem || 'image'}.svg`;
 }
+
+/** First color of a new palette entry: a data value the user then changes (not a UI color). */
+export const NEW_PALETTE_COLOR = '#808080';

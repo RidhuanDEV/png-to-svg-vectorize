@@ -18,6 +18,27 @@ the CLI and the app.
 
 Machine: Windows 11 laptop, Python 3.13, single process.
 
+## v1.4 — studio options (2026-10-25)
+
+Default output is **byte-identical** to v1.3 (checked on three E7 images × three presets), so every baseline above
+still holds. The new modes, on 12 E7 images (cartoons, flags, icons; transparent pixels compared on white), cartoon
+preset, rendered and compared with the original:
+
+| Mode | Similarity (median) | Size (median) | Time (median) |
+|---|---|---|---|
+| default | 99.82 % | 39 KB | 7.2 s |
+| cutout (`layout=cutout`) | 99.82 % | 44 KB | 7.4 s |
+| 16 flat colors (`max_colors=16`) | 99.80 % | 38 KB | 6.8 s |
+| 8 flat colors | 99.75 % | 36 KB | 6.6 s |
+| 4 flat colors | 98.89 % | 32 KB | 7.0 s |
+
+- A limited palette costs little quality down to ~8 colors: palette colors come from an area-weighted k-means of the
+  region colors, and touching regions with the same color merge (fewer shapes).
+- Cut-out shapes keep every hole (`fill-rule="evenodd"`), +13 % size, same look.
+- Exports, size relative to the SVG (median): **PDF 0.6×** (compressed stream), EPS 2.0×, DXF 4.2× (curves flattened to
+  polylines, 0.25 px). PDF pages rendered with the Windows PDF engine match the SVG render at 99.9 % (gradients
+  included).
+
 ## v1.3 — optional AI step (2026-10-25)
 
 `python bench/ai_restore.py MODELS_DIR --limit 10` — a **restoration** test: each clean E7 image is first degraded like
