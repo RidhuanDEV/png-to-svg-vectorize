@@ -187,7 +187,7 @@
   "download": "Unduh",
   "openRepo": "Kode sumber di GitHub",
   "licenses": "Lisensi open source",
-  "appLicense": "Gratis dan open source (lisensi MIT).",
+  "appLicense": "Gratis dan open source (GNU AGPL-3.0) · oleh Ridhuan Rangga Kusuma.",
   "desktopOnly": "Tersedia di aplikasi desktop.",
   "closeConfirm": "Masih ada {n} foto yang menunggu atau sedang diproses. Tutup aplikasi dan hentikan prosesnya?",
   "ai": "Perhalus dengan AI",

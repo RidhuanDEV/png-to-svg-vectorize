@@ -189,7 +189,12 @@ gradients, parallel processing and presets (v0.3) — see [docs/bench.md](docs/b
 
 ## License
 
-[MIT](LICENSE) © Ridhuan Rangga Kusuma.
+[GNU AGPL-3.0](LICENSE) © Ridhuan Rangga Kusuma — see [NOTICE](NOTICE).
+
+You may use, change and share this program, also commercially, as long as every copy and every modified version
+(including one offered as a web service) stays open source under the same license, and keeps the attribution
+**"Based on PNG to SVG Vectorize by Ridhuan Rangga Kusuma"** with a link to this repository (additional terms
+under AGPL section 7, in NOTICE). Releases 1.0.0–1.5.0 were published under the MIT License.
 
 ---
 

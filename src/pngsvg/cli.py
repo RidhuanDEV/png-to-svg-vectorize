@@ -21,6 +21,10 @@ from .presets import PRESETS, apply_overrides, options_for
 from .profile import ProfileError, check_options, load
 
 
+ATTRIBUTION = ('PNG to SVG Vectorize by Ridhuan Rangga Kusuma - https://github.com/RidhuanDEV/png-to-svg-vectorize - '
+               'GNU AGPL-3.0 (see NOTICE)')
+
+
 def _options(a: argparse.Namespace, stem: str):
     opts = options_for(a.preset, id_prefix=stem)
     apply_overrides(opts, a.profile_options)
@@ -60,7 +64,8 @@ def _convert(src: Path, dst: Path, opts, report: bool, executor=None) -> str:
 
 def watch_main(argv: list[str]) -> int:
     from .watch import NewFiles, unique_path
-    ap = argparse.ArgumentParser(prog='png2svg watch', description='Convert every picture that appears in a folder.')
+    ap = argparse.ArgumentParser(prog='png2svg watch', epilog=ATTRIBUTION,
+                                 description='Convert every picture that appears in a folder.')
     ap.add_argument('source', type=Path, help='folder to watch (PNG, JPEG, WebP)')
     ap.add_argument('target', type=Path, help='folder for the results')
     ap.add_argument('-p', '--preset', choices=list(PRESETS))
@@ -114,7 +119,7 @@ def main(argv=None) -> int:
             print('The UI needs the app extra: pip install "png-to-svg-vectorize[app]"', file=sys.stderr)
             return 2
         return serve_main(argv[1:])
-    ap = argparse.ArgumentParser(prog='png2svg', description='Raster cartoon illustration -> pure-path SVG with '
+    ap = argparse.ArgumentParser(prog='png2svg', epilog=ATTRIBUTION, description='Raster cartoon illustration -> pure-path SVG with '
                                  'gradient fills and crisp outlines.')
     ap.add_argument('inputs', nargs='+', type=Path, help='PNG/WebP/JPEG files')
     ap.add_argument('-o', '--out', type=Path, help='output file (single input) or directory (many inputs)')

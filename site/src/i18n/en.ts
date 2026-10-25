@@ -41,7 +41,7 @@ export const en = {
       },
       {
         title: "Free and open",
-        body: "MIT licensed, built in public, with every feature included: palettes, PDF/EPS/DXF, center lines, batch automation, optional AI clean-up.",
+        body: "Open source under the AGPL-3.0, built in public, with every feature included: palettes, PDF/EPS/DXF, center lines, batch automation, optional AI clean-up.",
       },
     ],
     stepsTitle: "Four steps",
@@ -58,7 +58,7 @@ export const en = {
     faq: [
       {
         q: "Is it really free?",
-        a: "Yes. The app, the engine and the optional AI models are free and open source under the MIT license (the AI models are Real-ESRGAN, BSD-3-Clause). There is no paid tier.",
+        a: "Yes. The app and the engine are free and open source under the GNU AGPL-3.0 (the optional AI models are Real-ESRGAN, BSD-3-Clause). There is no paid tier. Changed versions must stay open source and credit the original.",
       },
       {
         q: "Are my pictures uploaded anywhere?",
@@ -179,7 +179,7 @@ export const en = {
     note: "General characteristics of each kind of tool as of October 2026 — check each product's site for its current offer. We do not publish other tools' outputs without permission.",
     cols: ["", "PNG to SVG Vectorize", "Online vectorizer services", "Design suite image trace", "Open-source bitmap tracers"],
     rows: [
-      ["Price", "Free (MIT)", "Usually per image or subscription", "Part of a paid subscription", "Free"],
+      ["Price", "Free (AGPL-3.0)", "Usually per image or subscription", "Part of a paid subscription", "Free"],
       ["Where pictures go", "Stay on your computer", "Uploaded to a server", "Stay on your computer", "Stay on your computer"],
       ["Gradients", "Linear + radial", "Varies", "Varies", "No (one color per pass)"],
       ["Separate ink layer", "Yes", "Varies", "No", "No"],
@@ -227,7 +227,7 @@ export const en = {
   changelog: { title: "Release notes", note: "" },
   openSource: {
     title: "Open source",
-    lead: "PNG to SVG Vectorize is MIT licensed and built in public.",
+    lead: "PNG to SVG Vectorize is free software under the GNU AGPL-3.0, built in public. Forks and web services built on it must stay open source and keep the attribution to the original author.",
     items: [
       ["Code", "Engine (Python), local service (FastAPI), interface (Svelte) and this website (Next.js) live in one repository."],
       ["Translations", "Each language is one JSON file in app/ui/src/locales — copy en.json, translate, and open a pull request."],
@@ -258,13 +258,13 @@ export const en = {
     ],
   },
   footer: {
-    tagline: "Studio-grade vectorizing. Free, offline and open.",
+    tagline: "Studio-grade vectorizing. Free, offline and open. By Ridhuan Rangga Kusuma.",
     product: "Product",
     project: "Project",
     privacy: "Privacy",
     openSource: "Open source",
     changelog: "Release notes",
-    license: "MIT License",
+    license: "GNU AGPL-3.0",
     built: "Version {v} · site built {d}",
   },
   root: { choose: "Choose a language" },

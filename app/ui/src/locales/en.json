@@ -187,7 +187,7 @@
   "download": "Download",
   "openRepo": "Source code on GitHub",
   "licenses": "Open-source licenses",
-  "appLicense": "Free and open source (MIT license).",
+  "appLicense": "Free and open source (GNU AGPL-3.0) · by Ridhuan Rangga Kusuma.",
   "desktopOnly": "Available in the desktop app.",
   "closeConfirm": "{n} photo(s) are still waiting or being processed. Close the app and stop them?",
   "ai": "Enhance with AI",

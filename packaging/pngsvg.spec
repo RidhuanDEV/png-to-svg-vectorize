@@ -17,7 +17,7 @@ if not (STATIC / 'index.html').exists():
 a = Analysis(
     [str(ROOT / 'packaging/launcher.py')],
     pathex=[str(ROOT / 'src')],
-    datas=[(str(STATIC), 'pngsvg_app/static')],
+    datas=[(str(STATIC), 'pngsvg_app/static'), (str(ROOT / 'LICENSE'), '.'), (str(ROOT / 'NOTICE'), '.')],
     hiddenimports=collect_submodules('uvicorn') + ['pngsvg_app.desktop', 'pngsvg_app.server', 'pngsvg_app.jobs',
                                                    'pngsvg_app.watcher', 'pngsvg_app.svgcheck', 'pngsvg.profile'],
     excludes=['tkinter', 'matplotlib', 'IPython', 'pytest', 'PyInstaller'],

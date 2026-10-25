@@ -43,7 +43,7 @@ export const id: Dict = {
       },
       {
         title: "Gratis dan terbuka",
-        body: "Lisensi MIT, dikembangkan terbuka, semua fitur tersedia: palet, PDF/EPS/DXF, garis tengah, otomasi batch, penghalusan AI opsional.",
+        body: "Open source dengan AGPL-3.0, dikembangkan terbuka, semua fitur tersedia: palet, PDF/EPS/DXF, garis tengah, otomasi batch, penghalusan AI opsional.",
       },
     ],
     stepsTitle: "Empat langkah",
@@ -60,7 +60,7 @@ export const id: Dict = {
     faq: [
       {
         q: "Benar-benar gratis?",
-        a: "Ya. Aplikasi, mesin, dan model AI opsionalnya gratis dan open source dengan lisensi MIT (model AI-nya Real-ESRGAN, BSD-3-Clause). Tidak ada versi berbayar.",
+        a: "Ya. Aplikasi dan mesinnya gratis dan open source dengan GNU AGPL-3.0 (model AI opsionalnya Real-ESRGAN, BSD-3-Clause). Tidak ada versi berbayar. Versi yang diubah wajib tetap open source dan mencantumkan karya aslinya.",
       },
       {
         q: "Apakah gambar saya diunggah ke mana pun?",
@@ -181,7 +181,7 @@ export const id: Dict = {
     note: "Gambaran umum tiap jenis alat per Oktober 2026 — periksa situs masing-masing produk untuk penawaran terbarunya. Kami tidak menerbitkan hasil alat lain tanpa izin.",
     cols: ["", "PNG to SVG Vectorize", "Layanan vektorisasi online", "Image trace di paket desain", "Pelacak bitmap open source"],
     rows: [
-      ["Harga", "Gratis (MIT)", "Biasanya per gambar atau langganan", "Bagian dari langganan berbayar", "Gratis"],
+      ["Harga", "Gratis (AGPL-3.0)", "Biasanya per gambar atau langganan", "Bagian dari langganan berbayar", "Gratis"],
       ["Ke mana gambar pergi", "Tetap di komputer Anda", "Diunggah ke server", "Tetap di komputer Anda", "Tetap di komputer Anda"],
       ["Gradien", "Linear + radial", "Bervariasi", "Bervariasi", "Tidak (satu warna per lintasan)"],
       ["Lapisan tinta terpisah", "Ya", "Bervariasi", "Tidak", "Tidak"],
@@ -229,7 +229,7 @@ export const id: Dict = {
   changelog: { title: "Catatan rilis", note: "Catatan rilis lengkap ditulis dalam bahasa Inggris; ringkasan Bahasa Indonesia ada di setiap rilis GitHub." },
   openSource: {
     title: "Open source",
-    lead: "PNG to SVG Vectorize berlisensi MIT dan dikembangkan secara terbuka.",
+    lead: "PNG to SVG Vectorize adalah perangkat lunak bebas dengan GNU AGPL-3.0, dikembangkan secara terbuka. Fork dan layanan web yang dibangun darinya wajib tetap open source dan mencantumkan atribusi ke penulis aslinya.",
     items: [
       ["Kode", "Mesin (Python), layanan lokal (FastAPI), antarmuka (Svelte), dan website ini (Next.js) ada di satu repositori."],
       ["Terjemahan", "Setiap bahasa adalah satu berkas JSON di app/ui/src/locales — salin en.json, terjemahkan, lalu buka pull request."],
@@ -260,13 +260,13 @@ export const id: Dict = {
     ],
   },
   footer: {
-    tagline: "Vektorisasi kelas studio. Gratis, offline, dan terbuka.",
+    tagline: "Vektorisasi kelas studio. Gratis, offline, dan terbuka. Oleh Ridhuan Rangga Kusuma.",
     product: "Produk",
     project: "Proyek",
     privacy: "Privasi",
     openSource: "Open source",
     changelog: "Catatan rilis",
-    license: "Lisensi MIT",
+    license: "GNU AGPL-3.0",
     built: "Versi {v} · situs dibuat {d}",
   },
   root: { choose: "Pilih bahasa" },

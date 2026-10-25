@@ -1,6 +1,7 @@
 # Contributing
 
-Thank you for helping! Everything here is free and open source (MIT).
+Thank you for helping! Everything here is free and open source under the GNU AGPL-3.0 (see LICENSE and NOTICE).
+By sending a contribution you agree that it is published under the same license.
 
 ## Translate the app
 

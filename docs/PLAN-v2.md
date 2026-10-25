@@ -12,7 +12,7 @@
 
 | | Kita | Aplikasi lain (gambaran umum, perlu dicek ulang saat menulis halaman Bandingkan) |
 |---|---|---|
-| Harga | Gratis, open source (MIT) | Langganan / bayar per gambar / bagian dari paket desain berbayar |
+| Harga | Gratis, open source (AGPL-3.0, wajib atribusi) | Langganan / bayar per gambar / bagian dari paket desain berbayar |
 | Privasi | Semua di komputer sendiri, tanpa unggah | Banyak yang memproses di server |
 | Kualitas | Gradien linear + radial, garis tinta terpisah, skor kemiripan terukur | Bervariasi; jarang menampilkan angka kemiripan |
 | Massal | Antrean + (M10) folder pantau, profil, laporan | Sering terbatas di paket mahal |

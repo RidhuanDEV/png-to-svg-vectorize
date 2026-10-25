@@ -16,6 +16,9 @@ All notable changes. Benchmarks for every engine version are in [docs/bench.md](
   options of the chosen style's engine. Results report where a trimmed SVG sits (`stats.crop`) and a warning when a
   picture is not flat artwork (`stats.warnings`).
 - `pngsvg.color.delta_e2000` (CIEDE2000, checked against Sharma et al.'s reference pairs).
+- **License: GNU AGPL-3.0** (was MIT): copies, modified versions and web services built on it must stay open source
+  and keep the attribution to the author (additional terms under section 7 in [NOTICE](NOTICE)). Releases
+  1.0.0–1.5.0 remain available under MIT.
 - **Python 3.11 or newer** is required for the package and command line (3.10 reached end of life in October 2026), so
   every install gets **Pillow ≥ 13.0** with its security fixes for image decoding. The desktop app bundles Python 3.13.
 

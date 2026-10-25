@@ -1,0 +1,33 @@
+PNG to SVG Vectorize
+Copyright (C) 2026 Ridhuan Rangga Kusuma
+https://github.com/RidhuanDEV/png-to-svg-vectorize
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+Public License as published by the Free Software Foundation, version 3 of the License (see LICENSE).
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+details.
+
+Additional terms (section 7 of the GNU Affero General Public License)
+---------------------------------------------------------------------
+
+As permitted by section 7(b) and 7(c), the following terms apply to this program and to every work based on it:
+
+1. Author attribution. Every copy, modified version or work based on this program, including one offered to users
+   over a network, must keep this attribution visible in its Appropriate Legal Notices (for example the "About"
+   screen of the app, the website footer, or the output of the command line's --help):
+
+       Based on PNG to SVG Vectorize by Ridhuan Rangga Kusuma
+       https://github.com/RidhuanDEV/png-to-svg-vectorize
+
+2. Marking of modified versions. A modified version must be marked as different from the original, must not be
+   presented as the original or as an official release, and may not use the name "PNG to SVG Vectorize" as its own
+   name without that marking.
+
+Earlier releases (1.0.0 to 1.5.0) were published under the MIT License; copies obtained under those releases keep
+that license. Version 1.6.0 and later are licensed under the GNU Affero General Public License version 3 only.
+
+Third-party components keep their own licenses (listed in the app under Settings -> About and in the README):
+numpy and SciPy (BSD-3-Clause), Pillow (MIT-CMU), FastAPI and Pydantic (MIT), Uvicorn and pywebview (BSD-3-Clause),
+ONNX Runtime (MIT), the Real-ESRGAN models (BSD-3-Clause), Svelte, Next.js and React (MIT), IBM Plex (SIL OFL 1.1).
