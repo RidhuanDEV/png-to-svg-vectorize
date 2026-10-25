@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Job } from '../lib/api';
+  import { canRedo, canUndo, hitTest, recolor, redoEdit, removeShape, shapeInfo, undoEdit, viewBox } from '../lib/edit.svelte';
   import { t, tf, tk } from '../lib/i18n.svelte';
   import type { Media } from '../lib/store.svelte';
   import Button from './ui/Button.svelte';
@@ -20,6 +21,13 @@
   let split = $state(0.5);
   let manual = false; // the user zoomed or panned: stop re-fitting on resize
   let shownJob: string | undefined;
+  // light editing: pick a shape on the vector side, recolor / delete it, or give it another shape's color
+  let editing = $state(false);
+  let sel = $state<number | null>(null);
+  let picking = $state(false);
+  let busy = $state(false);
+  const selInfo = $derived(editing && sel !== null && media?.svgText ? shapeInfo(media.svgText, sel) : null);
+  const vb = $derived(media?.svgText ? viewBox(media.svgText) : [1, 1]);
 
   const w = $derived(job?.width ?? 1);
   const h = $derived(job?.height ?? 1);
@@ -42,6 +50,8 @@
     if (job?.id !== shownJob) {
       shownJob = job?.id;
       manual = false;
+      sel = null;
+      picking = false;
     }
     if (job && paneW && paneH && !manual) fit();
   });
@@ -65,10 +75,46 @@
   }
 
   let drag: { id: number; x: number; y: number } | null = null;
+  let press: { x: number; y: number } | null = null;
   function down(e: PointerEvent) {
     if ((e.target as HTMLElement).closest('.handle')) return;
     drag = { id: e.pointerId, x: e.clientX, y: e.clientY };
+    press = { x: e.clientX, y: e.clientY };
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  }
+
+  /** A click (not a drag) on the vector side while editing selects the shape under the pointer. */
+  async function pick(e: PointerEvent) {
+    const start = press;
+    press = null;
+    if (!editing || !start || Math.hypot(e.clientX - start.x, e.clientY - start.y) > 4 || !media?.svgText || !job) return;
+    const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const x = ((e.clientX - r.left - view.x) / (w * view.s)) * vb[0];
+    const y = ((e.clientY - r.top - view.y) / (h * view.s)) * vb[1];
+    const hit = hitTest(media.svgText, x, y, layer);
+    if (picking && sel !== null) {
+      picking = false;
+      const color = hit !== null ? shapeInfo(media.svgText, hit)?.color : undefined;
+      if (color) await change(() => recolor(job, sel ?? 0, color));
+      return;
+    }
+    sel = hit;
+  }
+
+  async function change(work: () => Promise<unknown>) {
+    busy = true;
+    try {
+      await work();
+    } finally {
+      busy = false;
+    }
+  }
+
+  function toggleEdit() {
+    editing = !editing;
+    sel = null;
+    picking = false;
+    if (editing) mode = 'side';
   }
   function move(e: PointerEvent) {
     if (!drag || drag.id !== e.pointerId) return;
@@ -92,6 +138,16 @@
     if (e.key === '+' || e.key === '=') zoomAt(1.25, paneW / 2, paneH / 2);
     else if (e.key === '-') zoomAt(0.8, paneW / 2, paneH / 2);
     else if (e.key === '0') fit();
+    else if ((e.key === 'e' || e.key === 'E') && !e.ctrlKey && !e.metaKey && job?.status === 'done') toggleEdit();
+    else if (e.key === 'Escape' && editing) {
+      if (picking) picking = false;
+      else if (sel !== null) sel = null;
+      else editing = false;
+    } else if ((e.key === 'Delete' || e.key === 'Backspace') && editing && sel !== null && job) {
+      const i = sel;
+      sel = null;
+      void change(() => removeShape(job, i));
+    }
     else if (pan[e.key]) {
       manual = true;
       view = { ...view, x: view.x + pan[e.key][0], y: view.y + pan[e.key][1] };
@@ -138,8 +194,60 @@
       <span class="pct num" data-testid="zoom">{Math.round(view.s * 100)}%</span>
       <Button variant="ghost" size="sm" iconOnly icon="zoomIn" title={t('zoomIn')} onclick={() => zoomAt(1.25, paneW / 2, paneH / 2)}>{t('zoomIn')}</Button>
       <Button variant="secondary" size="sm" icon="fit" onclick={fit}>{t('fit')}</Button>
+      <Button
+        variant={editing ? 'primary' : 'ghost'}
+        size="sm"
+        icon="pen"
+        disabled={job?.status !== 'done'}
+        aria-pressed={editing}
+        onclick={toggleEdit}
+        data-testid="edit-toggle">{t('edit')}</Button
+      >
     </div>
   </div>
+
+  {#if editing && job}
+    <div class="editbar" data-testid="editbar" role="toolbar" aria-label={t('edit')}>
+      {#if selInfo}
+        <span class="swatch" style="background:{selInfo.color}" aria-hidden="true"></span>
+        <label class="color">
+          <span>{t('editColor')}</span>
+          <input
+            type="color"
+            value={selInfo.color.toLowerCase()}
+            disabled={busy}
+            onchange={(e) => {
+              const c = e.currentTarget.value.toUpperCase();
+              const i = sel;
+              if (i !== null) void change(() => recolor(job, i, c));
+            }}
+            data-testid="edit-color"
+          />
+        </label>
+        <Button variant={picking ? 'primary' : 'ghost'} size="sm" icon="pipette" disabled={busy} aria-pressed={picking}
+          onclick={() => (picking = !picking)} data-testid="edit-pick">{t('editTakeColor')}</Button
+        >
+        <Button variant="ghost" size="sm" icon="trash" disabled={busy} data-testid="edit-delete"
+          onclick={() => {
+            const i = sel;
+            sel = null;
+            if (i !== null) void change(() => removeShape(job, i));
+          }}>{t('editDelete')}</Button
+        >
+        <span class="hint muted" role="status">{picking ? t('editPickHint') : ''}</span>
+      {:else}
+        <span class="hint muted" role="status">{t('editHint')}</span>
+      {/if}
+      <span class="undo">
+        <Button variant="ghost" size="sm" iconOnly icon="undo" title={t('undo')} disabled={busy || !canUndo(job.id)}
+          onclick={() => change(() => undoEdit(job))} data-testid="edit-undo">{t('undo')}</Button
+        >
+        <Button variant="ghost" size="sm" iconOnly icon="redo" title={t('redo')} disabled={busy || !canRedo(job.id)}
+          onclick={() => change(() => redoEdit(job))} data-testid="edit-redo">{t('redo')}</Button
+        >
+      </span>
+    </div>
+  {/if}
 
   {#if !job}
     <div class="empty muted">{t('selectHint')}</div>
@@ -171,9 +279,13 @@
             bind:clientWidth={paneW}
             bind:clientHeight={paneH}
             use:wheelZoom
+            class:editing={editing && which === 'svg'}
             onpointerdown={down}
             onpointermove={move}
-            onpointerup={up}
+            onpointerup={(e) => {
+              up();
+              if (which === 'svg') void pick(e);
+            }}
             onpointercancel={up}
             onkeydown={key}
           >
@@ -181,6 +293,12 @@
               <img src={media.sourceUrl} alt="" style={imgStyle} draggable="false" />
             {:else if which === 'svg' && svgUrl}
               <img src={svgUrl} alt="" style={imgStyle} draggable="false" data-testid="svg-image" />
+              {#if selInfo}
+                <svg class="overlay" viewBox="0 0 {vb[0]} {vb[1]}" style={imgStyle} aria-hidden="true" data-testid="edit-selection">
+                  <path d={selInfo.d} class="sel-halo" vector-effect="non-scaling-stroke" />
+                  <path d={selInfo.d} class="sel" vector-effect="non-scaling-stroke" />
+                </svg>
+              {/if}
             {:else if which === 'svg'}
               <div class="empty muted">{t('notReady')}</div>
             {/if}
@@ -294,6 +412,72 @@
     cursor: grab;
     touch-action: none;
     background: repeating-conic-gradient(var(--checker-a) 0% 25%, var(--checker-b) 0% 50%) 0 0 / 20px 20px;
+  }
+  .viewport.editing {
+    cursor: crosshair;
+  }
+  .overlay {
+    position: absolute;
+    pointer-events: none;
+    overflow: visible;
+  }
+  .overlay path {
+    fill: none;
+    stroke-linejoin: round;
+  }
+  .sel-halo {
+    stroke: var(--panel);
+    stroke-width: 5px;
+  }
+  .sel {
+    stroke: var(--accent);
+    stroke-width: 2.5px;
+    stroke-dasharray: 6 4;
+    animation: march 0.8s linear infinite;
+  }
+  @keyframes march {
+    to {
+      stroke-dashoffset: -10;
+    }
+  }
+  .editbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: var(--radius-sm);
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    animation: fade-in var(--medium) var(--ease);
+  }
+  .editbar .swatch {
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    border: 1px solid var(--line-strong);
+  }
+  .editbar .color {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: calc(13px * var(--ts));
+  }
+  .editbar input[type='color'] {
+    width: 30px;
+    height: 26px;
+    padding: 0;
+    border: 1px solid var(--line-strong);
+    border-radius: 6px;
+    background: none;
+  }
+  .editbar .hint {
+    font-size: calc(12.5px * var(--ts));
+  }
+  .editbar .undo {
+    margin-left: auto;
+    display: inline-flex;
+    gap: 2px;
   }
   .viewport.single {
     flex: 1;

@@ -168,3 +168,9 @@ def test_save_profile_validates(jobs, tmp_path):
     assert bridge(jobs, {'SAVE': str(tmp_path / 'brand.pngsvg-profile.json')}).save_profile('Brand', good) is True
     assert (tmp_path / 'brand.pngsvg-profile.json').read_text(encoding='utf-8') == good
     assert bridge(jobs, {'SAVE': str(tmp_path / 'x')}).save_profile('x', '{"format":"other"}') is False
+
+
+def test_save_report(jobs, tmp_path):
+    assert bridge(jobs, {'SAVE': str(tmp_path / 'r.csv')}).save_report('report.csv', 'file\r\na.png\r\n') is True
+    assert (tmp_path / 'r.csv').read_bytes() == b'file\r\na.png\r\n'
+    assert bridge(jobs, {'SAVE': str(tmp_path / 'r.exe')}).save_report('report.exe', 'x') is False

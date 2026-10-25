@@ -570,3 +570,83 @@ test('profiles: save a style, apply it again, export and import a file', async (
   await page.getByTestId('profile-file').setInputFiles({ name: 'bad.json', mimeType: 'application/json', buffer: Buffer.from('{"format":"x"}') });
   await expect(page.getByText(/not a valid style profile/)).toBeVisible();
 });
+
+// -- M10 P2 (v1.5) -------------------------------------------------------------------------------------------------
+
+test('center lines and design layers are options of the style', async ({ page }) => {
+  await openApp(page);
+  await page.getByTestId('advanced-toggle').click();
+  await page.getByTestId('opt-layers').click();
+  await uploadAndWait(page, 'badge.png');
+  expect((await serviceJob(page)).options).toMatchObject({ layers: true });
+  const svg = await (await page.request.get(`/api/jobs/${(await serviceJobs(page))[0].id}/svg`, { headers: H })).text();
+  expect(svg).toMatch(/<g id="color-[0-9A-F]{6}">/);
+
+  await page.getByTestId('opt-layout-centerline').click();
+  await expect(page.getByTestId('opt-threshold')).toBeVisible();
+  await expect(page.getByTestId('opt-layers')).toHaveCount(0);
+  await page.getByTestId('apply-selected').click();
+  await expect.poll(async () => (await serviceJob(page)).status).toBe('done');
+  const id = (await serviceJobs(page)).at(-1)?.id;
+  const lines = await (await page.request.get(`/api/jobs/${id}/svg`, { headers: H })).text();
+  expect(lines).toContain('<g id="centerline" fill="none"');
+});
+
+test('edit: select a shape, recolor, undo, delete', async ({ page }) => {
+  await openApp(page);
+  await uploadAndWait(page);
+  const id = (await serviceJobs(page))[0].id;
+  const svgOf = async () => (await page.request.get(`/api/jobs/${id}/svg`, { headers: H })).text();
+  await page.getByTestId('edit-toggle').click();
+  await expect(page.getByTestId('editbar')).toBeVisible();
+  const box = await page.getByTestId('viewport-svg').boundingBox();
+  if (!box) throw new Error('no viewport');
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  await expect(page.getByTestId('edit-selection')).toBeVisible();
+  await page.getByTestId('edit-color').fill('#12ab34');
+  await expect.poll(svgOf).toContain('#12AB34');
+  expect((await (await page.request.get(`/api/jobs/${id}`, { headers: H })).json()).stats.edited).toBe(true);
+  await page.getByTestId('edit-undo').click();
+  await expect.poll(svgOf).not.toContain('#12AB34');
+  await page.getByTestId('edit-redo').click();
+  await expect.poll(svgOf).toContain('#12AB34');
+  const before = (await svgOf()).split('<path').length;
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  await page.getByTestId('edit-delete').click();
+  await expect.poll(async () => (await svgOf()).split('<path').length).toBe(before - 1);
+  await page.keyboard.press('Control+z');
+  await expect.poll(async () => (await svgOf()).split('<path').length).toBe(before);
+});
+
+test('shortcuts: ? opens the sheet, Ctrl+S saves the selected result', async ({ page }) => {
+  await openApp(page);
+  await uploadAndWait(page);
+  await page.locator('body').click({ position: { x: 5, y: 5 } });
+  await page.keyboard.press('?');
+  await expect(page.getByTestId('shortcuts')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByTestId('shortcuts')).toHaveCount(0);
+  const [download] = await Promise.all([page.waitForEvent('download'), page.keyboard.press('Control+s')]);
+  expect(download.suggestedFilename()).toBe('face.svg');
+});
+
+test('batch report: CSV with the similarity of every result', async ({ page }) => {
+  await openApp(page);
+  await uploadAndWait(page);
+  await uploadAndWait(page, 'badge.png');
+  const [csv] = await Promise.all([page.waitForEvent('download'), page.getByTestId('report-csv').click()]);
+  expect(csv.suggestedFilename()).toBe('png2svg-report.csv');
+  const lines = readFileSync(await csv.path(), 'utf-8').trim().split(/\r\n/);
+  expect(lines[0]).toBe('file,saved_as,style,width,height,similarity,svg_bytes,seconds,regions,gradients,outline_paths,colors,ai,options');
+  expect(lines).toHaveLength(3);
+  for (const line of lines.slice(1)) expect(Number(line.split(',')[5])).toBeGreaterThan(80);
+  const [json] = await Promise.all([page.waitForEvent('download'), page.getByTestId('report-json').click()]);
+  expect(JSON.parse(readFileSync(await json.path(), 'utf-8')).results).toHaveLength(2);
+});
+
+test('watch folder is a desktop feature; the web page explains it', async ({ page }) => {
+  await openApp(page);
+  await openSettings(page, 'automation');
+  await expect(page.getByTestId('settings-dialog')).toContainText(/desktop app|aplikasi desktop/i);
+  await expect(page.getByTestId('settings-dialog')).toContainText('png2svg watch');
+});

@@ -4,7 +4,9 @@
   import { i18n, languages, setLang, t, type Lang } from './lib/i18n.svelte';
   import { registerFileInput } from './lib/picker';
   import { setCloseMessage } from './lib/platform';
-  import { addFiles, finished, inQueue, init, selectedJob, staged, store } from './lib/store.svelte';
+  import { redoEdit, undoEdit } from './lib/edit.svelte';
+  import { pickFiles } from './lib/picker';
+  import { addFiles, finished, inQueue, init, processPicked, removeJob, selectedJob, staged, store } from './lib/store.svelte';
   import { startTour, tourSeen } from './lib/tour.svelte';
   import DropZone from './components/DropZone.svelte';
   import Workbench from './components/Workbench.svelte';
@@ -15,6 +17,7 @@
   import Export from './components/Export.svelte';
   import Tour from './components/Tour.svelte';
   import Preferences from './components/Preferences.svelte';
+  import Shortcuts from './components/Shortcuts.svelte';
   import Button from './components/ui/Button.svelte';
   import Icon from './components/ui/Icon.svelte';
   import Select from './components/ui/Select.svelte';
@@ -25,6 +28,40 @@
   let depth = 0;
   let input: HTMLInputElement;
   let settingsOpen = $state(false);
+  let shortcutsOpen = $state(false);
+
+  const typing = (t: EventTarget | null) =>
+    t instanceof HTMLElement && !!t.closest('input, textarea, select, [contenteditable], [role="slider"], [role="dialog"]');
+
+  /** Global keyboard shortcuts (see the ? sheet). Keys inside fields and dialogs are left alone. */
+  function shortcut(e: KeyboardEvent) {
+    const mod = e.ctrlKey || e.metaKey;
+    if (mod && e.key === ',') {
+      e.preventDefault();
+      settingsOpen = true;
+      return;
+    }
+    if (!authed || settingsOpen || shortcutsOpen || typing(e.target)) return;
+    const k = e.key.toLowerCase();
+    const click = (id: string) => document.querySelector<HTMLButtonElement>(`[data-testid="${id}"]:not(:disabled)`)?.click();
+    if (mod && k === 'o') void pickFiles();
+    else if (mod && e.key === 'Enter') void processPicked();
+    else if (mod && k === 's') click(e.shiftKey ? 'save-all' : 'save-svg');
+    else if (mod && k === 'z' && job) void (e.shiftKey ? redoEdit(job) : undoEdit(job));
+    else if (mod && k === 'y' && job) void redoEdit(job);
+    else if (e.key === '?') shortcutsOpen = true;
+    else if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+      const list = [...inQueue(), ...finished()];
+      if (!list.length) return;
+      const i = list.findIndex((j) => j.id === store.selected);
+      const next = list[Math.min(list.length - 1, Math.max(0, i + (e.key === 'ArrowDown' ? 1 : -1)))];
+      store.selected = next.id;
+      store.focus = 'result';
+    } else if (e.key === 'Delete' && store.selected && !(e.target instanceof HTMLElement && e.target.closest('[role="application"]')))
+      removeJob(store.selected);
+    else return;
+    e.preventDefault();
+  }
 
   onMount(() => {
     document.documentElement.lang = i18n.lang;
@@ -59,12 +96,7 @@
 </script>
 
 <svelte:window
-  onkeydown={(e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === ',') {
-      e.preventDefault();
-      settingsOpen = true;
-    }
-  }}
+  onkeydown={shortcut}
   onpaste={(e) => {
     // Ctrl+V: pictures from the clipboard go on the workbench (not while typing in a field)
     const target = e.target;
@@ -143,6 +175,9 @@
     <div class="right">
       {#if authed}
         <Button variant="ghost" size="sm" icon="help" onclick={startTour} data-testid="tour-open">{t('help')}</Button>
+        <Button variant="ghost" size="sm" iconOnly icon="keyboard" title={t('shortcuts') + ' (?)'} onclick={() => (shortcutsOpen = true)}
+          data-testid="shortcuts-open">{t('shortcuts')}</Button
+        >
         <Button
           variant="ghost"
           size="sm"
@@ -203,7 +238,7 @@
   {/if}
   <Toasts />
   <Tour />
-  {#if authed}<Preferences bind:open={settingsOpen} />{/if}
+  {#if authed}<Preferences bind:open={settingsOpen} /><Shortcuts bind:open={shortcutsOpen} />{/if}
 </div>
 
 <style>

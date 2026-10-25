@@ -41,6 +41,8 @@ class Options:
     remove_bg: bool = False           # leave the background out (transparent pixels, else the region on most of the border)
     layout: str = 'stacked'           # 'stacked': shapes overlap and hide each other's holes (smallest files)
                                       # 'cutout': every shape has its holes cut out, nothing overlaps (cutters, editing)
+                                      # 'centerline': line art as stroked center lines, no fills (plotters, laser)
+    layers: bool = False              # design tools: fills grouped per color (<g id="color-RRGGBB">), implies cut-out
     outline: OutlineParams = field(default_factory=OutlineParams)
     regions: RegionParams = field(default_factory=RegionParams)
 
@@ -176,6 +178,8 @@ def vectorize(image: Image.Image, opts: Options | None = None, executor: Executo
     `if __name__ == '__main__':`). `on_stage(name, fraction)` reports progress: ink, regions, curves, svg."""
     opts = opts or Options()
     stage = on_stage or (lambda name, fraction: None)
+    if opts.layout == 'centerline':
+        return _centerline(image, opts, stage)
     stage('ink', 0.05)
     alpha = _alpha(image) if opts.remove_bg else None
     rgb = _tone(np.asarray(flatten(image)), opts.color_mode, opts.threshold)
@@ -205,7 +209,8 @@ def vectorize(image: Image.Image, opts: Options | None = None, executor: Executo
     behind = ol.behind_rgb.astype(np.float64)
     objects = ndimage.find_objects(label)
     dropped = _background(label, alpha) if opts.remove_bg else set()
-    cut = opts.layout == 'cutout' or bool(dropped)   # a removed background must not be hidden under other shapes
+    # a removed background must not be hidden under other shapes; color layers must not overlap either
+    cut = opts.layout == 'cutout' or opts.layers or bool(dropped)
 
     # shared boundaries: every chain is fitted once and used by both regions it separates
     stage('curves', 0.65)
@@ -237,6 +242,7 @@ def vectorize(image: Image.Image, opts: Options | None = None, executor: Executo
 
     stage('svg', 0.9)
     defs, fills, n_grad = [], [], 0
+    groups: dict[str, list[str]] = {}               # layers: fill color -> its paths
     rule = ' fill-rule="evenodd"' if cut else ''
     used: dict[str, float] = {}
     for i in order:
@@ -262,6 +268,8 @@ def vectorize(image: Image.Image, opts: Options | None = None, executor: Executo
         d = compact_path(loops_to_path(shapes[i][1], fitted), decimals=opts.decimals)
         stroke = f' stroke="{fill}"' if opts.seam > 0 else ''
         fills.append(f'<path d="{d}" fill="{fill}"{rule}{stroke}/>')
+        if opts.layers:
+            groups.setdefault('gradients' if grad else 'color-' + fill[1:], []).append(fills[-1])
 
     if color_of is not None and order:
         background = palette[color_of[order[0]]]
@@ -279,12 +287,33 @@ def vectorize(image: Image.Image, opts: Options | None = None, executor: Executo
 
     svg = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}">'
            + (f'<defs>{"".join(defs)}</defs>' if defs else '')
-           + f'<g id="fill"{seam}>{rect}{"".join(fills)}</g>'
+           + f'<g id="fill"{seam}>{rect}'
+           + (''.join(f'<g id="{k}">{"".join(v)}</g>' for k, v in groups.items()) if opts.layers else ''.join(fills))
+           + '</g>'
            + outline_svg + '</svg>\n')
     if quantized and has_ink:
         used[ink_hex] = used.get(ink_hex, 0.0)
     return Result(svg, len(fills), n_grad, n_out,
                   sorted(used, key=lambda c: -used[c]) if quantized else [])
+
+
+def _centerline(image: Image.Image, opts: Options, stage: Callable[[str, float], None]) -> Result:
+    """Line art as stroked center lines (see centerline.py). Palette / black & white set the stroke color."""
+    from .centerline import centerline
+    stage('ink', 0.05)
+    rgb = _tone(np.asarray(flatten(image)), 'grayscale' if opts.color_mode == 'bw' else opts.color_mode, opts.threshold)
+    h, w = rgb.shape[:2]
+    fixed = list(opts.palette) if opts.palette else (['#000000'] if opts.color_mode == 'bw' else None)
+    stage('curves', 0.3)
+    paths, ink = centerline(rgb, opts.threshold, opts.regions.speckle, opts.smooth, opts.tolerance)
+    if fixed:
+        ink = _nearest(_hex_rgb(ink), fixed)
+    stage('svg', 0.9)
+    body = ''.join(f'<path d="{compact_path(d, decimals=opts.decimals)}" stroke-width="{sw:g}"/>' for d, sw in paths)
+    svg = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}">'
+           f'<g id="centerline" fill="none" stroke="{ink}" stroke-linecap="round" stroke-linejoin="round">{body}</g>'
+           '</svg>\n')
+    return Result(svg, len(paths), 0, len(paths), [ink] if (fixed or opts.max_colors) else [])
 
 
 def _corner_tolerance(alpha: np.ndarray, base: float, hidden: float) -> np.ndarray:

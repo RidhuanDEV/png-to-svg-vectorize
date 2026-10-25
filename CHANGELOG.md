@@ -2,6 +2,26 @@
 
 All notable changes. Benchmarks for every engine version are in [docs/bench.md](docs/bench.md).
 
+## 1.5.0 — 2026-10-25 — center lines, editing, automation
+
+- **Center lines** (Shapes → *Center lines*, CLI `--centerline`): line drawings become one stroke along the middle of
+  each line, without fills — for plotters, laser and embroidery. Zhang-Suen thinning, a junction graph with spur
+  pruning, and the existing curve fitting; stroke width measured from the ink. PDF/EPS/DXF export the strokes (DXF:
+  open polylines on layer `CENTERLINE`).
+- **Layers per color** for design tools (`layers`, CLI `--layers`): fills grouped in `<g id="color-RRGGBB">`.
+- **Edit shapes** (Compare → *Edit*, or `E`): click a shape to select it, recolor it, give it another shape's color
+  (merge), or delete it; undo / redo (`Ctrl+Z` / `Ctrl+Shift+Z`). Edits are saved to the service
+  (`PUT /api/jobs/{id}/svg`), which accepts only the engine's own SVG subset (no scripts, links, entities or foreign
+  markup; same viewBox), and all exports use the edited version.
+- **Watch folder** (desktop: Settings → Automation; CLI `png2svg watch IN OUT [-f pdf] [--profile P]`): pictures
+  that appear in a folder are converted with the current style into another folder, once their copy is complete.
+- **Batch report**: CSV or JSON of every result (file, style, size, time, colors, similarity — measured for results
+  not opened yet). CSV cells that a spreadsheet would run as a formula are neutralized.
+- **Keyboard shortcuts** with a sheet (`?`): open, process, save, save all, previous/next result, remove, edit,
+  undo/redo.
+- Benchmark set: Wikimedia re-encodes and sometimes re-renders its thumbnails; `bench/fetch_sets.py` now also accepts
+  identical pixels (`pixels_sha256`) and known alternate renders (`also_sha256`).
+
 ## 1.4.0 — 2026-10-25 — studio options
 
 - **Colors**: *Number of colors* (2–32 flat colors, ink included) or a **locked palette**: *Use these colors* on a

@@ -154,7 +154,7 @@
             testid="opt-color_mode"
           />
         </div>
-        {#if colorMode === 'bw'}
+        {#if colorMode === 'bw' || current('layout') === 'centerline'}
           <Slider label={t('threshold')} min={1} max={254} step={1} value={current('threshold') ?? 128} format={(x) => x.toFixed(0)}
             onchange={(x) => set('threshold', x)} testid="opt-threshold" />
         {:else if palette.length}
@@ -190,19 +190,22 @@
             />
           </div>
         {/if}
-        <Switch checked={!!current('remove_bg')} label={t('removeBg')} onchange={(c) => set('remove_bg', c)} testid="opt-remove_bg" />
+        {#if current('layout') !== 'centerline'}
+          <Switch checked={!!current('remove_bg')} label={t('removeBg')} onchange={(c) => set('remove_bg', c)} testid="opt-remove_bg" />
+          <Switch checked={!!current('layers')} label={t('layers_design')} onchange={(c) => set('layers', c)} testid="opt-layers" />
+        {/if}
         <div class="row">
           <span class="lbl">{t('layout')}</span>
           <Segmented
             size="sm"
             label={t('layout')}
             value={current('layout') ?? 'stacked'}
-            options={(['stacked', 'cutout'] as Layout[]).map((m) => ({ value: m, label: tk('layout_' + m) }))}
+            options={(['stacked', 'cutout', 'centerline'] as Layout[]).map((m) => ({ value: m, label: tk('layout_' + m) }))}
             onchange={(m) => set('layout', m)}
             testid="opt-layout"
           />
         </div>
-        <p class="hint muted">{t('layoutHint')}</p>
+        <p class="hint muted">{current('layout') === 'centerline' ? t('layoutHint_centerline') : t('layoutHint')}</p>
       </div>
 
       <Button variant="ghost" size="sm" icon="retry" disabled={!changed} onclick={() => {

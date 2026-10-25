@@ -114,7 +114,8 @@ Selalu periksa detail di perbesaran 200% atau lebih: satu angka bisa menyembunyi
 | Jumlah warna | *Bebas* (dengan gradien) atau 2–32 warna datar, termasuk tinta |
 | Palet | setelah **Pakai warna ini** pada hasil: ubah warna (klik), tambah, atau hapus — areanya memakai warna terdekat |
 | Latar transparan | latar tidak disertakan: piksel transparan, atau area yang menutupi sebagian besar tepi gambar |
-| Bentuk | *Bertumpuk* (berkas terkecil) atau *Berlubang*: setiap bentuk dilubangi dan tidak ada yang menumpuk (mesin potong, penyuntingan) |
+| Bentuk | *Bertumpuk* (berkas terkecil), *Berlubang*: setiap bentuk dilubangi dan tidak ada yang menumpuk (mesin potong, penyuntingan), atau *Garis tengah*: gambar garis menjadi satu goresan di tengah setiap garis, tanpa isian (plotter, laser, bordir; ambang menentukan apa yang dianggap tinta) |
+| Lapisan per warna | mengelompokkan isian per warna (`<g id="color-RRGGBB">`), sehingga aplikasi desain menampilkan satu lapisan per warna |
 
 **Profil gaya** — simpan gaya dan penyesuaian saat ini dengan sebuah nama (**+**), pilih lagi dari daftar, **ekspor**
 sebagai `<nama>.pngsvg-profile.json` untuk dibagikan ke tim, atau **impor**. Baris perintah membaca berkas yang sama:
@@ -150,6 +151,18 @@ gambar kecil, buram, atau JPEG; prosesnya menjadi lebih lambat (sekitar 3–4×)
 
 Tidak tersedia di Mac Intel. Model: Real-ESRGAN oleh Xintao Wang dkk., BSD-3-Clause.
 
+### Menyunting bentuk
+
+Tekan **Sunting** di atas perbandingan (atau `E` saat gambar aktif), lalu klik sebuah bentuk pada vektor: ubah
+**warnanya**, **pakai warna bentuk lain** (klik tombolnya, lalu bentuk lain — ini menggabungkan dua warna), atau
+**hapus**. **Urungkan** / **Ulangi** (`Ctrl+Z` / `Ctrl+Shift+Z`) menelusuri suntingan. Menyimpan dan mengekspor memakai
+hasil yang sudah disunting; memproses ulang foto dimulai dari awal.
+
+### Pintasan keyboard
+
+Tekan `?` untuk daftar lengkap: `Ctrl+O` pilih foto, `Ctrl+V` tempel, `Ctrl+Enter` proses, `Ctrl+S` simpan,
+`Ctrl+Shift+S` simpan semua, `Alt+↑/↓` hasil sebelumnya/berikutnya, `Delete` hapus hasil, `+`/`−`/`0` zoom dan pas.
+
 ## 5. Menyimpan
 
 Pilih formatnya dulu:
@@ -167,6 +180,15 @@ Pilih formatnya dulu:
 - **Simpan semua** menyimpan semua hasil yang sudah selesai ke folder pilihan Anda (SVG, PDF, EPS, atau DXF); berkas
   yang sudah ada tidak pernah ditimpa (dipakai `nama-2.svg`).
 - **Salin kode SVG** / **Salin PNG** menyalin hasil ke clipboard, siap ditempel ke kode atau aplikasi desain.
+- **Laporan semua hasil**: **CSV** atau **JSON** berisi berkas, gaya, ukuran, waktu, warna, dan kemiripan setiap hasil —
+  berguna untuk memeriksa satu batch.
+
+### Folder pantau (aplikasi desktop)
+
+**Pengaturan → Otomasi**: pilih folder yang **dipantau** dan folder **hasil**, pilih format, lalu tekan **Mulai
+memantau**. Setiap gambar yang disalin ke folder pantau sejak saat itu diubah dengan gaya saat ini (beserta
+penyesuaiannya) dan disimpan di folder hasil; gambar itu juga tampil di antrean. Tanpa aplikasi pun bisa:
+`png2svg watch masuk/ keluar/ -f pdf --profile merek.pngsvg-profile.json`.
 
 ID gradien unik per berkas, jadi banyak SVG bisa disisipkan di satu halaman web.
 

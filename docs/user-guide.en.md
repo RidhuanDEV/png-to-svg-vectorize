@@ -113,7 +113,8 @@ Always check details at 200 % or more: one number can hide a small local defect.
 | Number of colors | *Free* (with gradients) or 2–32 flat colors, the ink included |
 | Palette | after **Use these colors** on a result: change a color (click it), add one, or remove one — its areas take the nearest color |
 | Transparent background | leave the background out: transparent pixels, or else the area that covers most of the picture's border |
-| Shapes | *Stacked* (smallest files) or *Cut out*: every shape has its holes cut out and nothing overlaps (cutting machines, editing) |
+| Shapes | *Stacked* (smallest files), *Cut out*: every shape has its holes cut out and nothing overlaps (cutting machines, editing), or *Center lines*: line drawings become one stroke along the middle of each line, no fills (plotters, laser, embroidery; the threshold sets what counts as ink) |
+| Layers per color | groups the fills by color (`<g id="color-RRGGBB">`), so a design tool shows one layer per color |
 
 **Style profiles** — save the current style and fine-tune choices under a name (**+**), pick it again from the list,
 **export** it as `<name>.pngsvg-profile.json` to share with your team, or **import** one. The command line reads the
@@ -148,6 +149,18 @@ small, blurry or JPEG pictures; it makes processing slower (about 3–4×).
 
 Not available on Intel Macs. Models: Real-ESRGAN by Xintao Wang et al., BSD-3-Clause.
 
+### Edit shapes
+
+Press **Edit** above the comparison (or `E` when the picture has focus), then click a shape in the vector: change its
+**color**, **use another shape's color** (click the button, then the other shape — this merges two colors), or
+**delete** it. **Undo** / **Redo** (`Ctrl+Z` / `Ctrl+Shift+Z`) step through your edits. Saving and exporting use the
+edited result; processing the photo again starts from scratch.
+
+### Keyboard shortcuts
+
+Press `?` for the full list: `Ctrl+O` choose photos, `Ctrl+V` paste, `Ctrl+Enter` process, `Ctrl+S` save,
+`Ctrl+Shift+S` save all, `Alt+↑/↓` previous/next result, `Delete` remove the result, `+`/`−`/`0` zoom and fit.
+
 ## 5. Save
 
 Choose the format first:
@@ -165,6 +178,15 @@ Choose the format first:
 - **Save all** saves every finished result into a folder you choose (SVG, PDF, EPS or DXF); existing files are never
   overwritten (`name-2.svg` is used instead).
 - **Copy SVG code** / **Copy PNG** put the result on the clipboard, ready to paste into code or a design tool.
+- **Report of all results**: **CSV** or **JSON** with the file, style, size, time, colors and similarity of every
+  result — useful to check a batch.
+
+### Watch folder (desktop app)
+
+**Settings → Automation**: choose a folder to **watch** and a folder for the **results**, pick the format and press
+**Start watching**. Every picture copied into the watched folder from then on is converted with the current style
+(and fine-tune choices) and saved in the results folder; it also appears in the queue. The same works without the
+app: `png2svg watch inbox/ out/ -f pdf --profile brand.pngsvg-profile.json`.
 
 Gradient ids are unique per file, so many SVGs can be inlined on one web page.
 

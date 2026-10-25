@@ -18,7 +18,8 @@ a = Analysis(
     [str(ROOT / 'packaging/launcher.py')],
     pathex=[str(ROOT / 'src')],
     datas=[(str(STATIC), 'pngsvg_app/static')],
-    hiddenimports=collect_submodules('uvicorn') + ['pngsvg_app.desktop', 'pngsvg_app.server', 'pngsvg_app.jobs'],
+    hiddenimports=collect_submodules('uvicorn') + ['pngsvg_app.desktop', 'pngsvg_app.server', 'pngsvg_app.jobs',
+                                                   'pngsvg_app.watcher', 'pngsvg_app.svgcheck', 'pngsvg.profile'],
     excludes=['tkinter', 'matplotlib', 'IPython', 'pytest', 'PyInstaller'],
     noarchive=False,
 )

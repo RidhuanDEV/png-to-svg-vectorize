@@ -60,7 +60,8 @@ class OptionsIn(BaseModel):
     color_mode: Literal['color', 'grayscale', 'bw'] | None = None
     threshold: int | None = Field(None, ge=1, le=254)
     remove_bg: bool | None = None
-    layout: Literal['stacked', 'cutout'] | None = None
+    layout: Literal['stacked', 'cutout', 'centerline'] | None = None
+    layers: bool | None = None
     seam: float | None = Field(None, ge=0.0, le=2.0)
     speckle: int | None = Field(None, ge=0, le=5000)
 
@@ -133,7 +134,7 @@ def _preset_defaults(name: str) -> dict[str, Any]:
     return {'outlines': o.outlines, 'gradients': o.gradients, 'radial': o.radial, 'tolerance': o.tolerance,
             'smooth': o.smooth, 'merge_de': o.regions.merge_de, 'scale': o.scale, 'speckle': o.regions.speckle,
             'seam': o.seam, 'max_colors': o.max_colors, 'color_mode': o.color_mode, 'threshold': o.threshold,
-            'remove_bg': o.remove_bg, 'layout': o.layout}
+            'remove_bg': o.remove_bg, 'layout': o.layout, 'layers': o.layers}
 
 
 def clean_name(name: str | None) -> str:
@@ -403,6 +404,25 @@ def create_app(jobs: JobManager, token: str, allowed_hosts: set[str], static_dir
             raise HTTPException(409, 'result not ready')
         name, body = export_file(job, format, jobs)
         return Response(body, media_type=MEDIA_TYPES[format], headers={'Content-Disposition': _disposition(name, True)})
+
+    @app.put('/api/jobs/{job_id}/svg')
+    async def put_svg(job_id: str, request: Request):
+        """Replace a result with the version edited in the page (recolor, delete, merge shapes)."""
+        from .svgcheck import MAX_BYTES, EditError, check_edited_svg
+        job = _job(job_id)
+        if job.status != 'done' or job.svg is None:
+            raise HTTPException(409, 'result not ready')
+        body = await request.body()
+        if len(body) > MAX_BYTES:
+            raise HTTPException(413, 'edited SVG too large')
+        try:
+            svg = check_edited_svg(body.decode('utf-8'), job.svg)
+        except (EditError, UnicodeDecodeError) as e:
+            raise HTTPException(422, str(e)[:200])
+        done = jobs.replace_svg(job_id, svg)
+        if done is None:
+            raise HTTPException(409, 'result not ready')
+        return pub(done)
 
     @app.get('/api/jobs/{job_id}/source')
     def get_source(job_id: str):

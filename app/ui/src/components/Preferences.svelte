@@ -6,6 +6,8 @@
   import { desktop, openExternal, setCloseMessage, type DesktopPrefs } from '../lib/platform';
   import { MAX_SIDES, MAX_STAGED, prefs, previewName, savePrefs, TEXT_SCALES, THEMES, type ThemeChoice } from '../lib/prefs.svelte';
   import { aiModelAction, refreshAi, saveSettings, setSpeed, store, updateService } from '../lib/store.svelte';
+  import { chooseWatchFolder, refreshWatch, startWatch, stopWatch, watch } from '../lib/watch.svelte';
+  import type { WatchFormat } from '../lib/platform';
   import { startTour } from '../lib/tour.svelte';
   import themes from '../theme/themes.json';
   import Button from './ui/Button.svelte';
@@ -16,11 +18,12 @@
 
   let { open = $bindable(false) }: { open?: boolean } = $props();
 
-  type Section = 'appearance' | 'processing' | 'output' | 'privacy' | 'about';
+  type Section = 'appearance' | 'processing' | 'output' | 'automation' | 'privacy' | 'about';
   const sections: { id: Section; icon: IconName }[] = [
     { id: 'appearance', icon: 'sparkles' },
     { id: 'processing', icon: 'gauge' },
     { id: 'output', icon: 'download' },
+    { id: 'automation', icon: 'folder' },
     { id: 'privacy', icon: 'lock' },
     { id: 'about', icon: 'info' },
   ];
@@ -32,6 +35,7 @@
   let version = $state('');
   let update = $state<{ state: 'idle' | 'busy' | 'done' | 'failed'; info?: UpdateInfo }>({ state: 'idle' });
   let dprefs = $state<DesktopPrefs | null>(null);
+  let watchFormat = $state<WatchFormat>('svg');
   const isDesktop = $derived(!!desktop());
 
   onMount(async () => {
@@ -50,6 +54,7 @@
     const d = desktop();
     if (d) void d.get_prefs().then((p) => (dprefs = p));
     void refreshAi();
+    void refreshWatch();
     return () => previous?.focus?.();
   });
 
@@ -447,6 +452,52 @@
               />
               <p class="hint">{t('sizeAttrsHint')}</p>
             </div>
+          {:else if section === 'automation'}
+            <div class="field">
+              <span class="lbl">{t('watchFolder')}</span>
+              <p class="hint">{t('watchHint')}</p>
+              {#if isDesktop && watch.status}
+                {@const ws = watch.status}
+                {#each [['source', ws.source, 'watchSource'], ['target', ws.target, 'watchTarget']] as const as [which, path, label] (which)}
+                  <div class="folder">
+                    <span class="wlbl">{t(label)}</span>
+                    <span class="path num" data-testid="watch-{which}">{path ?? t('saveFolderNone')}</span>
+                    <Button variant="secondary" size="sm" icon="folder" disabled={ws.watching} onclick={() => chooseWatchFolder(which)}
+                      data-testid="watch-choose-{which}">{t('chooseFolder')}</Button
+                    >
+                  </div>
+                {/each}
+                <div class="row">
+                  <span class="lbl">{t('format')}</span>
+                  <Segmented
+                    size="sm"
+                    label={t('format')}
+                    value={watchFormat}
+                    options={(['svg', 'pdf', 'eps', 'dxf'] as const).map((f) => ({ value: f, label: f.toUpperCase() }))}
+                    onchange={(f) => (watchFormat = f)}
+                    testid="watch-format"
+                  />
+                </div>
+                <p class="hint">{tf('watchStyle', { style: tk('preset_' + store.settings.preset) })}</p>
+                <div class="folder">
+                  {#if ws.watching}
+                    <Button variant="danger" icon="stop" onclick={stopWatch} data-testid="watch-stop">{t('watchStop')}</Button>
+                  {:else}
+                    <Button variant="primary" icon="play" disabled={!ws.source || !ws.target} onclick={() => startWatch(watchFormat)}
+                      data-testid="watch-start">{t('watchStart')}</Button
+                    >
+                  {/if}
+                </div>
+                <p class="status" role="status" data-testid="watch-status">
+                  {#if ws.watching}{tf('watchRunning', { n: ws.converted, f: ws.failed, w: ws.waiting })}
+                  {:else if ws.converted || ws.failed}{tf('watchStopped', { n: ws.converted, f: ws.failed })}{/if}
+                </p>
+                {#if watch.error || ws.last_error}<p class="hint err">{watch.error || ws.last_error}</p>{/if}
+              {:else}
+                <p class="hint">{t('desktopOnly')}</p>
+              {/if}
+              <p class="hint">{t('watchCli')}</p>
+            </div>
           {:else if section === 'privacy'}
             <div class="note">
               <Icon name="lock" size={18} />
@@ -812,6 +863,13 @@
     margin: 0;
     color: var(--danger);
     font-size: calc(12.5px * var(--ts));
+  }
+  .wlbl {
+    min-width: 90px;
+    font-size: calc(13px * var(--ts));
+  }
+  .err {
+    color: var(--danger);
   }
   .licenses {
     display: grid;

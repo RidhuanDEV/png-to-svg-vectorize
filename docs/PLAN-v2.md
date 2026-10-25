@@ -119,7 +119,7 @@ dicatat, e2e alur AI, versi 1.3.0.
 
 ---
 
-## 4. M10 — Fitur lengkap "kelas studio" (v1.4–v1.5) — P1 ✅ v1.4 (2026-10-25)
+## 4. M10 — Fitur lengkap "kelas studio" (v1.4–v1.5) — ✅ v1.4 + v1.5 (2026-10-25)
 
 Daftar diambil dari fitur yang umum ada di aplikasi vektorisasi komersial dan alat tracing populer. Prioritas P1 dulu.
 
@@ -162,8 +162,22 @@ halaman Bandingkan di website memakai angka nyata.
 - F12: tempel `Ctrl+V`, salin PNG.
 - Bukti: keluaran bawaan identik byte; tabel mode di `docs/bench.md`; PDF dirender mesin PDF Windows cocok 99,9 %
   dengan SVG. EPS diverifikasi struktural (belum dirender — tidak ada interpreter PostScript di mesin build).
-- Sisa M10 (v1.5): F7 centerline, F8 edit ringan, F10 folder pantau, F11 laporan batch, F13 SVG ramah aplikasi desain,
-  F15 pintasan; F14 (P3) riwayat.
+
+**Realisasi P2 (2026-10-25, v1.5.0)** — F7, F8, F10, F11, F13, F15:
+- F7: centerline = penipisan Zhang-Suen (numpy) → graf segmen antar ujung/simpang (tetangga diagonal hanya bila tidak
+  ada jalur ortogonal; cabang pendek dipangkas) → fitting Bezier yang sudah ada; lebar goresan dari jarak ke kertas.
+  Ekspor PDF/EPS/DXF ikut (DXF: polyline terbuka).
+- F8: pilih bentuk dengan klik (hit-test `Path2D` di kanvas), ubah warna, "pakai warna bentuk lain" (gabung), hapus,
+  urungkan/ulangi. Hasil disimpan lewat `PUT /api/jobs/{id}/svg` yang hanya menerima subset SVG mesin (`svgcheck.py`).
+  Gabung *geometri* dua bentuk tidak dilakukan (cukup warnanya; bentuk bersebelahan berwarna sama terlihat menyatu).
+- F10: folder pantau di desktop (Pengaturan → Otomasi) dan CLI `png2svg watch`; hanya gambar baru, setelah ukurannya
+  stabil. Profil CLI sudah ada sejak v1.4.
+- F11: laporan CSV/JSON dibuat di halaman (skor kemiripan dihitung di sana), sel formula dinetralkan.
+- F13: `layers` = isian per warna dalam `<g id="color-RRGGBB">` (memaksa berlubang agar urutan tidak berpengaruh); ID
+  gradien sudah stabil sejak v0.3.
+- F15: pintasan + lembar `?`.
+- **F14 (P3, riwayat percobaan berdampingan) ditunda**: proses ulang mengganti hasil lama; butuh desain tampilan
+  bandingkan tiga arah dulu.
 
 ---
 

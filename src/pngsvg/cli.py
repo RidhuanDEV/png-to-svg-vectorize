@@ -1,6 +1,7 @@
 """Command line: png2svg INPUT (or python -m pngsvg INPUT) [INPUT ...] [-o OUT] [options]
 
     png2svg serve [--port N] [--no-browser]     local web UI (needs the [app] extra)
+    png2svg watch IN OUT [-f pdf] [--profile P]  convert pictures as they appear in a folder
 """
 from __future__ import annotations
 
@@ -57,8 +58,54 @@ def _convert(src: Path, dst: Path, opts, report: bool, executor=None) -> str:
     return line
 
 
+def watch_main(argv: list[str]) -> int:
+    from .watch import NewFiles, unique_path
+    ap = argparse.ArgumentParser(prog='png2svg watch', description='Convert every picture that appears in a folder.')
+    ap.add_argument('source', type=Path, help='folder to watch (PNG, JPEG, WebP)')
+    ap.add_argument('target', type=Path, help='folder for the results')
+    ap.add_argument('-p', '--preset', choices=list(PRESETS))
+    ap.add_argument('--profile', type=Path, help='style profile (.pngsvg-profile.json)')
+    ap.add_argument('-f', '--format', choices=FORMATS, default='svg')
+    ap.add_argument('--existing', action='store_true', help='also convert the pictures already in the folder')
+    ap.add_argument('--interval', type=float, default=1.5, help='seconds between checks (default 1.5)')
+    ap.add_argument('--once', action='store_true', help=argparse.SUPPRESS)   # tests: two looks, then exit
+    a = ap.parse_args(argv)
+    if not a.source.is_dir():
+        ap.error(f'not a folder: {a.source}')
+    preset, extra = 'cartoon', {}
+    if a.profile:
+        try:
+            preset, extra, _ = load(a.profile)
+        except (ProfileError, OSError) as e:
+            ap.error(str(e))
+    preset = a.preset or preset
+    a.target.mkdir(parents=True, exist_ok=True)
+    new = NewFiles(a.source, include_existing=a.existing)
+    print(f'watching {a.source} -> {a.target} ({a.format}, {preset}); Ctrl+C to stop', flush=True)
+    looks = 0
+    try:
+        while True:
+            looks += 1
+            for src in new.poll():
+                try:
+                    opts = apply_overrides(options_for(preset, id_prefix=src.stem), extra)
+                    res = vectorize(Image.open(src), opts)
+                    dst = unique_path(a.target, f'{src.stem}.{a.format}')
+                    dst.write_bytes(convert(res.svg, a.format))
+                    print(f'{src.name} -> {dst.name}', flush=True)
+                except Exception as e:  # noqa: BLE001 - one bad file must not stop the watch
+                    print(f'{src.name}: failed ({type(e).__name__}: {e})', file=sys.stderr, flush=True)
+            if a.once and looks >= 2:
+                return 0
+            time.sleep(a.interval)
+    except KeyboardInterrupt:
+        return 0
+
+
 def main(argv=None) -> int:
     argv = sys.argv[1:] if argv is None else list(argv)
+    if argv[:1] == ['watch']:                  # png2svg watch IN OUT [...]: convert pictures as they arrive
+        return watch_main(argv[1:])
     if argv[:1] == ['serve']:                  # png2svg serve [...]: local web UI
         try:
             from pngsvg_app.__main__ import main as serve_main
@@ -94,6 +141,9 @@ def main(argv=None) -> int:
     st.add_argument('--threshold', type=int, help='bw: gray level 1-254 below which a pixel is black (128)')
     st.add_argument('--remove-bg', action='store_true', help='leave the background out (transparent)')
     st.add_argument('--cutout', action='store_true', help='cut holes instead of stacking shapes (nothing overlaps)')
+    st.add_argument('--centerline', action='store_true', help='line art: one stroked line along the middle of each '
+                    'line, no fills (plotters, laser); --threshold sets what counts as ink')
+    st.add_argument('--layers', action='store_true', help='group fills per color for design tools (implies --cutout)')
     st.add_argument('--seam', type=float, help='gap filler: stroke width painted around each fill (0-2, default .5)')
     st.add_argument('--speckle', type=int, help='merge spots smaller than N px into their neighbour (default 10)')
     a = ap.parse_args(argv)
@@ -105,7 +155,8 @@ def main(argv=None) -> int:
         a.studio = check_options({
             'max_colors': a.max_colors, 'color_mode': a.color_mode, 'threshold': a.threshold, 'seam': a.seam,
             'speckle': a.speckle, 'remove_bg': True if a.remove_bg else None,
-            'layout': 'cutout' if a.cutout else None,
+            'layout': 'centerline' if a.centerline else 'cutout' if a.cutout else None,
+            'layers': True if a.layers else None,
             'palette': [c.strip() for c in a.palette.split(',')] if a.palette else None})
     except (ProfileError, OSError) as e:
         ap.error(str(e))

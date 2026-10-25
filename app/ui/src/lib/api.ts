@@ -21,7 +21,7 @@ export interface Job {
   filename: string;
   bytes: number | null;
   /** `palette`: the colors used, largest area first (palette and black & white modes only). */
-  stats: { regions?: number; gradients?: number; outline_paths?: number; ai?: boolean; palette?: string[] };
+  stats: { regions?: number; gradients?: number; outline_paths?: number; ai?: boolean; palette?: string[]; edited?: boolean };
   error: string | null;
 }
 
@@ -46,10 +46,12 @@ export interface Overrides {
   threshold: number;
   remove_bg: boolean;
   layout: Layout;
+  /** fills grouped per color for design tools (implies cut-out shapes) */
+  layers: boolean;
 }
 
 export type ColorMode = 'color' | 'grayscale' | 'bw';
-export type Layout = 'stacked' | 'cutout';
+export type Layout = 'stacked' | 'cutout' | 'centerline';
 export type ExportFormat = 'svg' | 'pdf' | 'eps' | 'dxf';
 
 /** A validated style profile (see /api/profiles/check). */
@@ -250,6 +252,9 @@ export const api = {
     await call(`/api/jobs/${id}`, { method: 'DELETE' });
   },
   svgText: async (id: string): Promise<string> => (await call(`/api/jobs/${id}/svg`)).text(),
+  /** Replace a result with an edited version (validated by the service). */
+  putSvg: async (id: string, svg: string): Promise<Job> =>
+    (await call(`/api/jobs/${id}/svg`, { method: 'PUT', body: svg, headers: { 'Content-Type': 'image/svg+xml' } })).json(),
   source: async (id: string): Promise<Blob> => (await call(`/api/jobs/${id}/source`)).blob(),
   zip: async (ids: string[], format: ExportFormat = 'svg'): Promise<Blob> =>
     (await call(`/api/export.zip?${query({ ids: ids.join(','), format })}`)).blob(),

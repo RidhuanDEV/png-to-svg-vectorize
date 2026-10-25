@@ -332,6 +332,16 @@ class JobManager:
         with self._lock:
             return list(self._jobs.values())
 
+    def replace_svg(self, job_id: str, svg: str) -> Job | None:
+        """Store a result edited in the page (already validated, see svgcheck)."""
+        with self._lock:
+            job = self._jobs.get(job_id)
+            if job is None or job.status != 'done':
+                return None
+            job.svg = svg
+            job.stats = {**job.stats, 'edited': True}
+            return job
+
     def cancel(self, job_id: str) -> bool:
         """A waiting job leaves the queue at once; a running one is marked cancelled and its result discarded
         (the worker finishes the image in the background, then takes the next one)."""

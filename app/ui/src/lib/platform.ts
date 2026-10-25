@@ -16,6 +16,21 @@ export interface DesktopPrefs {
   log_dir: string;
 }
 
+export type WatchFormat = 'svg' | 'pdf' | 'eps' | 'dxf';
+
+export interface WatchStatus {
+  watching: boolean;
+  source: string | null;
+  target: string | null;
+  format: WatchFormat | null;
+  preset: string | null;
+  converted: number;
+  failed: number;
+  waiting: number;
+  last_error: string | null;
+  error?: string;
+}
+
 interface DesktopApi {
   open_files(): Promise<{ ids: string[]; errors: FileError[] }>;
   set_close_message(template: string): Promise<void>;
@@ -29,6 +44,11 @@ interface DesktopApi {
   save_all(ids: string[], fmt: ExportFormat): Promise<number>;
   save_png(name: string, dataB64: string): Promise<boolean>;
   save_profile(name: string, text: string): Promise<boolean>;
+  save_report(name: string, text: string): Promise<boolean>;
+  watch_status(): Promise<WatchStatus>;
+  watch_choose(which: 'source' | 'target'): Promise<WatchStatus>;
+  watch_start(preset: string, options: string, format: WatchFormat): Promise<WatchStatus>;
+  watch_stop(): Promise<WatchStatus>;
 }
 
 declare global {
@@ -137,6 +157,13 @@ async function base64(blob: Blob): Promise<string> {
 export async function savePng(png: Blob, filename: string): Promise<boolean> {
   if (isDesktop()) return window.pywebview!.api.save_png(filename, await base64(png));
   download(png, withExt(filename, 'png'));
+  return true;
+}
+
+/** Save a batch report (`.csv` or `.json`). */
+export async function saveReport(filename: string, text: string): Promise<boolean> {
+  if (isDesktop()) return window.pywebview!.api.save_report(filename, text);
+  download(new Blob([text], { type: filename.endsWith('.csv') ? 'text/csv' : 'application/json' }), filename);
   return true;
 }
 

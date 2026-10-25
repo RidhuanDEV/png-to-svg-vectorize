@@ -2,9 +2,10 @@
   // Save the selected result as SVG, PDF, EPS, DXF or PNG (rendered from the vector at any scale), save all, copy.
   import type { Job } from '../lib/api';
   import { t, tf } from '../lib/i18n.svelte';
-  import { isDesktop, renderPng, saveAll, savePng, saveResult } from '../lib/platform';
+  import { isDesktop, renderPng, saveAll, savePng, saveReport, saveResult } from '../lib/platform';
+  import { reportRow, toCsv, toJson } from '../lib/report';
   import { EXPORT_CHOICES, PNG_SCALES, prefs, savePrefs } from '../lib/prefs.svelte';
-  import { report, store, type Media } from '../lib/store.svelte';
+  import { ensureMedia, report, store, type Media } from '../lib/store.svelte';
   import { toast } from '../lib/toast.svelte';
   import Button from './ui/Button.svelte';
   import Segmented from './ui/Segmented.svelte';
@@ -47,6 +48,19 @@
     const f = prefs.exportFormat;
     if (f === 'png') return;
     run(() => saveAll(doneIds, f), (n) => isDesktop() && n > 0 && toast('success', tf('t_savedAll', { n })));
+  }
+
+  /** Batch report of every finished result; scores are measured first for results not opened yet. */
+  function saveBatchReport(kind: 'csv' | 'json') {
+    run(
+      async () => {
+        const done = store.jobs.filter((j) => j.status === 'done' && !store.hidden[j.id]);
+        for (const j of done) if (store.media[j.id]?.score === undefined) await ensureMedia(j);
+        const rows = done.map((j) => reportRow(j, store.media[j.id]?.score));
+        return saveReport(`png2svg-report.${kind}`, kind === 'csv' ? toCsv(rows) : toJson(rows));
+      },
+      (ok) => isDesktop() && ok && toast('success', t('t_saved')),
+    );
   }
 
   async function copy(kind: 'svg' | 'png') {
@@ -118,6 +132,11 @@
           >{copied === 'png' ? t('copied') : t('copyPng')}</Button
         >
       </div>
+      <div class="report">
+        <span class="muted">{t('report')}</span>
+        <Button variant="ghost" size="sm" disabled={saving} onclick={() => saveBatchReport('csv')} data-testid="report-csv">CSV</Button>
+        <Button variant="ghost" size="sm" disabled={saving} onclick={() => saveBatchReport('json')} data-testid="report-json">JSON</Button>
+      </div>
     </div>
   </section>
 {/if}
@@ -137,6 +156,15 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
+  }
+  .report {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: calc(13px * var(--ts));
+  }
+  .report .muted {
+    margin-right: auto;
   }
   .copy {
     display: grid;

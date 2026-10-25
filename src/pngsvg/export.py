@@ -1,8 +1,9 @@
 """Other output formats from the engine's own SVG: PDF, EPS (print, design tools) and DXF (CAD, laser, plotters).
 
-Only the SVG subset `vectorize` writes is read: <path> (M/L/C/Q/Z, absolute or relative), <rect>, solid colors and
-userSpaceOnUse linear/radial gradients with stops. Gradients stay real gradients in PDF and EPS (PostScript level 3
-shadings); DXF has no fills, so every shape becomes a closed polyline on a layer named after its color.
+Only the SVG subset `vectorize` writes is read: <path> (M/L/C/Q/Z, absolute or relative), <rect>, solid colors,
+userSpaceOnUse linear/radial gradients with stops, and stroked center lines (fill="none"). Gradients stay real
+gradients in PDF and EPS (PostScript level 3 shadings); DXF has no fills, so every shape becomes a polyline on a layer
+named after its color.
 """
 from __future__ import annotations
 
@@ -19,8 +20,8 @@ _ATTR = re.compile(r'([\w:-]+)="([^"]*)"')
 _TAG = re.compile(r'<(/?)(\w+)([^>]*?)(/?)>')
 
 Point = tuple[float, float]
-# one sub-path: start point and segments; a segment is ('L', p) or ('C', c1, c2, p)
-SubPath = tuple[Point, list[tuple]]
+# one sub-path: start point, segments (('L', p) or ('C', c1, c2, p)) and whether it is closed (Z)
+SubPath = tuple[Point, list[tuple], bool]
 
 
 @dataclass
@@ -34,10 +35,11 @@ class Gradient:
 @dataclass
 class Shape:
     paths: list[SubPath]
-    fill: tuple[float, float, float] | Gradient
+    fill: tuple[float, float, float] | Gradient | None   # None: a stroked line only (center lines)
     evenodd: bool = False
-    stroke: float = 0.0                        # seam width (stroke in the fill color)
+    stroke: float = 0.0                        # seam width (stroke in the fill color), or the line width
     layer: str = 'fill'
+    line: tuple[float, float, float] | None = None     # color of a stroked line (fill None)
 
 
 @dataclass
@@ -58,7 +60,7 @@ def _hex(c: tuple[float, float, float]) -> str:
 
 def parse_path(d: str) -> list[SubPath]:
     tokens = _NUM.findall(d)
-    out: list[SubPath] = []
+    out: list[list] = []
     cur: list[tuple] | None = None
     x = y = sx = sy = 0.0
     i, cmd = 0, ''
@@ -68,6 +70,8 @@ def parse_path(d: str) -> list[SubPath]:
             i += 1
             if cmd in 'Zz':
                 x, y = sx, sy
+                if out and cur is not None:
+                    out[-1][2] = True
                 cur = None
                 continue
         rel = cmd.islower()
@@ -85,12 +89,12 @@ def parse_path(d: str) -> list[SubPath]:
         if c == 'M':
             sx, sy = pts[0]
             cur = []
-            out.append(((sx, sy), cur))
+            out.append([(sx, sy), cur, False])
             cmd = 'l' if rel else 'L'        # further pairs after a move are line-tos
         else:
             if cur is None:                  # drawing after Z continues from the sub-path start
                 cur = []
-                out.append(((x, y), cur))
+                out.append([(x, y), cur, False])
             if c == 'L':
                 cur.append(('L', pts[0]))
             elif c == 'C':
@@ -100,7 +104,7 @@ def parse_path(d: str) -> list[SubPath]:
                 cur.append(('C', (x + 2 / 3 * (qx - x), y + 2 / 3 * (qy - y)),
                             (p[0] + 2 / 3 * (qx - p[0]), p[1] + 2 / 3 * (qy - p[1])), p))
         x, y = pts[-1]
-    return out
+    return [(s, segs, closed) for s, segs, closed in out]
 
 
 def parse_svg(svg: str) -> Drawing:
@@ -138,14 +142,20 @@ def parse_svg(svg: str) -> Drawing:
             for g in groups:
                 inherited.update(g)
             fill = a.get('fill') or inherited.get('fill', '#000000')
+            line_color = a.get('stroke') or inherited.get('stroke')
             if fill == 'none':
+                if not line_color or line_color == 'none' or tag != 'path':
+                    continue
+                width = float(a.get('stroke-width') or inherited.get('stroke-width', '1'))
+                layer = next((g['id'] for g in reversed(groups) if 'id' in g), 'line')
+                drawing.shapes.append(Shape(parse_path(a['d']), None, False, width, layer, _rgb(line_color)))
                 continue
             ref = re.match(r'url\(#([^)]+)\)', fill)
             paint = grads[ref.group(1)] if ref else _rgb(fill)
             if tag == 'rect':
                 rw, rh = float(a['width']), float(a['height'])
                 rx, ry = float(a.get('x', 0)), float(a.get('y', 0))
-                paths = [((rx, ry), [('L', (rx + rw, ry)), ('L', (rx + rw, ry + rh)), ('L', (rx, ry + rh))])]
+                paths = [((rx, ry), [('L', (rx + rw, ry)), ('L', (rx + rw, ry + rh)), ('L', (rx, ry + rh))], True)]
             else:
                 paths = parse_path(a['d'])
             stroke = float(inherited.get('stroke-width', '0')) if 'stroke' in a else 0.0
@@ -159,7 +169,10 @@ def _f(v: float) -> str:
     return '0' if s in ('', '-0') else s
 
 
-def _mid_color(paint) -> tuple[float, float, float]:
+def _mid_color(shape: Shape) -> tuple[float, float, float]:
+    paint = shape.fill if shape.fill is not None else shape.line
+    if paint is None:
+        return (0.0, 0.0, 0.0)
     return paint if isinstance(paint, tuple) else paint.stops[len(paint.stops) // 2][1]
 
 
@@ -168,14 +181,15 @@ def _mid_color(paint) -> tuple[float, float, float]:
 def _path_ops(paths: list[SubPath], ps: bool) -> str:
     m, l, c, h = ('moveto', 'lineto', 'curveto', 'closepath') if ps else ('m', 'l', 'c', 'h')
     out = []
-    for (x0, y0), segs in paths:
+    for (x0, y0), segs, closed in paths:
         out.append(f'{_f(x0)} {_f(y0)} {m}')
         for s in segs:
             if s[0] == 'L':
                 out.append(f'{_f(s[1][0])} {_f(s[1][1])} {l}')
             else:
                 out.append(' '.join(f'{_f(p[0])} {_f(p[1])}' for p in s[1:]) + f' {c}')
-        out.append(h)
+        if closed:
+            out.append(h)
     return '\n'.join(out)
 
 
@@ -210,7 +224,10 @@ def to_pdf(svg: str) -> bytes:
     for s in d.shapes:
         path = _path_ops(s.paths, False)
         star = '*' if s.evenodd else ''
-        if isinstance(s.fill, tuple):
+        if s.fill is None:
+            col = ' '.join(_f(v) for v in _mid_color(s))
+            ops.append(f'q {col} RG {_f(s.stroke)} w 1 J 1 j\n{path}\nS Q')
+        elif isinstance(s.fill, tuple):
             col = ' '.join(_f(v) for v in s.fill)
             if s.stroke:
                 ops.append(f'{col} rg {col} RG {_f(s.stroke)} w\n{path}\nB{star}')
@@ -221,7 +238,7 @@ def to_pdf(svg: str) -> bytes:
             shadings.append(_shading(s.fill, False))
             cm = '' if s.fill.kind == 'linear' else ' '.join(_f(v) for v in s.fill.matrix) + ' cm '
             if s.stroke:
-                col = ' '.join(_f(v) for v in _mid_color(s.fill))
+                col = ' '.join(_f(v) for v in _mid_color(s))
                 ops.append(f'{col} RG {_f(s.stroke)} w\n{path}\nS')
             ops.append(f'q\n{path}\nW{star} n\n{cm}{name} sh\nQ')
     content = zlib.compress('\n'.join(ops).encode('ascii'), 9)
@@ -259,13 +276,16 @@ def to_eps(svg: str) -> bytes:
         path = 'newpath\n' + _path_ops(s.paths, True)
         fill = 'eofill' if s.evenodd else 'fill'
         clip = 'eoclip' if s.evenodd else 'clip'
-        if isinstance(s.fill, tuple):
+        if s.fill is None:
+            col = ' '.join(_f(v) for v in _mid_color(s))
+            lines.append(f'gsave {col} setrgbcolor {_f(s.stroke)} setlinewidth 1 setlinecap\n{path}\nstroke grestore')
+        elif isinstance(s.fill, tuple):
             col = ' '.join(_f(v) for v in s.fill) + ' setrgbcolor'
             stroke = f' gsave {fill} grestore {_f(s.stroke)} setlinewidth stroke' if s.stroke else f' {fill}'
             lines.append(f'{col}\n{path}\n{stroke.strip()}')
         else:
             if s.stroke:
-                col = ' '.join(_f(v) for v in _mid_color(s.fill))
+                col = ' '.join(_f(v) for v in _mid_color(s))
                 lines.append(f'{col} setrgbcolor {_f(s.stroke)} setlinewidth\n{path}\nstroke')
             cm = '' if s.fill.kind == 'linear' else f'[{" ".join(_f(v) for v in s.fill.matrix)}] concat\n'
             lines.append(f'gsave\n{path}\n{clip}\n{cm}{_shading(s.fill, True)} shfill\ngrestore')
@@ -275,10 +295,11 @@ def to_eps(svg: str) -> bytes:
 
 # ---------------------------------------------------------------------------------------------------------------- DXF
 
-def _flatten(paths: list[SubPath], tol: float = 0.25) -> list[list[Point]]:
-    """Polylines: cubic segments subdivided until the control polygon is within `tol` of the chord."""
+def _flatten(paths: list[SubPath], tol: float = 0.25) -> list[tuple[list[Point], bool]]:
+    """Polylines (and whether closed): cubic segments subdivided until the control polygon is within `tol` of the
+    chord."""
     out = []
-    for start, segs in paths:
+    for start, segs, closed in paths:
         pts = [start]
         for s in segs:
             if s[0] == 'L':
@@ -294,23 +315,26 @@ def _flatten(paths: list[SubPath], tol: float = 0.25) -> list[list[Point]]:
                 u = 1 - t
                 pts.append((u ** 3 * p0[0] + 3 * u * u * t * p1[0] + 3 * u * t * t * p2[0] + t ** 3 * p3[0],
                             u ** 3 * p0[1] + 3 * u * u * t * p1[1] + 3 * u * t * t * p2[1] + t ** 3 * p3[1]))
-        out.append(pts)
+        out.append((pts, closed))
     return out
 
 
 def to_dxf(svg: str) -> bytes:
-    """AutoCAD R12 ASCII DXF: closed polylines, one layer per fill color (plus OUTLINE); y axis pointing up."""
+    """AutoCAD R12 ASCII DXF: polylines, one layer per fill color (plus OUTLINE / CENTERLINE); y axis pointing up."""
     d = parse_svg(svg)
     ents: list[str] = []
     layers: list[str] = []
     for s in d.shapes:
-        layer = 'OUTLINE' if s.layer == 'outline' else 'C' + _hex(_mid_color(s.fill))[1:]
+        if s.layer in ('outline', 'centerline'):
+            layer = s.layer.upper()
+        else:
+            layer = 'C' + _hex(_mid_color(s))[1:]
         if layer not in layers:
             layers.append(layer)
-        for pts in _flatten(s.paths):
-            if len(pts) < 3:
+        for pts, closed in _flatten(s.paths):
+            if len(pts) < (3 if closed else 2):
                 continue
-            ents += ['0', 'POLYLINE', '8', layer, '66', '1', '70', '1']
+            ents += ['0', 'POLYLINE', '8', layer, '66', '1', '70', '1' if closed else '0']
             for x, y in pts:
                 ents += ['0', 'VERTEX', '8', layer, '10', _f(x), '20', _f(d.height - y), '30', '0']
             ents += ['0', 'SEQEND', '8', layer]

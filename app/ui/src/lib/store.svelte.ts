@@ -152,23 +152,31 @@ export async function init(): Promise<void> {
 
 const loading = new Set<string>();
 
-async function ensureMedia(job: Job): Promise<void> {
+/** Show a (new or edited) SVG for a result: preview URLs per layer, then the similarity score. */
+export async function setResultSvg(job: Job, svg: string): Promise<void> {
+  const old = store.media[job.id];
+  const sourceUrl = old?.sourceUrl ?? URL.createObjectURL(await api.source(job.id));
+  for (const u of [old?.svgUrl, old?.fillUrl, old?.outlineUrl]) if (u) URL.revokeObjectURL(u);
+  const blob = (text: string) => URL.createObjectURL(new Blob([text], { type: 'image/svg+xml' }));
+  const media: Media = {
+    sourceUrl,
+    svgText: svg,
+    svgUrl: blob(svg),
+    fillUrl: blob(svg.replace(/<g id="outline"[\s\S]*?<\/g>/, '')),
+    outlineUrl: blob(svg.replace('<g id="fill"', '<g id="fill" display="none"')),
+  };
+  store.media[job.id] = media;
+  const score = await similarity(sourceUrl, media.svgUrl!, job.width, job.height);
+  store.media[job.id] = { ...store.media[job.id], score };
+}
+
+/** Load a finished result's preview and score once (also used by the batch report). */
+export async function ensureMedia(job: Job): Promise<void> {
   const m = store.media[job.id];
   if ((m && m.svgUrl) || loading.has(job.id)) return;
   loading.add(job.id);
   try {
-    const [src, svg] = await Promise.all([m?.sourceUrl ? null : api.source(job.id), api.svgText(job.id)]);
-    const blob = (text: string) => URL.createObjectURL(new Blob([text], { type: 'image/svg+xml' }));
-    const media: Media = {
-      sourceUrl: m?.sourceUrl ?? URL.createObjectURL(src!),
-      svgText: svg,
-      svgUrl: blob(svg),
-      fillUrl: blob(svg.replace(/<g id="outline"[\s\S]*?<\/g>/, '')),
-      outlineUrl: blob(svg.replace('<g id="fill"', '<g id="fill" display="none"')),
-    };
-    store.media[job.id] = media;
-    const score = await similarity(media.sourceUrl!, media.svgUrl!, job.width, job.height);
-    store.media[job.id] = { ...store.media[job.id], score };
+    await setResultSvg(job, await api.svgText(job.id));
   } catch (e) {
     report(e, job.name);
   } finally {

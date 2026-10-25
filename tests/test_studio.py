@@ -213,3 +213,109 @@ def test_profile_check_endpoint(client):
                                                                   b'"options":{"max_colors":500}}')
     assert bad.status_code == 422 and 'max_colors' in bad.json()['detail']
     assert client.post('/api/profiles/check', content=b'{}').status_code == 401
+
+
+# ------------------------------------------------------------------------------------- v1.5: centerline, layers
+
+def line_art() -> Image.Image:
+    img = Image.new('RGB', (300, 200), 'white')
+    d = ImageDraw.Draw(img)
+    d.line((20, 30, 160, 35), fill='black', width=5)
+    d.ellipse((180, 20, 280, 120), outline='black', width=6)
+    d.line((30, 180, 90, 90, 150, 180), fill='black', width=5, joint='curve')
+    return img
+
+
+def test_centerline_strokes_each_line_once():
+    r = vectorize(line_art(), options_for('logo', layout='centerline'))
+    drawing = parse_svg(r.svg)
+    assert all(s.fill is None and s.layer == 'centerline' for s in drawing.shapes)
+    assert 3 <= r.regions <= 6, r.regions                       # line, circle, V (a junction may split it)
+    widths = [s.stroke for s in drawing.shapes]
+    assert all(2.5 <= w <= 7.5 for w in widths), widths
+    assert any(sp[2] for s in drawing.shapes for sp in s.paths), 'the circle is one closed loop'
+    dxf = convert(r.svg, 'dxf').decode()
+    assert '\nCENTERLINE\n' in dxf and convert(r.svg, 'pdf').startswith(b'%PDF')
+    pal = vectorize(line_art(), options_for('logo', layout='centerline', palette=('#2B4C9A', '#FFFFFF')))
+    assert 'stroke="#2B4C9A"' in pal.svg
+
+
+def test_layers_group_fills_per_color():
+    r = vectorize(picture(), options_for('flat', layers=True, gradients=False))
+    groups = re.findall(r'<g id="(color-[0-9A-F]{6})">', r.svg)
+    assert len(groups) == len(set(groups)) >= 3 and 'fill-rule="evenodd"' in r.svg
+    for g in groups:   # every path in a color group has that color
+        block = r.svg.split(f'<g id="{g}">', 1)[1].split('</g>', 1)[0]
+        assert set(re.findall(r'fill="(#[0-9A-F]{6})"', block)) == {'#' + g[6:]}
+
+
+def test_edited_svg_is_validated_and_stored(client):
+    jid = client.post('/api/jobs?name=e.png', content=png_bytes(), headers=H).json()['id']
+    done(client, jid)
+    svg = client.get(f'/api/jobs/{jid}/svg', headers=H).text
+    first = re.search(r'<path d="[^"]+" fill="(#[0-9A-F]{6})"', svg)
+    edited = svg.replace(f'fill="{first.group(1)}"', 'fill="#123456"', 1)
+    r = client.put(f'/api/jobs/{jid}/svg', content=edited.encode(), headers=H)
+    assert r.status_code == 200 and r.json()['stats']['edited'] is True
+    saved = client.get(f'/api/jobs/{jid}/svg', headers=H).text
+    assert '#123456' in saved and saved.startswith('<svg xmlns="http://www.w3.org/2000/svg" viewBox=')
+    assert convert(saved, 'pdf').startswith(b'%PDF'), 'edited results still export'
+    head = svg.split('>', 1)[0]
+    for bad in (svg.replace('<path ', '<script>alert(1)</script><path ', 1),
+                svg.replace('<path ', '<path onclick="x()" ', 1),
+                svg.replace(f'fill="{first.group(1)}"', 'fill="url(https://evil.example/x)"', 1),
+                svg.replace('<path ', '<image href="file:///etc/passwd"/><path ', 1),
+                '<!DOCTYPE svg [<!ENTITY a "b">]>' + svg,
+                svg.replace(head, head.replace('viewBox="0 0 200 150"', 'viewBox="0 0 9999 9999"')),
+                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 150"><path fill="url(#nope)" d="M0 0"/></svg>',
+                'not xml'):
+        assert client.put(f'/api/jobs/{jid}/svg', content=bad.encode(), headers=H).status_code == 422, bad[:80]
+    assert '#123456' in client.get(f'/api/jobs/{jid}/svg', headers=H).text, 'a refused edit changes nothing'
+
+
+# ------------------------------------------------------------------------------------------------- watch folder
+
+def test_new_files_waits_until_a_copy_is_complete(tmp_path):
+    from pngsvg.watch import NewFiles
+    (tmp_path / 'old.png').write_bytes(b'x')
+    w = NewFiles(tmp_path)
+    (tmp_path / 'new.png').write_bytes(b'12')
+    (tmp_path / 'notes.txt').write_text('ignored')
+    assert w.poll() == []                                  # size seen once
+    (tmp_path / 'new.png').write_bytes(b'1234')            # still growing
+    assert w.poll() == []
+    assert [p.name for p in w.poll()] == ['new.png']       # stable: reported once
+    assert w.poll() == []
+    assert [p.name for p in NewFiles(tmp_path, include_existing=True).poll()] == []
+    assert sorted(p.name for p in (lambda n: (n.poll(), n.poll())[1])(NewFiles(tmp_path, True))) == ['new.png', 'old.png']
+
+
+def test_cli_watch_once(tmp_path):
+    from pngsvg.cli import main
+    src, dst = tmp_path / 'in', tmp_path / 'out'
+    src.mkdir()
+    picture().save(src / 'a.png')
+    assert main(['watch', str(src), str(dst), '-f', 'pdf', '--existing', '--once', '--interval', '0']) == 0
+    assert (dst / 'a.pdf').read_bytes().startswith(b'%PDF'), 'converted once its size was stable'
+
+
+def test_desktop_watch_folder(tmp_path):
+    from pngsvg_app.watcher import FolderWatch
+    src, dst = tmp_path / 'in', tmp_path / 'out'
+    src.mkdir()
+    jobs = JobManager(workers=1)
+    jobs.start()
+    try:
+        w = FolderWatch(jobs, server, src, dst, 'flat', {'max_colors': 4}, 'dxf', poll=0.05)
+        w.start()
+        picture().save(src / 'drop.png')
+        (src / 'broken.png').write_bytes(b'not really a png')
+        end = time.time() + 60
+        while time.time() < end and (w.converted + w.failed) < 2:
+            time.sleep(0.1)
+        w.stop()
+        assert w.converted == 1 and (dst / 'drop.dxf').read_text().startswith('0\nSECTION')
+        assert w.failed == 1 and 'broken.png' in w.status()['last_error']
+        assert jobs.list()[-1].options == {'max_colors': 4}
+    finally:
+        jobs.shutdown()

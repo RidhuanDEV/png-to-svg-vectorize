@@ -18,6 +18,17 @@ the CLI and the app.
 
 Machine: Windows 11 laptop, Python 3.13, single process.
 
+## v1.5 — center lines, layers, editing (2026-10-25)
+
+Default output is byte-identical to v1.4 (same check). New modes are opt-in and verified by tests rather than the
+similarity bench, because they deliberately change what is drawn:
+- **Center lines** (`layout=centerline`): a synthetic drawing (straight line, circle, sine wave, V, rectangle) gives
+  10 stroked paths in 0.13 s; the circle is one closed loop. Stroke widths are estimated from the ink (75th percentile
+  of the distance to the paper along the line, ±1 px on slanted lines). PDF of the result rendered by the Windows PDF
+  engine matches the SVG render at 99.85 %.
+- **Layers per color** (`layers=true`, implies cut-out): flag-brazil 99.86 % similarity, one `<g id="color-…">` per
+  color.
+
 ## v1.4 — studio options (2026-10-25)
 
 Default output is **byte-identical** to v1.3 (checked on three E7 images × three presets), so every baseline above

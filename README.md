@@ -23,7 +23,7 @@ input.png ──► outline separation ──► fill layer (regions + gradients
                                                                           <g id="outline">
 ```
 
-> **Status:** v1.4 — desktop app for **Windows and macOS**, local web UI, command line and Python library.
+> **Status:** v1.5 — desktop app for **Windows and macOS**, local web UI, command line and Python library.
 > **[Download](https://github.com/RidhuanDEV/png-to-svg-vectorize/releases)** ·
 > [User guide](docs/user-guide.en.md) · [Panduan (ID)](docs/user-guide.id.md) · [Changelog](CHANGELOG.md)
 
@@ -48,6 +48,8 @@ png2svg logo.png --preset logo           # flat colors, crisp geometry (also: fl
 png2svg scenes/*.png -o out/ -j 8        # 8 worker processes (default: min(4, CPUs))
 png2svg logo.png -o logo.pdf --max-colors 4 --remove-bg   # PDF / EPS / DXF too; flat palette, no background
 png2svg art/*.png -o out/ --profile brand.pngsvg-profile.json   # a style profile saved from the app
+png2svg sketch.png -o sketch.dxf --centerline   # line art as center-line strokes (plotters, laser)
+png2svg watch inbox/ out/ -f pdf               # convert pictures as they appear in a folder
 ```
 
 | Preset | For |

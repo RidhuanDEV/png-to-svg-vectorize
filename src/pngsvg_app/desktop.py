@@ -23,6 +23,8 @@ import time
 import urllib.request
 from pathlib import Path
 
+from pngsvg.watch import unique_path
+
 from . import free_port
 
 EXPORT_FORMATS = ('svg', 'pdf', 'eps', 'dxf')
@@ -77,16 +79,6 @@ def load_prefs(folder: Path | None = None) -> dict:
     return prefs
 
 
-def unique_path(folder: Path, filename: str) -> Path:
-    """`folder/filename`, or name-2.svg, name-3.svg, ... so an existing file is never overwritten."""
-    stem, dot, ext = filename.rpartition('.')
-    path, k = folder / filename, 1
-    while path.exists():
-        k += 1
-        path = folder / (f'{stem}-{k}.{ext}' if dot else f'{filename}-{k}')
-    return path
-
-
 class Bridge:
     """Methods callable from the page as window.pywebview.api.<name>(...). Underscored attributes are private.
     File paths stay here: the page only ever sees the chosen folder's path for display."""
@@ -98,6 +90,8 @@ class Bridge:
         self._prefs_dir = prefs_dir
         self._prefs = load_prefs(prefs_dir)
         self._close_message = '{n} image(s) are still waiting or being processed. Close the app and stop them?'
+        self._watch_dirs: dict[str, Path] = {}
+        self._watch = None                          # watcher.FolderWatch while a folder is watched
 
     # -- preferences -------------------------------------------------------------------------------------------
     def _save_prefs(self) -> None:
@@ -225,6 +219,50 @@ class Bridge:
             return False
         stem = self._server.output_name(self._server.clean_name(str(name)), '', '{name}')[:-4]
         return self._save_bytes(stem + SUFFIX, text.encode('utf-8'))
+
+    # -- watch folder ------------------------------------------------------------------------------------------
+    def watch_status(self) -> dict:
+        st = self._watch.status() if self._watch else {'watching': False, 'converted': 0, 'failed': 0, 'waiting': 0,
+                                                         'last_error': None, 'format': None, 'preset': None}
+        st['source'] = str(self._watch_dirs['source']) if 'source' in self._watch_dirs else None
+        st['target'] = str(self._watch_dirs['target']) if 'target' in self._watch_dirs else None
+        return st
+
+    def watch_choose(self, which: str) -> dict:
+        """Pick the folder to watch ('source') or the folder for the results ('target') with the native dialog."""
+        if which in ('source', 'target'):
+            chosen = self._dialog('FOLDER', directory=str(self._watch_dirs.get(which, '')))
+            if chosen:
+                self._watch_dirs[which] = Path(chosen if isinstance(chosen, str) else chosen[0])
+        return self.watch_status()
+
+    def watch_start(self, preset: str, options: str, fmt: str) -> dict:
+        """Start watching with the style shown in the app (validated like an API request)."""
+        from .watcher import FolderWatch
+        src, dst = self._watch_dirs.get('source'), self._watch_dirs.get('target')
+        if fmt not in EXPORT_FORMATS or src is None or dst is None or not src.is_dir():
+            return dict(self.watch_status(), error='choose both folders first')
+        try:
+            overrides = self._server.parse_options(str(preset), str(options))
+        except self._server.HTTPException as e:
+            return dict(self.watch_status(), error=str(e.detail))
+        self.watch_stop()
+        self._watch = FolderWatch(self._jobs, self._server, src, dst, str(preset), overrides, fmt)
+        self._watch.start()
+        return self.watch_status()
+
+    def watch_stop(self) -> dict:
+        if self._watch:
+            self._watch.stop()
+        return self.watch_status()
+
+    def save_report(self, name: str, text: str) -> bool:
+        """Save a batch report the page built (CSV or JSON, plain text)."""
+        stem, _, ext = str(name).rpartition('.')
+        if ext not in ('csv', 'json') or not isinstance(text, str) or len(text) > 20 * 1024 * 1024:
+            return False
+        safe = self._server.output_name(self._server.clean_name(stem), '', '{name}')[:-4]
+        return self._save_bytes(f'{safe}.{ext}', text.encode('utf-8'))
 
     def _save_bytes(self, name: str, body: bytes) -> bool:
         ext = 'json' if name.endswith('.json') else name.rsplit('.', 1)[-1].lower()
