@@ -1,0 +1,812 @@
+{
+ "E7:astronaut": {
+  "category": "cartoon",
+  "preset": "cartoon",
+  "1.6.0": {
+   "similarity": 99.435,
+   "defects": 0.448,
+   "psnr": 27.06,
+   "ssim": 0.9861,
+   "bytes": 102550
+  },
+  "now": {
+   "similarity": 99.595,
+   "defects": 0.148,
+   "psnr": 30.07,
+   "ssim": 0.9897,
+   "bytes": 99956
+  }
+ },
+ "E7:robot": {
+  "category": "cartoon",
+  "preset": "cartoon",
+  "1.6.0": {
+   "similarity": 99.528,
+   "defects": 1.244,
+   "psnr": 30.22,
+   "ssim": 0.9837,
+   "bytes": 70728
+  },
+  "now": {
+   "similarity": 99.766,
+   "defects": 0.234,
+   "psnr": 35.56,
+   "ssim": 0.9907,
+   "bytes": 70586
+  }
+ },
+ "E7:cow": {
+  "category": "cartoon",
+  "preset": "cartoon",
+  "1.6.0": {
+   "similarity": 99.818,
+   "defects": 0.058,
+   "psnr": 35.76,
+   "ssim": 0.9946,
+   "bytes": 35175
+  },
+  "now": {
+   "similarity": 99.818,
+   "defects": 0.058,
+   "psnr": 35.76,
+   "ssim": 0.9946,
+   "bytes": 35175
+  }
+ },
+ "E7:penguin": {
+  "category": "cartoon",
+  "preset": "cartoon",
+  "1.6.0": {
+   "similarity": 99.075,
+   "defects": 0.696,
+   "psnr": 32.41,
+   "ssim": 0.9268,
+   "bytes": 83914
+  },
+  "now": {
+   "similarity": 99.287,
+   "defects": 0.664,
+   "psnr": 33.65,
+   "ssim": 0.9496,
+   "bytes": 90386
+  }
+ },
+ "E7:donkey": {
+  "category": "cartoon",
+  "preset": "cartoon",
+  "1.6.0": {
+   "similarity": 99.834,
+   "defects": 0.039,
+   "psnr": 34.73,
+   "ssim": 0.9923,
+   "bytes": 45081
+  },
+  "now": {
+   "similarity": 99.834,
+   "defects": 0.039,
+   "psnr": 34.73,
+   "ssim": 0.9923,
+   "bytes": 45081
+  }
+ },
+ "E7:fish-mascot": {
+  "category": "cartoon",
+  "preset": "cartoon",
+  "1.6.0": {
+   "similarity": 99.625,
+   "defects": 1.664,
+   "psnr": 31.95,
+   "ssim": 0.9859,
+   "bytes": 58325
+  },
+  "now": {
+   "similarity": 99.822,
+   "defects": 0.171,
+   "psnr": 34.77,
+   "ssim": 0.9939,
+   "bytes": 59827
+  }
+ },
+ "E7:basketball-mascot": {
+  "category": "cartoon",
+  "preset": "cartoon",
+  "1.6.0": {
+   "similarity": 99.83,
+   "defects": 0.022,
+   "psnr": 38.92,
+   "ssim": 0.9952,
+   "bytes": 69936
+  },
+  "now": {
+   "similarity": 99.83,
+   "defects": 0.022,
+   "psnr": 38.92,
+   "ssim": 0.9952,
+   "bytes": 69936
+  }
+ },
+ "E7:cute-girl": {
+  "category": "cartoon",
+  "preset": "cartoon",
+  "1.6.0": {
+   "similarity": 99.519,
+   "defects": 0.598,
+   "psnr": 31.87,
+   "ssim": 0.9817,
+   "bytes": 178044
+  },
+  "now": {
+   "similarity": 99.519,
+   "defects": 0.598,
+   "psnr": 31.87,
+   "ssim": 0.9817,
+   "bytes": 178044
+  }
+ },
+ "E7:silver-hair-girl": {
+  "category": "cartoon",
+  "preset": "cartoon",
+  "1.6.0": {
+   "similarity": 99.143,
+   "defects": 1.768,
+   "psnr": 28.63,
+   "ssim": 0.9683,
+   "bytes": 131310
+  },
+  "now": {
+   "similarity": 99.343,
+   "defects": 0.885,
+   "psnr": 29.39,
+   "ssim": 0.9721,
+   "bytes": 157067
+  }
+ },
+ "E7:caticorn": {
+  "category": "cartoon",
+  "preset": "cartoon",
+  "1.6.0": {
+   "similarity": 99.81,
+   "defects": 0.062,
+   "psnr": 38.79,
+   "ssim": 0.9929,
+   "bytes": 94084
+  },
+  "now": {
+   "similarity": 99.81,
+   "defects": 0.062,
+   "psnr": 38.79,
+   "ssim": 0.9929,
+   "bytes": 94084
+  }
+ },
+ "E7:kazoo": {
+  "category": "cartoon-raster",
+  "preset": "cartoon",
+  "1.6.0": {
+   "similarity": 99.879,
+   "defects": 0.005,
+   "psnr": 38.87,
+   "ssim": 0.9969,
+   "bytes": 11901
+  },
+  "now": {
+   "similarity": 99.879,
+   "defects": 0.005,
+   "psnr": 38.87,
+   "ssim": 0.9969,
+   "bytes": 11901
+  }
+ },
+ "E7:popcorn": {
+  "category": "cartoon-raster",
+  "preset": "cartoon",
+  "1.6.0": {
+   "similarity": 99.571,
+   "defects": 0.132,
+   "psnr": 34.58,
+   "ssim": 0.9844,
+   "bytes": 33307
+  },
+  "now": {
+   "similarity": 99.571,
+   "defects": 0.132,
+   "psnr": 34.58,
+   "ssim": 0.9844,
+   "bytes": 33307
+  }
+ },
+ "E7:futuristic-mascot": {
+  "category": "cartoon-raster",
+  "preset": "cartoon",
+  "1.6.0": {
+   "similarity": 99.11,
+   "defects": 5.627,
+   "psnr": 31.3,
+   "ssim": 0.936,
+   "bytes": 19243
+  },
+  "now": {
+   "similarity": 99.614,
+   "defects": 0.031,
+   "psnr": 36.65,
+   "ssim": 0.9918,
+   "bytes": 24536
+  }
+ },
+ "E7:mountain-landscape": {
+  "category": "flat",
+  "preset": "flat",
+  "1.6.0": {
+   "similarity": 99.747,
+   "defects": 0.192,
+   "psnr": 37.91,
+   "ssim": 0.9928,
+   "bytes": 41313
+  },
+  "now": {
+   "similarity": 99.77,
+   "defects": 0.031,
+   "psnr": 39.95,
+   "ssim": 0.993,
+   "bytes": 41918
+  }
+ },
+ "E7:shipment": {
+  "category": "flat",
+  "preset": "flat",
+  "1.6.0": {
+   "similarity": 99.667,
+   "defects": 0.37,
+   "psnr": 35.68,
+   "ssim": 0.9807,
+   "bytes": 87691
+  },
+  "now": {
+   "similarity": 99.667,
+   "defects": 0.37,
+   "psnr": 35.68,
+   "ssim": 0.9807,
+   "bytes": 87691
+  }
+ },
+ "E7:flying-plane": {
+  "category": "flat",
+  "preset": "flat",
+  "1.6.0": {
+   "similarity": 99.247,
+   "defects": 0.165,
+   "psnr": 33.91,
+   "ssim": 0.9864,
+   "bytes": 57070
+  },
+  "now": {
+   "similarity": 99.247,
+   "defects": 0.165,
+   "psnr": 33.91,
+   "ssim": 0.9864,
+   "bytes": 57070
+  }
+ },
+ "E7:flag-brazil": {
+  "category": "logo",
+  "preset": "logo",
+  "1.6.0": {
+   "similarity": 99.077,
+   "defects": 0.524,
+   "psnr": 26.04,
+   "ssim": 0.9828,
+   "bytes": 1707
+  },
+  "now": {
+   "similarity": 99.886,
+   "defects": 0.014,
+   "psnr": 34.72,
+   "ssim": 0.9948,
+   "bytes": 18625
+  }
+ },
+ "E7:flag-nepal": {
+  "category": "logo",
+  "preset": "logo",
+  "1.6.0": {
+   "similarity": 99.826,
+   "defects": 0.001,
+   "psnr": 31.59,
+   "ssim": 0.986,
+   "bytes": 2534
+  },
+  "now": {
+   "similarity": 99.874,
+   "defects": 0.0,
+   "psnr": 34.43,
+   "ssim": 0.9879,
+   "bytes": 2486
+  }
+ },
+ "E7:flag-kiribati": {
+  "category": "logo",
+  "preset": "logo",
+  "1.6.0": {
+   "similarity": 99.442,
+   "defects": 0.26,
+   "psnr": 26.0,
+   "ssim": 0.964,
+   "bytes": 14989
+  },
+  "now": {
+   "similarity": 99.491,
+   "defects": 0.257,
+   "psnr": 26.53,
+   "ssim": 0.9675,
+   "bytes": 18554
+  }
+ },
+ "E7:flag-south-africa": {
+  "category": "logo",
+  "preset": "logo",
+  "1.6.0": {
+   "similarity": 99.882,
+   "defects": 0.0,
+   "psnr": 34.84,
+   "ssim": 0.9954,
+   "bytes": 848
+  },
+  "now": {
+   "similarity": 99.882,
+   "defects": 0.0,
+   "psnr": 34.84,
+   "ssim": 0.9954,
+   "bytes": 848
+  }
+ },
+ "E7:icon-exclamation": {
+  "category": "icon",
+  "preset": "logo",
+  "1.6.0": {
+   "similarity": 99.957,
+   "defects": 0.0,
+   "psnr": 39.62,
+   "ssim": 0.9977,
+   "bytes": 2219
+  },
+  "now": {
+   "similarity": 99.973,
+   "defects": 0.0,
+   "psnr": 43.53,
+   "ssim": 0.9989,
+   "bytes": 800
+  }
+ },
+ "E7:icon-shop": {
+  "category": "icon",
+  "preset": "logo",
+  "1.6.0": {
+   "similarity": 97.992,
+   "defects": 18.331,
+   "psnr": 28.97,
+   "ssim": 0.9827,
+   "bytes": 5433
+  },
+  "now": {
+   "similarity": 99.951,
+   "defects": 0.002,
+   "psnr": 40.63,
+   "ssim": 0.9953,
+   "bytes": 6390
+  }
+ },
+ "E7:icon-flask": {
+  "category": "icon",
+  "preset": "logo",
+  "1.6.0": {
+   "similarity": 99.286,
+   "defects": 0.002,
+   "psnr": 33.61,
+   "ssim": 0.9923,
+   "bytes": 1176
+  },
+  "now": {
+   "similarity": 99.957,
+   "defects": 0.0,
+   "psnr": 39.49,
+   "ssim": 0.9958,
+   "bytes": 1384
+  }
+ },
+ "E7:icon-cat": {
+  "category": "icon",
+  "preset": "logo",
+  "1.6.0": {
+   "similarity": 99.957,
+   "defects": 0.003,
+   "psnr": 38.63,
+   "ssim": 0.9986,
+   "bytes": 1559
+  },
+  "now": {
+   "similarity": 99.961,
+   "defects": 0.0,
+   "psnr": 39.79,
+   "ssim": 0.9988,
+   "bytes": 1491
+  }
+ },
+ "E7:great-wave": {
+  "category": "poster",
+  "preset": "poster",
+  "1.6.0": {
+   "similarity": 92.726,
+   "defects": 22.385,
+   "psnr": 17.73,
+   "ssim": 0.4718,
+   "bytes": 296405
+  },
+  "now": {
+   "similarity": 92.726,
+   "defects": 22.385,
+   "psnr": 17.73,
+   "ssim": 0.4718,
+   "bytes": 296405
+  }
+ },
+ "E7:starry-night": {
+  "category": "poster",
+  "preset": "poster",
+  "1.6.0": {
+   "similarity": 92.17,
+   "defects": 49.219,
+   "psnr": 19.57,
+   "ssim": 0.2693,
+   "bytes": 831396
+  },
+  "now": {
+   "similarity": 92.17,
+   "defects": 49.219,
+   "psnr": 19.57,
+   "ssim": 0.2693,
+   "bytes": 831396
+  }
+ },
+ "E7:earth-apollo17": {
+  "category": "poster",
+  "preset": "poster",
+  "1.6.0": {
+   "similarity": 95.183,
+   "defects": 15.232,
+   "psnr": 21.59,
+   "ssim": 0.6155,
+   "bytes": 550568
+  },
+  "now": {
+   "similarity": 95.183,
+   "defects": 15.232,
+   "psnr": 21.59,
+   "ssim": 0.6155,
+   "bytes": 550568
+  }
+ },
+ "E8:apple-cartoon": {
+  "category": "cartoon",
+  "preset": "cartoon",
+  "1.6.0": {
+   "similarity": 99.137,
+   "defects": 0.857,
+   "psnr": 28.48,
+   "ssim": 0.9692,
+   "bytes": 13538
+  },
+  "now": {
+   "similarity": 99.34,
+   "defects": 0.356,
+   "psnr": 29.69,
+   "ssim": 0.9827,
+   "bytes": 23772
+  }
+ },
+ "E8:banana-icon": {
+  "category": "cartoon",
+  "preset": "cartoon",
+  "1.6.0": {
+   "similarity": 99.236,
+   "defects": 0.182,
+   "psnr": 33.83,
+   "ssim": 0.9681,
+   "bytes": 42816
+  },
+  "now": {
+   "similarity": 99.236,
+   "defects": 0.182,
+   "psnr": 33.83,
+   "ssim": 0.9681,
+   "bytes": 42816
+  }
+ },
+ "E8:red-apple-icon": {
+  "category": "cartoon",
+  "preset": "cartoon",
+  "1.6.0": {
+   "similarity": 98.969,
+   "defects": 0.538,
+   "psnr": 33.11,
+   "ssim": 0.9586,
+   "bytes": 30252
+  },
+  "now": {
+   "similarity": 98.969,
+   "defects": 0.538,
+   "psnr": 33.11,
+   "ssim": 0.9586,
+   "bytes": 30252
+  }
+ },
+ "E8:pickle": {
+  "category": "cartoon",
+  "preset": "cartoon",
+  "1.6.0": {
+   "similarity": 99.536,
+   "defects": 0.013,
+   "psnr": 33.66,
+   "ssim": 0.9828,
+   "bytes": 14111
+  },
+  "now": {
+   "similarity": 99.568,
+   "defects": 0.062,
+   "psnr": 34.46,
+   "ssim": 0.9844,
+   "bytes": 24912
+  }
+ },
+ "E8:smiley": {
+  "category": "cartoon",
+  "preset": "cartoon",
+  "1.6.0": {
+   "similarity": 99.339,
+   "defects": 0.291,
+   "psnr": 35.9,
+   "ssim": 0.9797,
+   "bytes": 98109
+  },
+  "now": {
+   "similarity": 99.339,
+   "defects": 0.291,
+   "psnr": 35.9,
+   "ssim": 0.9797,
+   "bytes": 98109
+  }
+ },
+ "E8:border-collie": {
+  "category": "cartoon",
+  "preset": "cartoon",
+  "1.6.0": {
+   "similarity": 99.131,
+   "defects": 1.083,
+   "psnr": 28.68,
+   "ssim": 0.9678,
+   "bytes": 129288
+  },
+  "now": {
+   "similarity": 99.142,
+   "defects": 1.052,
+   "psnr": 28.76,
+   "ssim": 0.9692,
+   "bytes": 130536
+  }
+ },
+ "E8:running-collie": {
+  "category": "cartoon",
+  "preset": "cartoon",
+  "1.6.0": {
+   "similarity": 99.511,
+   "defects": 0.98,
+   "psnr": 30.4,
+   "ssim": 0.9856,
+   "bytes": 243132
+  },
+  "now": {
+   "similarity": 99.511,
+   "defects": 0.98,
+   "psnr": 30.4,
+   "ssim": 0.9856,
+   "bytes": 243132
+  }
+ },
+ "E8:mustache-guy": {
+  "category": "cartoon",
+  "preset": "cartoon",
+  "1.6.0": {
+   "similarity": 99.567,
+   "defects": 0.949,
+   "psnr": 32.96,
+   "ssim": 0.987,
+   "bytes": 18747
+  },
+  "now": {
+   "similarity": 99.567,
+   "defects": 0.949,
+   "psnr": 32.96,
+   "ssim": 0.987,
+   "bytes": 18747
+  }
+ },
+ "E8:grawlix-head": {
+  "category": "cartoon",
+  "preset": "cartoon",
+  "1.6.0": {
+   "similarity": 98.212,
+   "defects": 6.776,
+   "psnr": 28.05,
+   "ssim": 0.9056,
+   "bytes": 707331
+  },
+  "now": {
+   "similarity": 98.212,
+   "defects": 6.776,
+   "psnr": 28.05,
+   "ssim": 0.9056,
+   "bytes": 707331
+  }
+ },
+ "E8:gray-cat": {
+  "category": "cartoon",
+  "preset": "cartoon",
+  "1.6.0": {
+   "similarity": 99.714,
+   "defects": 0.089,
+   "psnr": 36.3,
+   "ssim": 0.9898,
+   "bytes": 95303
+  },
+  "now": {
+   "similarity": 99.714,
+   "defects": 0.089,
+   "psnr": 36.3,
+   "ssim": 0.9898,
+   "bytes": 95303
+  }
+ },
+ "E8:eyes": {
+  "category": "cartoon",
+  "preset": "cartoon",
+  "1.6.0": {
+   "similarity": 98.005,
+   "defects": 0.322,
+   "psnr": 21.92,
+   "ssim": 0.9157,
+   "bytes": 180050
+  },
+  "now": {
+   "similarity": 98.005,
+   "defects": 0.322,
+   "psnr": 21.92,
+   "ssim": 0.9157,
+   "bytes": 180050
+  }
+ },
+ "E8:tux-flat": {
+  "category": "icon",
+  "preset": "logo",
+  "1.6.0": {
+   "similarity": 97.652,
+   "defects": 10.218,
+   "psnr": 24.5,
+   "ssim": 0.9367,
+   "bytes": 3814
+  },
+  "now": {
+   "similarity": 99.767,
+   "defects": 0.013,
+   "psnr": 33.67,
+   "ssim": 0.9884,
+   "bytes": 4973
+  }
+ },
+ "E8:ferris": {
+  "category": "icon",
+  "preset": "logo",
+  "1.6.0": {
+   "similarity": 98.509,
+   "defects": 4.942,
+   "psnr": 23.55,
+   "ssim": 0.9417,
+   "bytes": 3241
+  },
+  "now": {
+   "similarity": 99.451,
+   "defects": 0.418,
+   "psnr": 26.84,
+   "ssim": 0.9723,
+   "bytes": 4314
+  }
+ },
+ "E8:kaskelix": {
+  "category": "icon",
+  "preset": "logo",
+  "1.6.0": {
+   "similarity": 97.846,
+   "defects": 9.407,
+   "psnr": 25.12,
+   "ssim": 0.9615,
+   "bytes": 9863
+  },
+  "now": {
+   "similarity": 97.908,
+   "defects": 11.459,
+   "psnr": 25.63,
+   "ssim": 0.962,
+   "bytes": 10483
+  }
+ },
+ "E8:evil-twin": {
+  "category": "icon",
+  "preset": "logo",
+  "1.6.0": {
+   "similarity": 98.895,
+   "defects": 0.359,
+   "psnr": 21.32,
+   "ssim": 0.9647,
+   "bytes": 6654
+  },
+  "now": {
+   "similarity": 99.621,
+   "defects": 0.0,
+   "psnr": 29.68,
+   "ssim": 0.9923,
+   "bytes": 2220
+  }
+ },
+ "E8:bird-pixel-art": {
+  "category": "pixel",
+  "preset": "pixel",
+  "1.6.0": {
+   "similarity": 97.575,
+   "defects": 16.26,
+   "psnr": 19.83,
+   "ssim": 0.9192,
+   "bytes": 3400
+  },
+  "now": {
+   "similarity": 100.0,
+   "defects": 0.0,
+   "psnr": Infinity,
+   "ssim": 1.0,
+   "bytes": 14818
+  }
+ },
+ "E8:spot-cow": {
+  "category": "poster",
+  "preset": "poster",
+  "1.6.0": {
+   "similarity": 98.512,
+   "defects": 5.788,
+   "psnr": 30.47,
+   "ssim": 0.9409,
+   "bytes": 17876
+  },
+  "now": {
+   "similarity": 98.512,
+   "defects": 5.788,
+   "psnr": 30.47,
+   "ssim": 0.9409,
+   "bytes": 17876
+  }
+ },
+ "E8:saxophone": {
+  "category": "poster",
+  "preset": "poster",
+  "1.6.0": {
+   "similarity": 95.65,
+   "defects": 9.369,
+   "psnr": 19.04,
+   "ssim": 0.8476,
+   "bytes": 120403
+  },
+  "now": {
+   "similarity": 95.65,
+   "defects": 9.369,
+   "psnr": 19.04,
+   "ssim": 0.8476,
+   "bytes": 120403
+  }
+ }
+}

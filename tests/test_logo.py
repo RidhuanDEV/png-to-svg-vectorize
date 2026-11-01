@@ -187,9 +187,198 @@ def test_shaded_picture_warns_and_is_limited():
     img = Image.fromarray(np.clip(rgb, 0, 255).astype(np.uint8))
     r = vectorize(img, options_for('logo'))
     assert r.warnings and 'not a flat logo' in r.warnings[0]
-    assert len(r.palette) <= 8
+    assert len(r.palette) <= LogoParams().max_auto_colors
     four = vectorize(img, options_for('logo', max_colors=4))
     assert len(four.palette) <= 4
+
+
+def test_opaque_dark_art_without_background_has_no_holes():
+    # four dark quadrants: no border color dominates, so there is no background and nothing may turn transparent
+    img = Image.new('RGB', (240, 160), (20, 24, 40))
+    d = ImageDraw.Draw(img)
+    d.rectangle((120, 0, 239, 79), fill=(60, 30, 30))
+    d.rectangle((0, 80, 119, 159), fill=(30, 60, 40))
+    d.rectangle((120, 80, 239, 159), fill=(200, 180, 90))
+    d.ellipse((90, 50, 150, 110), fill=(22, 26, 42))           # art in (almost) the border color
+    r = vectorize(img, options_for('logo'))
+    assert r.crop == (0.0, 0.0, 240.0, 160.0)
+    assert (rasterize(r.svg, r.crop, img.size)[..., 3] > 250).mean() > 0.99
+
+
+def test_shaded_picture_keeps_its_dark_frame():
+    # a dominant border color on a picture that is not flat is part of the art, not a background
+    y, x = np.mgrid[0:200, 0:300]
+    rgb = np.stack([x * 0.8, y * 1.2, (x + y) * 0.4], -1)
+    rgb[:30], rgb[-30:], rgb[:, :30], rgb[:, -30:] = 12, 12, 12, 12
+    img = Image.fromarray(np.clip(rgb, 0, 255).astype(np.uint8))
+    r = vectorize(img, options_for('logo'))
+    assert any('background was kept' in w for w in r.warnings)
+    assert (rasterize(r.svg, r.crop, img.size)[..., 3] > 250).mean() > 0.99
+
+
+def test_a_smoothed_textured_gradient_keeps_its_border_color():
+    # the texture is smoothed like noise, which makes the border color dominant; the gradient left is still not flat
+    y, _ = np.mgrid[0:240, 0:360]
+    rgb = np.stack([10 + y * 0.15, 15 + y * 0.2, 40 + y * 0.3], -1)
+    rgb = rgb + np.random.default_rng(0).normal(0, 3, (240, 360, 3))
+    img = Image.fromarray(np.clip(rgb, 0, 255).astype(np.uint8))
+    r = vectorize(img, options_for('logo'))
+    assert any('gradient' in w for w in r.warnings) and any('background was kept' in w for w in r.warnings)
+    assert (rasterize(r.svg, r.crop, img.size)[..., 3] > 250).mean() > 0.99
+
+
+def test_two_shades_of_one_hue_stay_two_colors():
+    # flat UI icons pair a color with its darker shade (here CIEDE2000 8.6 and 10): both are design colors
+    img = Image.new('RGB', (400, 300), 'white')
+    d = ImageDraw.Draw(img)
+    d.rectangle((40, 40, 190, 260), fill=(231, 76, 60))
+    d.rectangle((190, 40, 360, 260), fill=(192, 57, 43))
+    d.rectangle((80, 100, 150, 200), fill=(52, 152, 219))
+    d.rectangle((230, 100, 320, 200), fill=(41, 128, 185))
+    r = vectorize(img, options_for('logo'))
+    assert sorted(r.palette) == ['#2980B9', '#3498DB', '#C0392B', '#E74C3C']
+
+
+def _icon_on_white() -> Image.Image:
+    img = Image.new('RGB', (800, 600), 'white')
+    d = ImageDraw.Draw(img)
+    d.rectangle((300, 200, 500, 400), fill=(236, 240, 241))        # close to white (CIEDE2000 under 6)
+    d.rectangle((320, 220, 400, 300), fill=(231, 76, 60))
+    d.rectangle((400, 220, 480, 300), fill=(192, 57, 43))
+    d.rectangle((320, 300, 400, 380), fill=(52, 152, 219))
+    d.rectangle((400, 300, 480, 380), fill=(41, 128, 185))
+    return img
+
+
+def test_a_kept_background_does_not_crowd_out_the_colors():
+    # the white background is most of the picture: the art's own colors are found without it, then white is added
+    r = vectorize(_icon_on_white(), options_for('logo', remove_bg=False))
+    assert sorted(r.palette) == ['#2980B9', '#3498DB', '#C0392B', '#E74C3C', '#ECF0F1', '#FFFFFF']
+    removed = vectorize(_icon_on_white(), options_for('logo'))
+    assert '#FFFFFF' not in removed.palette
+
+
+def _noisy_flag(sigma: float) -> Image.Image:
+    img = Image.new('RGB', (480, 320), (206, 17, 38))
+    d = ImageDraw.Draw(img)
+    d.rectangle((0, 107, 479, 213), fill=(255, 255, 255))
+    d.ellipse((180, 100, 300, 220), fill=(0, 56, 147))
+    noise = np.random.default_rng(1).normal(0, sigma, (320, 480, 3))
+    return Image.fromarray(np.clip(np.asarray(img, np.float64) + noise, 0, 255).astype(np.uint8))
+
+
+def test_noise_is_smoothed_away_and_a_clean_picture_is_untouched():
+    from pngsvg.logo import noise_level
+    assert noise_level(np.asarray(_noisy_flag(0), np.float64)) == 0.0
+    r = vectorize(_noisy_flag(16), options_for('logo', remove_bg=False))
+    assert len(r.palette) == 3 and not r.warnings
+    pal = to_lab(np.array([[int(h[i:i + 2], 16) for i in (1, 3, 5)] for h in r.palette], np.float64))
+    for want in ((206, 17, 38), (255, 255, 255), (0, 56, 147)):
+        assert float(np.min(delta_e2000(pal, to_lab(np.array(want, np.float64))))) < 3
+    assert r.regions <= 6
+
+
+def test_light_halo_returns_to_the_background_but_a_light_line_stays():
+    img = Image.new('RGB', (400, 300), 'white')
+    d = ImageDraw.Draw(img)
+    d.rectangle((60, 60, 220, 240), fill=(228, 244, 252))             # a 4 px light rim around the shape...
+    d.rectangle((64, 64, 216, 236), fill=(2, 156, 248))
+    d.rectangle((300, 40, 303, 260), fill=(228, 244, 252))            # ...and a light line on its own
+    r = vectorize(img, options_for('logo'))
+    assert sorted(r.palette) == ['#029CF8', '#E4F4FC']
+    assert r.crop[0] == 64.0                                            # the rim is gone...
+    assert [d for _, f, d in paths(r.svg) if f == '#E4F4FC'] == ['M240 0h-4V221h4Z']   # ...the line stays
+
+
+@pytest.mark.parametrize('width', [4, 8])
+def test_thin_bar_keeps_its_width(width):
+    # 1.6.0 joined the two long sides of a thin bar at one point (parallel lines never meet): a zero-area sliver
+    img = Image.new('RGB', (400, 300), 'white')
+    ImageDraw.Draw(img).rectangle((300, 40, 300 + width - 1, 260), fill=(20, 20, 20))
+    r = vectorize(img, options_for('logo'))
+    assert paths(r.svg)[0][2] == f'M{width} 0H0V221H{width}Z' or paths(r.svg)[0][2] == f'M{width} 0h-{width}V221h{width}Z'
+
+
+def test_rounded_bar_ends_stay_round():
+    img = Image.new('RGB', (400, 300), 'white')
+    ImageDraw.Draw(img).rounded_rectangle((300, 40, 315, 260), radius=8, fill=(20, 20, 20))
+    d = paths(vectorize(img, options_for('logo')).svg)[0][2]
+    assert d.count('c') + d.count('C') >= 2
+
+
+def test_a_flat_grey_between_black_and_white_stays_grey():
+    # 1.6: #545454 lies exactly on the black-white mix line, so the mix (anti-aliasing) won over the pure color
+    img = Image.new('RGBA', (400, 300), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.ellipse((40, 20, 360, 280), fill=(84, 84, 84, 255))
+    d.ellipse((70, 50, 330, 250), fill=(41, 41, 41, 255))
+    d.ellipse((150, 100, 250, 200), fill=(255, 255, 255, 255))
+    r = vectorize(img, options_for('logo'))
+    assert sorted(r.palette) == ['#292929', '#545454', '#FFFFFF']
+
+
+def test_line_art_is_flat_but_a_gradient_is_not():
+    lines = Image.new('RGB', (400, 300), 'white')
+    d = ImageDraw.Draw(lines)
+    for i in range(6):
+        d.arc((20 + i * 30, 20, 380 - i * 30, 280), 10 * i, 300, fill='black', width=3)
+    assert vectorize(lines, options_for('logo')).warnings == []
+    y, x = np.mgrid[0:300, 0:400]
+    whale = np.where((((x - 200) / 170) ** 2 + ((y - 150) / 120) ** 2 < 1)[..., None],
+                     np.stack([40 + x * 0.1, 120 + y * 0.2, 150 + x * 0.12], -1), 255)
+    r = vectorize(Image.fromarray(whale.astype(np.uint8)), options_for('logo'))
+    assert r.warnings and ('gradient' in r.warnings[0] or 'shading' in r.warnings[0])
+
+
+def test_pixel_art_keeps_every_color_and_every_pixel():
+    img = Image.new('RGB', (32, 32), (105, 193, 235))
+    px = img.load()
+    for yy in range(8, 20):
+        for xx in range(8, 20):
+            px[xx, yy] = (0, 0, 0) if (xx + yy) % 2 else (249, 235, 170)        # a checkerboard: no pixel is "flat"
+    px[25, 5] = (255, 255, 5)                                                    # a single-pixel star
+    r = vectorize(img, options_for('pixel', remove_bg=False))
+    assert sorted(r.palette) == ['#000000', '#69C1EB', '#F9EBAA', '#FFFF05']
+    assert 'd="M25 5V6h1V5Z"' in r.svg                                          # the star, exactly one pixel
+    from pngsvg.compare import find_browser, render
+    if find_browser() is None:
+        pytest.skip('no Chrome/Edge to render with')
+    assert (np.asarray(render(r.svg, 32, 32)) == np.asarray(img)).all()        # every pixel as it was
+
+
+def test_a_thin_ring_is_one_shape_and_stays_round():
+    # 1.6 cut a 3 px ring into dozens of pieces (every thinner spot was taken for a neck between two shapes), so its
+    # edges became short polygons; now it is one shape whose two edges are exact circles
+    img = Image.new('RGB', (400, 400), 'white')
+    ImageDraw.Draw(img).ellipse((50, 50, 350, 350), outline=(10, 10, 10), width=3)
+    r = vectorize(img, options_for('logo'))
+    assert len(paths(r.svg)) == 1
+    d = paths(r.svg)[0][2]
+    assert not re.search('[LlHhVv]', d) and len(CMD.findall(d)) <= 12               # 2 circles of 4 arcs
+
+
+def test_an_ellipse_is_exact():
+    img = Image.new('RGBA', (400, 300), (0, 0, 0, 0))
+    ImageDraw.Draw(img).ellipse((60, 70, 340, 230), fill=(37, 99, 235, 255))
+    r = vectorize(img, options_for('logo'))
+    d = paths(r.svg)[0][2]
+    assert len(CMD.findall(d)) <= 6                                                   # M + 4 cubics + Z
+    out = rasterize(r.svg, r.crop, img.size)
+    inside = np.asarray(img)[..., 3] > 128
+    assert ((out[..., 3] > 128) == inside).mean() > 0.998
+
+
+def test_a_gentle_curve_is_not_a_line():
+    # the top edge bows by 0.7 px: inside the 1 px line tolerance, but the residual is systematic (an arc), so it
+    # must stay a curve (1.6 drew it as a straight line)
+    h, w, sub = 200, 400, 16
+    x = np.arange(w) + 0.5
+    edge = 100 - 0.7 * (1 - ((x - 200) / 200) ** 2)
+    ys = np.arange(h * sub)[:, None] / sub
+    cover = (ys > edge[None]).reshape(h, sub, w).mean(1)
+    rgb = 255 - cover[..., None] * (255 - np.array([220, 60, 30]))
+    r = vectorize(Image.fromarray(np.round(rgb).astype(np.uint8)), options_for('logo'))
+    assert 'c' in paths(r.svg)[0][2].lower()
 
 
 def test_palette_is_forced():

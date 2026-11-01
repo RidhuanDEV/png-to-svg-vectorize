@@ -143,7 +143,7 @@ small, blurry or JPEG pictures; it makes processing slower (about 3–4×).
 1. **Settings → Processing → AI model**: press **Download** next to *Illustrations* (recommended, 17 MB; for drawings,
    cartoons and flat art) or *General* (5 MB; photos and mixed pictures). The file comes once from this project's
    GitHub release, is checked, and is kept on your computer — after that it works offline. **Remove** deletes it.
-2. In the style panel, **Enhance with AI**: *Off*, *Automatic* (default — only photos smaller than 1000 px or JPEGs)
+2. In the style panel, **Enhance with AI**: *Off*, *Automatic* (default — pictures smaller than 1000 px or JPEGs; with the Logo style only JPEGs, whose compression blocks it removes; never with Pixel art)
    or *Always*. The result panel shows whether AI was used.
 3. **Run AI on**: *Automatic* uses the graphics card when one is supported (DirectML on Windows, Core ML on Apple
    Silicon Macs) and falls back to the processor; choose *Processor only* if the graphics card causes trouble.

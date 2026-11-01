@@ -1,0 +1,623 @@
+{
+ "model": "nvidia/nemotron-3.5-super-vl-120b-a12b",
+ "runs": 3,
+ "temperature": 0.3,
+ "prompt": "You are checking a raster-to-vector conversion. In the top row, picture A (left) is the original and picture B (right) is the vector copy drawn back to pixels. The bottom row shows the same small area of A and B enlarged. Judge only how faithful B is to A: shapes, colors, missing or extra parts, outlines, gradients, text. Ignore tiny anti-aliasing differences along edges.\nScore 0-10: 10 = no visible difference; 8-9 = differences visible only in the enlarged area; 6-7 = small visible defects at normal size (a lost detail, a slightly wrong color in a small area); 3-5 = clear defects (missing shapes, merged colors, wrong gradients, holes); 0-2 = largely wrong.\nReply with JSON only: {\"score\": <integer 0-10>, \"defects\": [\"short description\", ...]} (an empty list if none).",
+ "pairs": {
+  "control:identical:cow": {
+   "expect": "identical (expect 10)",
+   "scores": [
+    10.0,
+    10.0,
+    10.0
+   ],
+   "median": 10.0,
+   "defects": []
+  },
+  "control:identical:tux-flat": {
+   "expect": "identical (expect 10)",
+   "scores": [
+    10.0,
+    10.0,
+    10.0
+   ],
+   "median": 10.0,
+   "defects": []
+  },
+  "control:identical:starry-night": {
+   "expect": "identical (expect 10)",
+   "scores": [
+    9.0,
+    8.0,
+    9.0
+   ],
+   "median": 9.0,
+   "defects": [
+    "Slight loss of fine texture and color gradient detail visible in the enlarged area"
+   ]
+  },
+  "control:erased:icon-shop": {
+   "expect": "a part erased (expect <= 5)",
+   "scores": [
+    4.0,
+    4.0,
+    4.0
+   ],
+   "median": 4.0,
+   "defects": [
+    "Missing door/window shape on the right side of the building",
+    "Enlarged detail area is completely empty/white instead of showing the blue gradient"
+   ]
+  },
+  "control:hue:border-collie": {
+   "expect": "colors shifted (expect <= 5)",
+   "scores": [
+    4.0,
+    6.0,
+    6.0
+   ],
+   "median": 6.0,
+   "defects": [
+    "Collar color changed from red to yellow",
+    "Eye color changed from brown to green",
+    "Tongue color changed from pink to orange"
+   ]
+  },
+  "control:posterized:shipment": {
+   "expect": "3 colors per channel (expect <= 6)",
+   "scores": [
+    4.0,
+    4.0,
+    4.0
+   ],
+   "median": 4.0,
+   "defects": [
+    "Background is gray instead of white",
+    "Box is pink instead of tan",
+    "Woman's hair is green/orange instead of blonde",
+    "Skin tones are pale/yellowish instead of natural",
+    "Pants are black instead of dark gray",
+    "Enlarged area shows dark gray fill instead of black"
+   ]
+  },
+  "E7:astronaut": {
+   "expect": "",
+   "scores": [
+    8.0,
+    8.0,
+    9.0
+   ],
+   "median": 8.0,
+   "defects": [
+    "Missing dotted line detail in enlarged view",
+    "Outline thickness variation in enlarged view"
+   ]
+  },
+  "E7:robot": {
+   "expect": "",
+   "scores": [
+    9.0,
+    9.0,
+    9.0
+   ],
+   "median": 9.0,
+   "defects": [
+    "Minor gradient simplification on shoulder visible in enlargement"
+   ]
+  },
+  "E7:cow": {
+   "expect": "",
+   "scores": [
+    10.0,
+    10.0,
+    10.0
+   ],
+   "median": 10.0,
+   "defects": []
+  },
+  "E7:penguin": {
+   "expect": "",
+   "scores": [
+    8.0,
+    8.0,
+    8.0
+   ],
+   "median": 8.0,
+   "defects": [
+    "Gradient banding visible in the enlarged area"
+   ]
+  },
+  "E7:donkey": {
+   "expect": "",
+   "scores": [
+    10.0,
+    9.0,
+    9.0
+   ],
+   "median": 9.0,
+   "defects": []
+  },
+  "E7:fish-mascot": {
+   "expect": "",
+   "scores": [
+    9.0,
+    9.0,
+    9.0
+   ],
+   "median": 9.0,
+   "defects": [
+    "Slightly simplified gradient or sharper edges on the handle highlight visible in the enlarged area"
+   ]
+  },
+  "E7:basketball-mascot": {
+   "expect": "",
+   "scores": [
+    9.0,
+    10.0,
+    9.0
+   ],
+   "median": 9.0,
+   "defects": [
+    "Vector copy has smoother edges and slightly flatter gradients than the original raster, visible only in the enlarged area"
+   ]
+  },
+  "E7:cute-girl": {
+   "expect": "",
+   "scores": [
+    9.0,
+    9.0,
+    9.0
+   ],
+   "median": 9.0,
+   "defects": [
+    "Smooth gradients simplified into flat color regions in enlarged area",
+    "Slightly sharper transitions between color blocks visible only when zoomed in"
+   ]
+  },
+  "E7:silver-hair-girl": {
+   "expect": "",
+   "scores": [
+    8.0,
+    8.0,
+    8.0
+   ],
+   "median": 8.0,
+   "defects": [
+    "jagged and broken hair strands in enlarged view",
+    "stray black specks in hair area",
+    "slightly blocky eye shading"
+   ]
+  },
+  "E7:caticorn": {
+   "expect": "",
+   "scores": [
+    9.0,
+    10.0,
+    10.0
+   ],
+   "median": 10.0,
+   "defects": [
+    "Minor gradient simplification in horn segments visible in enlarged view"
+   ]
+  },
+  "E7:kazoo": {
+   "expect": "",
+   "scores": [
+    10.0,
+    10.0,
+    10.0
+   ],
+   "median": 10.0,
+   "defects": []
+  },
+  "E7:popcorn": {
+   "expect": "",
+   "scores": [
+    9.0,
+    9.0,
+    9.0
+   ],
+   "median": 9.0,
+   "defects": [
+    "Slight difference in line termination/thickness of the black squiggle in the enlarged area"
+   ]
+  },
+  "E7:futuristic-mascot": {
+   "expect": "",
+   "scores": [
+    9.0,
+    9.0,
+    9.0
+   ],
+   "median": 9.0,
+   "defects": [
+    "Small black artifact in the corner of the grey bezel visible in the enlarged view"
+   ]
+  },
+  "E7:mountain-landscape": {
+   "expect": "",
+   "scores": [
+    8.0,
+    8.0,
+    8.0
+   ],
+   "median": 8.0,
+   "defects": [
+    "Stepped/banded gradients visible in enlarged area",
+    "Smooth curves approximated by polygonal color blocks in enlargement"
+   ]
+  },
+  "E7:shipment": {
+   "expect": "",
+   "scores": [
+    9.0,
+    9.0,
+    9.0
+   ],
+   "median": 9.0,
+   "defects": [
+    "missing freckles on cheek",
+    "reduced facial shading on forehead and nose"
+   ]
+  },
+  "E7:flying-plane": {
+   "expect": "",
+   "scores": [
+    10.0,
+    10.0,
+    10.0
+   ],
+   "median": 10.0,
+   "defects": []
+  },
+  "E7:flag-brazil": {
+   "expect": "",
+   "scores": [
+    8.0,
+    8.0,
+    9.0
+   ],
+   "median": 8.0,
+   "defects": [
+    "Star shape is malformed/blobby in enlarged view",
+    "Text letters appear slightly blockier in enlarged view"
+   ]
+  },
+  "E7:flag-nepal": {
+   "expect": "",
+   "scores": [
+    10.0,
+    10.0,
+    10.0
+   ],
+   "median": 10.0,
+   "defects": []
+  },
+  "E7:flag-kiribati": {
+   "expect": "",
+   "scores": [
+    6.0,
+    7.0,
+    6.0
+   ],
+   "median": 6.0,
+   "defects": [
+    "Missing internal feather texture lines on the bird",
+    "Stray blue pixel artifacts on the bird"
+   ]
+  },
+  "E7:flag-south-africa": {
+   "expect": "",
+   "scores": [
+    10.0,
+    10.0,
+    10.0
+   ],
+   "median": 10.0,
+   "defects": []
+  },
+  "E7:icon-exclamation": {
+   "expect": "",
+   "scores": [
+    10.0,
+    10.0,
+    10.0
+   ],
+   "median": 10.0,
+   "defects": []
+  },
+  "E7:icon-shop": {
+   "expect": "",
+   "scores": [
+    10.0,
+    10.0,
+    7.0
+   ],
+   "median": 10.0,
+   "defects": []
+  },
+  "E7:icon-flask": {
+   "expect": "",
+   "scores": [
+    10.0,
+    10.0,
+    10.0
+   ],
+   "median": 10.0,
+   "defects": []
+  },
+  "E7:icon-cat": {
+   "expect": "",
+   "scores": [
+    10.0,
+    10.0,
+    10.0
+   ],
+   "median": 10.0,
+   "defects": []
+  },
+  "E7:great-wave": {
+   "expect": "",
+   "scores": [
+    4.0,
+    4.0,
+    4.0
+   ],
+   "median": 4.0,
+   "defects": [
+    "Lost fine details in the boat structure and figures",
+    "Merged water colors and lost foam texture",
+    "Flattened gradients and simplified outlines",
+    "Text block simplified and less legible"
+   ]
+  },
+  "E7:starry-night": {
+   "expect": "",
+   "scores": [
+    4.0,
+    4.0,
+    4.0
+   ],
+   "median": 4.0,
+   "defects": [
+    "Lost fine brushstroke texture and detail",
+    "Colors merged into large flat regions",
+    "Blocky or stepped gradients instead of smooth transitions",
+    "Simplified shapes in the cypress tree and village"
+   ]
+  },
+  "E7:earth-apollo17": {
+   "expect": "",
+   "scores": [
+    4.0,
+    4.0,
+    8.0
+   ],
+   "median": 4.0,
+   "defects": [
+    "Fine cloud and ocean textures replaced by large flat color regions",
+    "Smooth gradients posterized into stepped bands",
+    "Detailed shapes simplified into blocky polygons"
+   ]
+  },
+  "E8:apple-cartoon": {
+   "expect": "",
+   "scores": [
+    9.0,
+    9.0,
+    9.0
+   ],
+   "median": 9.0,
+   "defects": [
+    "Slight color variation in the stem visible in the enlarged area"
+   ]
+  },
+  "E8:banana-icon": {
+   "expect": "",
+   "scores": [
+    8.0,
+    9.0,
+    9.0
+   ],
+   "median": 9.0,
+   "defects": [
+    "Simplified shading and gradients visible in the enlarged area",
+    "Minor shape variations in the green stalks and white gaps in the enlarged area"
+   ]
+  },
+  "E8:red-apple-icon": {
+   "expect": "",
+   "scores": [
+    9.0,
+    9.0,
+    8.0
+   ],
+   "median": 9.0,
+   "defects": [
+    "Small light green artifact at the base of the stem visible in the enlarged area"
+   ]
+  },
+  "E8:pickle": {
+   "expect": "",
+   "scores": [
+    10.0,
+    9.0,
+    9.0
+   ],
+   "median": 9.0,
+   "defects": []
+  },
+  "E8:smiley": {
+   "expect": "",
+   "scores": [
+    8.0,
+    8.0,
+    8.0
+   ],
+   "median": 8.0,
+   "defects": [
+    "Gradient banding visible in enlarged area",
+    "Irregular artifacts in the top-left highlight region"
+   ]
+  },
+  "E8:border-collie": {
+   "expect": "",
+   "scores": [
+    9.0,
+    9.0,
+    9.0
+   ],
+   "median": 9.0,
+   "defects": [
+    "Minor gradient flattening in enlarged chest area",
+    "Slightly sharper vector edges on fur tufts"
+   ]
+  },
+  "E8:running-collie": {
+   "expect": "",
+   "scores": [
+    9.0,
+    9.0,
+    8.0
+   ],
+   "median": 9.0,
+   "defects": [
+    "Edges appear slightly sharper/crisper in the vector copy in the enlarged area"
+   ]
+  },
+  "E8:mustache-guy": {
+   "expect": "",
+   "scores": [
+    10.0,
+    10.0,
+    10.0
+   ],
+   "median": 10.0,
+   "defects": []
+  },
+  "E8:grawlix-head": {
+   "expect": "",
+   "scores": [
+    9.0,
+    9.0,
+    9.0
+   ],
+   "median": 9.0,
+   "defects": [
+    "Hair texture smoothed to flat color in vector copy",
+    "Outlines appear slightly thicker in enlarged view",
+    "Minor stray black artifacts near edges in enlarged view"
+   ]
+  },
+  "E8:gray-cat": {
+   "expect": "",
+   "scores": [
+    10.0,
+    9.0,
+    10.0
+   ],
+   "median": 10.0,
+   "defects": []
+  },
+  "E8:eyes": {
+   "expect": "",
+   "scores": [
+    8.0,
+    8.0,
+    8.0
+   ],
+   "median": 8.0,
+   "defects": [
+    "Hair strands in the enlarged area are thicker and merged, losing fine wispy details",
+    "Some individual hair strands are missing or combined into larger blobs in the vector copy"
+   ]
+  },
+  "E8:tux-flat": {
+   "expect": "",
+   "scores": [
+    10.0,
+    10.0,
+    10.0
+   ],
+   "median": 10.0,
+   "defects": []
+  },
+  "E8:ferris": {
+   "expect": "",
+   "scores": [
+    10.0,
+    10.0,
+    10.0
+   ],
+   "median": 10.0,
+   "defects": []
+  },
+  "E8:kaskelix": {
+   "expect": "",
+   "scores": [
+    7.0,
+    8.0,
+    7.0
+   ],
+   "median": 7.0,
+   "defects": [
+    "Slight color/gradient mismatch on the rear body (darker patch in B)",
+    "Minor outline artifact/irregularity visible in the enlarged area"
+   ]
+  },
+  "E8:evil-twin": {
+   "expect": "",
+   "scores": [
+    10.0,
+    10.0,
+    10.0
+   ],
+   "median": 10.0,
+   "defects": []
+  },
+  "E8:bird-pixel-art": {
+   "expect": "",
+   "scores": [
+    10.0,
+    10.0,
+    10.0
+   ],
+   "median": 10.0,
+   "defects": []
+  },
+  "E8:spot-cow": {
+   "expect": "",
+   "scores": [
+    6.0,
+    8.0,
+    7.0
+   ],
+   "median": 7.0,
+   "defects": [
+    "blocky gradients instead of smooth shading",
+    "faceted surfaces instead of smooth curves"
+   ]
+  },
+  "E8:saxophone": {
+   "expect": "",
+   "scores": [
+    3.0,
+    3.0,
+    4.0
+   ],
+   "median": 3.0,
+   "defects": [
+    "Staff lines broken into disconnected fragments",
+    "Musical notes distorted into grey blobs",
+    "Loss of crisp black outlines in notation elements",
+    "Fragmented and noisy musical symbols around the saxophone"
+   ]
+  }
+ },
+ "spearman": {
+  "similarity": 0.67,
+  "defect_area": 0.679,
+  "ssim": 0.697
+ },
+ "run_spread_median": 0.0
+}

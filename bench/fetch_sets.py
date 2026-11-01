@@ -1,6 +1,7 @@
-"""Download the license-free comparison set (E7) listed in bench/sets/sources.json into bench/sets/images.
+"""Download the license-free comparison sets listed in bench/<set>/sources.json into bench/<set>/images.
 
-Images are not stored in git: they are downloaded on demand and checked against the recorded hash. Wikimedia
+    python bench/fetch_sets.py                 # E7: renders of CC0 vector art (bench/sets)
+    python bench/fetch_sets.py --set real      # E8: pictures that were made as rasters (PNG / JPEG, bench/real)
     python bench/fetch_sets.py --update        # (maintainers) record hashes of freshly downloaded files
     python bench/fetch_sets.py --sources-md    # regenerate bench/sets/SOURCES.md from the manifest
 
@@ -19,7 +20,8 @@ import time
 import urllib.request
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent / 'sets'
+BENCH = Path(__file__).resolve().parent
+ROOT = BENCH / 'sets'
 MANIFEST = ROOT / 'sources.json'
 IMAGES = ROOT / 'images'
 UA = 'png-to-svg-vectorize-bench/1.0 (https://github.com/RidhuanDEV/png-to-svg-vectorize)'
@@ -82,9 +84,10 @@ def fetch(update: bool) -> int:
 
 def sources_md() -> None:
     rows = json.loads(MANIFEST.read_text(encoding='utf-8'))
+    command = 'python bench/fetch_sets.py' + ('' if ROOT.name == 'sets' else f' --set {ROOT.name}')
     lines = ['# Comparison set sources', '',
              'All images are **CC0 or public domain** on Wikimedia Commons. They are downloaded on demand by',
-             '`python bench/fetch_sets.py` (not stored in this repository) and verified by SHA-256.', '',
+             f'`{command}` (not stored in this repository) and verified by SHA-256.', '',
              '| File | Category | Work (Commons page) | Author | License |', '|---|---|---|---|---|']
     for r in rows:
         title = r['title'].removeprefix('File:')
@@ -98,7 +101,11 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--update', action='store_true', help='re-download everything and record new hashes')
     ap.add_argument('--sources-md', action='store_true', help='regenerate SOURCES.md')
+    ap.add_argument('--set', default='sets', choices=['sets', 'real'], help='which set (default: sets = E7)')
     a = ap.parse_args(argv)
+    global ROOT, MANIFEST, IMAGES
+    ROOT = BENCH / a.set
+    MANIFEST, IMAGES = ROOT / 'sources.json', ROOT / 'images'
     if a.sources_md:
         sources_md()
         return 0

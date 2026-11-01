@@ -1,0 +1,1702 @@
+{
+ "E7:astronaut|clean:0": {
+  "ours": {
+   "similarity": 99.595,
+   "defects": 0.148,
+   "ssim": 0.9897
+  },
+  "ours+AI": {
+   "similarity": 99.569,
+   "defects": 0.053,
+   "ssim": 0.9953
+  },
+  "vtracer": {
+   "similarity": 98.661,
+   "defects": 0.809,
+   "ssim": 0.9649
+  }
+ },
+ "E7:astronaut|jpeg:70": {
+  "ours": {
+   "similarity": 99.503,
+   "defects": 0.217,
+   "ssim": 0.9886
+  },
+  "ours+AI": {
+   "similarity": 99.53,
+   "defects": 0.057,
+   "ssim": 0.9951
+  },
+  "vtracer": {
+   "similarity": 98.688,
+   "defects": 1.162,
+   "ssim": 0.9678
+  }
+ },
+ "E7:astronaut|jpeg:50": {
+  "ours": {
+   "similarity": 99.439,
+   "defects": 0.303,
+   "ssim": 0.9875
+  },
+  "ours+AI": {
+   "similarity": 99.498,
+   "defects": 0.047,
+   "ssim": 0.9951
+  },
+  "vtracer": {
+   "similarity": 98.653,
+   "defects": 1.49,
+   "ssim": 0.9672
+  }
+ },
+ "E7:astronaut|jpeg:30": {
+  "ours": {
+   "similarity": 99.381,
+   "defects": 0.43,
+   "ssim": 0.985
+  },
+  "ours+AI": {
+   "similarity": 99.489,
+   "defects": 0.084,
+   "ssim": 0.9944
+  },
+  "vtracer": {
+   "similarity": 98.448,
+   "defects": 2.963,
+   "ssim": 0.9638
+  }
+ },
+ "E7:astronaut|scale:0.75": {
+  "ours": {
+   "similarity": 99.299,
+   "defects": 0.477,
+   "ssim": 0.9793
+  },
+  "ours+AI": {
+   "similarity": 99.496,
+   "defects": 0.179,
+   "ssim": 0.9923
+  },
+  "vtracer": {
+   "similarity": 98.473,
+   "defects": 2.094,
+   "ssim": 0.9527
+  }
+ },
+ "E7:astronaut|scale:0.5": {
+  "ours": {
+   "similarity": 98.441,
+   "defects": 2.322,
+   "ssim": 0.9452
+  },
+  "ours+AI": {
+   "similarity": 99.264,
+   "defects": 2.201,
+   "ssim": 0.9827
+  },
+  "vtracer": {
+   "similarity": 97.957,
+   "defects": 3.997,
+   "ssim": 0.9297
+  }
+ },
+ "E7:astronaut|scale:0.25": {
+  "ours": {
+   "similarity": 97.34,
+   "defects": 5.752,
+   "ssim": 0.9014
+  },
+  "ours+AI": {
+   "similarity": 98.396,
+   "defects": 3.819,
+   "ssim": 0.9544
+  },
+  "vtracer": {
+   "similarity": 97.154,
+   "defects": 5.388,
+   "ssim": 0.8909
+  }
+ },
+ "E7:astronaut|noise:4": {
+  "ours": {
+   "similarity": 99.014,
+   "defects": 0.622,
+   "ssim": 0.991
+  },
+  "ours+AI": {
+   "similarity": 99.474,
+   "defects": 0.027,
+   "ssim": 0.9959
+  },
+  "vtracer": {
+   "similarity": 98.298,
+   "defects": 1.09,
+   "ssim": 0.9616
+  }
+ },
+ "E7:astronaut|noise:8": {
+  "ours": {
+   "similarity": 98.616,
+   "defects": 1.322,
+   "ssim": 0.9903
+  },
+  "ours+AI": {
+   "similarity": 99.455,
+   "defects": 0.034,
+   "ssim": 0.9957
+  },
+  "vtracer": {
+   "similarity": 97.854,
+   "defects": 1.228,
+   "ssim": 0.9624
+  }
+ },
+ "E7:astronaut|noise:16": {
+  "ours": {
+   "similarity": 97.465,
+   "defects": 1.872,
+   "ssim": 0.9867
+  },
+  "ours+AI": {
+   "similarity": 99.31,
+   "defects": 0.089,
+   "ssim": 0.9948
+  },
+  "vtracer": {
+   "similarity": 96.75,
+   "defects": 4.667,
+   "ssim": 0.9427
+  }
+ },
+ "E7:cow|clean:0": {
+  "ours": {
+   "similarity": 99.818,
+   "defects": 0.058,
+   "ssim": 0.9946
+  },
+  "ours+AI": {
+   "similarity": 99.619,
+   "defects": 0.033,
+   "ssim": 0.9967
+  },
+  "vtracer": {
+   "similarity": 98.984,
+   "defects": 0.119,
+   "ssim": 0.9285
+  }
+ },
+ "E7:cow|jpeg:70": {
+  "ours": {
+   "similarity": 99.714,
+   "defects": 0.058,
+   "ssim": 0.993
+  },
+  "ours+AI": {
+   "similarity": 99.577,
+   "defects": 0.032,
+   "ssim": 0.9968
+  },
+  "vtracer": {
+   "similarity": 98.982,
+   "defects": 0.086,
+   "ssim": 0.907
+  }
+ },
+ "E7:cow|jpeg:50": {
+  "ours": {
+   "similarity": 99.49,
+   "defects": 0.012,
+   "ssim": 0.9931
+  },
+  "ours+AI": {
+   "similarity": 99.552,
+   "defects": 0.001,
+   "ssim": 0.996
+  },
+  "vtracer": {
+   "similarity": 98.866,
+   "defects": 0.191,
+   "ssim": 0.9048
+  }
+ },
+ "E7:cow|jpeg:30": {
+  "ours": {
+   "similarity": 99.501,
+   "defects": 0.056,
+   "ssim": 0.9931
+  },
+  "ours+AI": {
+   "similarity": 99.563,
+   "defects": 0.001,
+   "ssim": 0.9967
+  },
+  "vtracer": {
+   "similarity": 98.741,
+   "defects": 0.28,
+   "ssim": 0.9028
+  }
+ },
+ "E7:cow|scale:0.75": {
+  "ours": {
+   "similarity": 99.563,
+   "defects": 0.071,
+   "ssim": 0.9874
+  },
+  "ours+AI": {
+   "similarity": 99.591,
+   "defects": 0.03,
+   "ssim": 0.9946
+  },
+  "vtracer": {
+   "similarity": 98.759,
+   "defects": 0.171,
+   "ssim": 0.8914
+  }
+ },
+ "E7:cow|scale:0.5": {
+  "ours": {
+   "similarity": 99.254,
+   "defects": 0.337,
+   "ssim": 0.9706
+  },
+  "ours+AI": {
+   "similarity": 99.526,
+   "defects": 0.063,
+   "ssim": 0.9897
+  },
+  "vtracer": {
+   "similarity": 98.369,
+   "defects": 0.313,
+   "ssim": 0.8644
+  }
+ },
+ "E7:cow|scale:0.25": {
+  "ours": {
+   "similarity": 98.14,
+   "defects": 3.945,
+   "ssim": 0.9068
+  },
+  "ours+AI": {
+   "similarity": 98.939,
+   "defects": 0.356,
+   "ssim": 0.9642
+  },
+  "vtracer": {
+   "similarity": 96.942,
+   "defects": 2.017,
+   "ssim": 0.8097
+  }
+ },
+ "E7:cow|noise:4": {
+  "ours": {
+   "similarity": 99.396,
+   "defects": 0.068,
+   "ssim": 0.9929
+  },
+  "ours+AI": {
+   "similarity": 99.607,
+   "defects": 0.0,
+   "ssim": 0.9971
+  },
+  "vtracer": {
+   "similarity": 98.268,
+   "defects": 2.104,
+   "ssim": 0.9041
+  }
+ },
+ "E7:cow|noise:8": {
+  "ours": {
+   "similarity": 98.97,
+   "defects": 0.063,
+   "ssim": 0.9939
+  },
+  "ours+AI": {
+   "similarity": 99.558,
+   "defects": 0.0,
+   "ssim": 0.9959
+  },
+  "vtracer": {
+   "similarity": 98.144,
+   "defects": 0.463,
+   "ssim": 0.8974
+  }
+ },
+ "E7:cow|noise:16": {
+  "ours": {
+   "similarity": 98.245,
+   "defects": 0.07,
+   "ssim": 0.9924
+  },
+  "ours+AI": {
+   "similarity": 99.213,
+   "defects": 0.871,
+   "ssim": 0.9936
+  },
+  "vtracer": {
+   "similarity": 97.204,
+   "defects": 6.594,
+   "ssim": 0.8571
+  }
+ },
+ "E7:robot|clean:0": {
+  "ours": {
+   "similarity": 99.766,
+   "defects": 0.234,
+   "ssim": 0.9907
+  },
+  "ours+AI": {
+   "similarity": 99.353,
+   "defects": 0.476,
+   "ssim": 0.9853
+  },
+  "vtracer": {
+   "similarity": 99.155,
+   "defects": 0.012,
+   "ssim": 0.9717
+  }
+ },
+ "E7:robot|jpeg:70": {
+  "ours": {
+   "similarity": 99.331,
+   "defects": 0.539,
+   "ssim": 0.9855
+  },
+  "ours+AI": {
+   "similarity": 99.339,
+   "defects": 0.497,
+   "ssim": 0.9844
+  },
+  "vtracer": {
+   "similarity": 99.119,
+   "defects": 0.734,
+   "ssim": 0.97
+  }
+ },
+ "E7:robot|jpeg:50": {
+  "ours": {
+   "similarity": 99.278,
+   "defects": 0.474,
+   "ssim": 0.9861
+  },
+  "ours+AI": {
+   "similarity": 99.341,
+   "defects": 0.503,
+   "ssim": 0.984
+  },
+  "vtracer": {
+   "similarity": 99.071,
+   "defects": 0.709,
+   "ssim": 0.9686
+  }
+ },
+ "E7:robot|jpeg:30": {
+  "ours": {
+   "similarity": 99.126,
+   "defects": 6.815,
+   "ssim": 0.9788
+  },
+  "ours+AI": {
+   "similarity": 99.248,
+   "defects": 0.483,
+   "ssim": 0.9839
+  },
+  "vtracer": {
+   "similarity": 99.112,
+   "defects": 0.565,
+   "ssim": 0.967
+  }
+ },
+ "E7:robot|scale:0.75": {
+  "ours": {
+   "similarity": 99.273,
+   "defects": 0.909,
+   "ssim": 0.9784
+  },
+  "ours+AI": {
+   "similarity": 99.243,
+   "defects": 0.837,
+   "ssim": 0.9788
+  },
+  "vtracer": {
+   "similarity": 98.877,
+   "defects": 0.174,
+   "ssim": 0.9491
+  }
+ },
+ "E7:robot|scale:0.5": {
+  "ours": {
+   "similarity": 98.882,
+   "defects": 1.991,
+   "ssim": 0.9551
+  },
+  "ours+AI": {
+   "similarity": 99.015,
+   "defects": 1.14,
+   "ssim": 0.9666
+  },
+  "vtracer": {
+   "similarity": 98.525,
+   "defects": 0.553,
+   "ssim": 0.9262
+  }
+ },
+ "E7:robot|scale:0.25": {
+  "ours": {
+   "similarity": 97.414,
+   "defects": 8.362,
+   "ssim": 0.8981
+  },
+  "ours+AI": {
+   "similarity": 97.927,
+   "defects": 6.095,
+   "ssim": 0.9255
+  },
+  "vtracer": {
+   "similarity": 97.521,
+   "defects": 6.903,
+   "ssim": 0.8762
+  }
+ },
+ "E7:robot|noise:4": {
+  "ours": {
+   "similarity": 99.016,
+   "defects": 9.632,
+   "ssim": 0.9873
+  },
+  "ours+AI": {
+   "similarity": 99.394,
+   "defects": 0.2,
+   "ssim": 0.9862
+  },
+  "vtracer": {
+   "similarity": 98.667,
+   "defects": 0.727,
+   "ssim": 0.966
+  }
+ },
+ "E7:robot|noise:8": {
+  "ours": {
+   "similarity": 98.015,
+   "defects": 6.739,
+   "ssim": 0.9614
+  },
+  "ours+AI": {
+   "similarity": 99.334,
+   "defects": 0.276,
+   "ssim": 0.9848
+  },
+  "vtracer": {
+   "similarity": 98.389,
+   "defects": 0.581,
+   "ssim": 0.9642
+  }
+ },
+ "E7:robot|noise:16": {
+  "ours": {
+   "similarity": 97.73,
+   "defects": 0.534,
+   "ssim": 0.9746
+  },
+  "ours+AI": {
+   "similarity": 98.096,
+   "defects": 4.745,
+   "ssim": 0.9645
+  },
+  "vtracer": {
+   "similarity": 97.341,
+   "defects": 8.349,
+   "ssim": 0.942
+  }
+ },
+ "E7:shipment|clean:0": {
+  "ours": {
+   "similarity": 99.667,
+   "defects": 0.37,
+   "ssim": 0.9807
+  },
+  "ours+AI": {
+   "similarity": 99.484,
+   "defects": 0.283,
+   "ssim": 0.9838
+  },
+  "vtracer": {
+   "similarity": 99.009,
+   "defects": 0.15,
+   "ssim": 0.9594
+  }
+ },
+ "E7:shipment|jpeg:70": {
+  "ours": {
+   "similarity": 99.513,
+   "defects": 0.905,
+   "ssim": 0.9818
+  },
+  "ours+AI": {
+   "similarity": 99.467,
+   "defects": 0.256,
+   "ssim": 0.9843
+  },
+  "vtracer": {
+   "similarity": 98.856,
+   "defects": 1.827,
+   "ssim": 0.9551
+  }
+ },
+ "E7:shipment|jpeg:50": {
+  "ours": {
+   "similarity": 99.494,
+   "defects": 0.819,
+   "ssim": 0.9796
+  },
+  "ours+AI": {
+   "similarity": 99.424,
+   "defects": 0.344,
+   "ssim": 0.9834
+  },
+  "vtracer": {
+   "similarity": 98.749,
+   "defects": 2.461,
+   "ssim": 0.9548
+  }
+ },
+ "E7:shipment|jpeg:30": {
+  "ours": {
+   "similarity": 99.454,
+   "defects": 0.951,
+   "ssim": 0.9786
+  },
+  "ours+AI": {
+   "similarity": 99.408,
+   "defects": 0.54,
+   "ssim": 0.9828
+  },
+  "vtracer": {
+   "similarity": 98.721,
+   "defects": 3.344,
+   "ssim": 0.9521
+  }
+ },
+ "E7:shipment|scale:0.75": {
+  "ours": {
+   "similarity": 99.493,
+   "defects": 0.472,
+   "ssim": 0.9747
+  },
+  "ours+AI": {
+   "similarity": 99.435,
+   "defects": 0.493,
+   "ssim": 0.9811
+  },
+  "vtracer": {
+   "similarity": 98.719,
+   "defects": 1.701,
+   "ssim": 0.9425
+  }
+ },
+ "E7:shipment|scale:0.5": {
+  "ours": {
+   "similarity": 99.165,
+   "defects": 1.57,
+   "ssim": 0.9612
+  },
+  "ours+AI": {
+   "similarity": 99.332,
+   "defects": 0.905,
+   "ssim": 0.9748
+  },
+  "vtracer": {
+   "similarity": 98.439,
+   "defects": 2.537,
+   "ssim": 0.9266
+  }
+ },
+ "E7:shipment|scale:0.25": {
+  "ours": {
+   "similarity": 98.276,
+   "defects": 6.43,
+   "ssim": 0.9162
+  },
+  "ours+AI": {
+   "similarity": 98.868,
+   "defects": 2.088,
+   "ssim": 0.95
+  },
+  "vtracer": {
+   "similarity": 97.427,
+   "defects": 6.936,
+   "ssim": 0.8858
+  }
+ },
+ "E7:shipment|noise:4": {
+  "ours": {
+   "similarity": 99.102,
+   "defects": 0.416,
+   "ssim": 0.9808
+  },
+  "ours+AI": {
+   "similarity": 99.44,
+   "defects": 0.115,
+   "ssim": 0.9843
+  },
+  "vtracer": {
+   "similarity": 98.444,
+   "defects": 0.182,
+   "ssim": 0.9572
+  }
+ },
+ "E7:shipment|noise:8": {
+  "ours": {
+   "similarity": 98.556,
+   "defects": 0.54,
+   "ssim": 0.9792
+  },
+  "ours+AI": {
+   "similarity": 99.412,
+   "defects": 0.234,
+   "ssim": 0.9842
+  },
+  "vtracer": {
+   "similarity": 98.089,
+   "defects": 0.743,
+   "ssim": 0.9546
+  }
+ },
+ "E7:shipment|noise:16": {
+  "ours": {
+   "similarity": 97.656,
+   "defects": 0.64,
+   "ssim": 0.9774
+  },
+  "ours+AI": {
+   "similarity": 99.304,
+   "defects": 0.374,
+   "ssim": 0.9826
+  },
+  "vtracer": {
+   "similarity": 97.108,
+   "defects": 3.816,
+   "ssim": 0.9368
+  }
+ },
+ "E8:border-collie|clean:0": {
+  "ours": {
+   "similarity": 99.142,
+   "defects": 1.052,
+   "ssim": 0.9692
+  },
+  "ours+AI": {
+   "similarity": 99.331,
+   "defects": 0.199,
+   "ssim": 0.9822
+  },
+  "vtracer": {
+   "similarity": 97.696,
+   "defects": 3.196,
+   "ssim": 0.9399
+  }
+ },
+ "E8:border-collie|jpeg:70": {
+  "ours": {
+   "similarity": 98.785,
+   "defects": 1.19,
+   "ssim": 0.9658
+  },
+  "ours+AI": {
+   "similarity": 99.3,
+   "defects": 0.232,
+   "ssim": 0.9815
+  },
+  "vtracer": {
+   "similarity": 97.644,
+   "defects": 4.048,
+   "ssim": 0.9374
+  }
+ },
+ "E8:border-collie|jpeg:50": {
+  "ours": {
+   "similarity": 98.754,
+   "defects": 1.343,
+   "ssim": 0.9659
+  },
+  "ours+AI": {
+   "similarity": 99.282,
+   "defects": 0.243,
+   "ssim": 0.9802
+  },
+  "vtracer": {
+   "similarity": 97.706,
+   "defects": 3.961,
+   "ssim": 0.938
+  }
+ },
+ "E8:border-collie|jpeg:30": {
+  "ours": {
+   "similarity": 98.683,
+   "defects": 1.432,
+   "ssim": 0.9616
+  },
+  "ours+AI": {
+   "similarity": 99.248,
+   "defects": 0.278,
+   "ssim": 0.9804
+  },
+  "vtracer": {
+   "similarity": 97.701,
+   "defects": 4.756,
+   "ssim": 0.9377
+  }
+ },
+ "E8:border-collie|scale:0.75": {
+  "ours": {
+   "similarity": 98.41,
+   "defects": 1.848,
+   "ssim": 0.9533
+  },
+  "ours+AI": {
+   "similarity": 99.021,
+   "defects": 0.436,
+   "ssim": 0.9739
+  },
+  "vtracer": {
+   "similarity": 97.35,
+   "defects": 4.958,
+   "ssim": 0.9212
+  }
+ },
+ "E8:border-collie|scale:0.5": {
+  "ours": {
+   "similarity": 97.766,
+   "defects": 4.004,
+   "ssim": 0.9301
+  },
+  "ours+AI": {
+   "similarity": 98.635,
+   "defects": 1.36,
+   "ssim": 0.9601
+  },
+  "vtracer": {
+   "similarity": 96.859,
+   "defects": 7.257,
+   "ssim": 0.8966
+  }
+ },
+ "E8:border-collie|scale:0.25": {
+  "ours": {
+   "similarity": 96.198,
+   "defects": 11.573,
+   "ssim": 0.8749
+  },
+  "ours+AI": {
+   "similarity": 97.427,
+   "defects": 4.897,
+   "ssim": 0.9174
+  },
+  "vtracer": {
+   "similarity": 95.731,
+   "defects": 10.716,
+   "ssim": 0.8471
+  }
+ },
+ "E8:border-collie|noise:4": {
+  "ours": {
+   "similarity": 98.581,
+   "defects": 1.007,
+   "ssim": 0.9675
+  },
+  "ours+AI": {
+   "similarity": 99.233,
+   "defects": 0.202,
+   "ssim": 0.9818
+  },
+  "vtracer": {
+   "similarity": 97.502,
+   "defects": 2.382,
+   "ssim": 0.9386
+  }
+ },
+ "E8:border-collie|noise:8": {
+  "ours": {
+   "similarity": 97.995,
+   "defects": 1.109,
+   "ssim": 0.9675
+  },
+  "ours+AI": {
+   "similarity": 99.222,
+   "defects": 0.182,
+   "ssim": 0.982
+  },
+  "vtracer": {
+   "similarity": 97.424,
+   "defects": 1.561,
+   "ssim": 0.9462
+  }
+ },
+ "E8:border-collie|noise:16": {
+  "ours": {
+   "similarity": 97.094,
+   "defects": 1.787,
+   "ssim": 0.9635
+  },
+  "ours+AI": {
+   "similarity": 99.095,
+   "defects": 0.351,
+   "ssim": 0.9782
+  },
+  "vtracer": {
+   "similarity": 96.486,
+   "defects": 5.675,
+   "ssim": 0.9375
+  }
+ },
+ "E8:pickle|clean:0": {
+  "ours": {
+   "similarity": 99.568,
+   "defects": 0.062,
+   "ssim": 0.9844
+  },
+  "ours+AI": {
+   "similarity": 99.378,
+   "defects": 0.004,
+   "ssim": 0.9894
+  },
+  "vtracer": {
+   "similarity": 98.564,
+   "defects": 0.0,
+   "ssim": 0.9734
+  }
+ },
+ "E8:pickle|jpeg:70": {
+  "ours": {
+   "similarity": 99.254,
+   "defects": 0.753,
+   "ssim": 0.9671
+  },
+  "ours+AI": {
+   "similarity": 99.396,
+   "defects": 0.004,
+   "ssim": 0.9904
+  },
+  "vtracer": {
+   "similarity": 98.331,
+   "defects": 0.835,
+   "ssim": 0.9642
+  }
+ },
+ "E8:pickle|jpeg:50": {
+  "ours": {
+   "similarity": 99.289,
+   "defects": 0.943,
+   "ssim": 0.9729
+  },
+  "ours+AI": {
+   "similarity": 99.376,
+   "defects": 0.087,
+   "ssim": 0.9883
+  },
+  "vtracer": {
+   "similarity": 98.281,
+   "defects": 1.185,
+   "ssim": 0.9586
+  }
+ },
+ "E8:pickle|jpeg:30": {
+  "ours": {
+   "similarity": 99.182,
+   "defects": 1.325,
+   "ssim": 0.9675
+  },
+  "ours+AI": {
+   "similarity": 99.349,
+   "defects": 0.026,
+   "ssim": 0.9894
+  },
+  "vtracer": {
+   "similarity": 98.282,
+   "defects": 1.435,
+   "ssim": 0.9575
+  }
+ },
+ "E8:pickle|scale:0.75": {
+  "ours": {
+   "similarity": 99.384,
+   "defects": 0.11,
+   "ssim": 0.9783
+  },
+  "ours+AI": {
+   "similarity": 99.28,
+   "defects": 0.044,
+   "ssim": 0.9836
+  },
+  "vtracer": {
+   "similarity": 98.456,
+   "defects": 0.035,
+   "ssim": 0.9574
+  }
+ },
+ "E8:pickle|scale:0.5": {
+  "ours": {
+   "similarity": 99.184,
+   "defects": 0.38,
+   "ssim": 0.966
+  },
+  "ours+AI": {
+   "similarity": 99.139,
+   "defects": 0.566,
+   "ssim": 0.9741
+  },
+  "vtracer": {
+   "similarity": 98.186,
+   "defects": 0.273,
+   "ssim": 0.927
+  }
+ },
+ "E8:pickle|scale:0.25": {
+  "ours": {
+   "similarity": 98.518,
+   "defects": 3.694,
+   "ssim": 0.9349
+  },
+  "ours+AI": {
+   "similarity": 98.66,
+   "defects": 2.275,
+   "ssim": 0.9485
+  },
+  "vtracer": {
+   "similarity": 97.739,
+   "defects": 2.024,
+   "ssim": 0.8918
+  }
+ },
+ "E8:pickle|noise:4": {
+  "ours": {
+   "similarity": 99.029,
+   "defects": 0.022,
+   "ssim": 0.9806
+  },
+  "ours+AI": {
+   "similarity": 99.284,
+   "defects": 0.0,
+   "ssim": 0.9922
+  },
+  "vtracer": {
+   "similarity": 98.682,
+   "defects": 0.042,
+   "ssim": 0.9709
+  }
+ },
+ "E8:pickle|noise:8": {
+  "ours": {
+   "similarity": 98.499,
+   "defects": 0.028,
+   "ssim": 0.9808
+  },
+  "ours+AI": {
+   "similarity": 99.21,
+   "defects": 0.0,
+   "ssim": 0.9922
+  },
+  "vtracer": {
+   "similarity": 98.363,
+   "defects": 0.289,
+   "ssim": 0.9692
+  }
+ },
+ "E8:pickle|noise:16": {
+  "ours": {
+   "similarity": 97.639,
+   "defects": 0.073,
+   "ssim": 0.9728
+  },
+  "ours+AI": {
+   "similarity": 99.169,
+   "defects": 0.023,
+   "ssim": 0.9881
+  },
+  "vtracer": {
+   "similarity": 97.377,
+   "defects": 0.873,
+   "ssim": 0.9423
+  }
+ },
+ "E7:icon-shop|clean:0": {
+  "ours": {
+   "similarity": 99.957,
+   "defects": 0.002,
+   "ssim": 0.9973
+  },
+  "ours+AI": {
+   "similarity": 98.837,
+   "defects": 0.449,
+   "ssim": 0.9756
+  },
+  "vtracer": {
+   "similarity": 99.679,
+   "defects": 0.12,
+   "ssim": 0.9824
+  }
+ },
+ "E7:icon-shop|jpeg:70": {
+  "ours": {
+   "similarity": 99.627,
+   "defects": 0.251,
+   "ssim": 0.9889
+  },
+  "ours+AI": {
+   "similarity": 98.804,
+   "defects": 0.314,
+   "ssim": 0.9793
+  },
+  "vtracer": {
+   "similarity": 99.342,
+   "defects": 0.811,
+   "ssim": 0.9894
+  }
+ },
+ "E7:icon-shop|jpeg:50": {
+  "ours": {
+   "similarity": 98.454,
+   "defects": 0.799,
+   "ssim": 0.973
+  },
+  "ours+AI": {
+   "similarity": 98.296,
+   "defects": 0.295,
+   "ssim": 0.9842
+  },
+  "vtracer": {
+   "similarity": 99.24,
+   "defects": 1.436,
+   "ssim": 0.9906
+  }
+ },
+ "E7:icon-shop|jpeg:30": {
+  "ours": {
+   "similarity": 97.752,
+   "defects": 5.218,
+   "ssim": 0.9675
+  },
+  "ours+AI": {
+   "similarity": 97.952,
+   "defects": 0.279,
+   "ssim": 0.9815
+  },
+  "vtracer": {
+   "similarity": 99.017,
+   "defects": 1.465,
+   "ssim": 0.9898
+  }
+ },
+ "E7:icon-shop|scale:0.75": {
+  "ours": {
+   "similarity": 99.701,
+   "defects": 0.114,
+   "ssim": 0.9889
+  },
+  "ours+AI": {
+   "similarity": 98.784,
+   "defects": 0.308,
+   "ssim": 0.9716
+  },
+  "vtracer": {
+   "similarity": 99.58,
+   "defects": 0.201,
+   "ssim": 0.9805
+  }
+ },
+ "E7:icon-shop|scale:0.5": {
+  "ours": {
+   "similarity": 99.464,
+   "defects": 1.29,
+   "ssim": 0.9746
+  },
+  "ours+AI": {
+   "similarity": 97.996,
+   "defects": 0.615,
+   "ssim": 0.9624
+  },
+  "vtracer": {
+   "similarity": 99.486,
+   "defects": 0.527,
+   "ssim": 0.9747
+  }
+ },
+ "E7:icon-shop|scale:0.25": {
+  "ours": {
+   "similarity": 98.941,
+   "defects": 3.929,
+   "ssim": 0.9354
+  },
+  "ours+AI": {
+   "similarity": 97.531,
+   "defects": 1.952,
+   "ssim": 0.9407
+  },
+  "vtracer": {
+   "similarity": 99.15,
+   "defects": 1.412,
+   "ssim": 0.9628
+  }
+ },
+ "E7:icon-shop|noise:4": {
+  "ours": {
+   "similarity": 99.635,
+   "defects": 0.051,
+   "ssim": 0.9951
+  },
+  "ours+AI": {
+   "similarity": 98.984,
+   "defects": 0.253,
+   "ssim": 0.9861
+  },
+  "vtracer": {
+   "similarity": 99.364,
+   "defects": 0.15,
+   "ssim": 0.9855
+  }
+ },
+ "E7:icon-shop|noise:8": {
+  "ours": {
+   "similarity": 99.594,
+   "defects": 0.002,
+   "ssim": 0.9955
+  },
+  "ours+AI": {
+   "similarity": 98.304,
+   "defects": 0.05,
+   "ssim": 0.9918
+  },
+  "vtracer": {
+   "similarity": 99.209,
+   "defects": 0.245,
+   "ssim": 0.9849
+  }
+ },
+ "E7:icon-shop|noise:16": {
+  "ours": {
+   "similarity": 98.12,
+   "defects": 4.591,
+   "ssim": 0.9852
+  },
+  "ours+AI": {
+   "similarity": 97.871,
+   "defects": 0.14,
+   "ssim": 0.9895
+  },
+  "vtracer": {
+   "similarity": 98.508,
+   "defects": 6.074,
+   "ssim": 0.9485
+  }
+ },
+ "E7:flag-nepal|clean:0": {
+  "ours": {
+   "similarity": 99.874,
+   "defects": 0.0,
+   "ssim": 0.9879
+  },
+  "ours+AI": {
+   "similarity": 99.512,
+   "defects": 0.0,
+   "ssim": 0.9942
+  },
+  "vtracer": {
+   "similarity": 99.553,
+   "defects": 0.0,
+   "ssim": 0.9917
+  }
+ },
+ "E7:flag-nepal|jpeg:70": {
+  "ours": {
+   "similarity": 99.666,
+   "defects": 0.0,
+   "ssim": 0.991
+  },
+  "ours+AI": {
+   "similarity": 99.359,
+   "defects": 0.0,
+   "ssim": 0.9939
+  },
+  "vtracer": {
+   "similarity": 99.37,
+   "defects": 0.956,
+   "ssim": 0.9902
+  }
+ },
+ "E7:flag-nepal|jpeg:50": {
+  "ours": {
+   "similarity": 99.583,
+   "defects": 0.0,
+   "ssim": 0.9915
+  },
+  "ours+AI": {
+   "similarity": 99.346,
+   "defects": 0.0,
+   "ssim": 0.9949
+  },
+  "vtracer": {
+   "similarity": 99.216,
+   "defects": 1.28,
+   "ssim": 0.9898
+  }
+ },
+ "E7:flag-nepal|jpeg:30": {
+  "ours": {
+   "similarity": 99.622,
+   "defects": 0.0,
+   "ssim": 0.9899
+  },
+  "ours+AI": {
+   "similarity": 99.36,
+   "defects": 0.0,
+   "ssim": 0.995
+  },
+  "vtracer": {
+   "similarity": 99.214,
+   "defects": 2.257,
+   "ssim": 0.988
+  }
+ },
+ "E7:flag-nepal|scale:0.75": {
+  "ours": {
+   "similarity": 99.729,
+   "defects": 0.227,
+   "ssim": 0.9825
+  },
+  "ours+AI": {
+   "similarity": 99.476,
+   "defects": 0.0,
+   "ssim": 0.9918
+  },
+  "vtracer": {
+   "similarity": 99.505,
+   "defects": 0.001,
+   "ssim": 0.9894
+  }
+ },
+ "E7:flag-nepal|scale:0.5": {
+  "ours": {
+   "similarity": 99.615,
+   "defects": 0.541,
+   "ssim": 0.976
+  },
+  "ours+AI": {
+   "similarity": 99.329,
+   "defects": 0.069,
+   "ssim": 0.9829
+  },
+  "vtracer": {
+   "similarity": 99.368,
+   "defects": 0.115,
+   "ssim": 0.981
+  }
+ },
+ "E7:flag-nepal|scale:0.25": {
+  "ours": {
+   "similarity": 99.223,
+   "defects": 3.058,
+   "ssim": 0.9572
+  },
+  "ours+AI": {
+   "similarity": 98.936,
+   "defects": 0.666,
+   "ssim": 0.9726
+  },
+  "vtracer": {
+   "similarity": 98.993,
+   "defects": 0.454,
+   "ssim": 0.9626
+  }
+ },
+ "E7:flag-nepal|noise:4": {
+  "ours": {
+   "similarity": 99.377,
+   "defects": 0.0,
+   "ssim": 0.9893
+  },
+  "ours+AI": {
+   "similarity": 99.38,
+   "defects": 0.0,
+   "ssim": 0.994
+  },
+  "vtracer": {
+   "similarity": 99.134,
+   "defects": 0.168,
+   "ssim": 0.9906
+  }
+ },
+ "E7:flag-nepal|noise:8": {
+  "ours": {
+   "similarity": 99.148,
+   "defects": 0.0,
+   "ssim": 0.9895
+  },
+  "ours+AI": {
+   "similarity": 98.965,
+   "defects": 0.0,
+   "ssim": 0.9941
+  },
+  "vtracer": {
+   "similarity": 98.743,
+   "defects": 0.455,
+   "ssim": 0.9888
+  }
+ },
+ "E7:flag-nepal|noise:16": {
+  "ours": {
+   "similarity": 98.59,
+   "defects": 0.0,
+   "ssim": 0.9904
+  },
+  "ours+AI": {
+   "similarity": 98.163,
+   "defects": 0.0,
+   "ssim": 0.9947
+  },
+  "vtracer": {
+   "similarity": 97.898,
+   "defects": 0.895,
+   "ssim": 0.9668
+  }
+ },
+ "E8:tux-flat|clean:0": {
+  "ours": {
+   "similarity": 99.717,
+   "defects": 0.005,
+   "ssim": 0.9846
+  },
+  "ours+AI": {
+   "similarity": 99.381,
+   "defects": 0.03,
+   "ssim": 0.9888
+  },
+  "vtracer": {
+   "similarity": 99.05,
+   "defects": 0.227,
+   "ssim": 0.9546
+  }
+ },
+ "E8:tux-flat|jpeg:70": {
+  "ours": {
+   "similarity": 99.634,
+   "defects": 0.027,
+   "ssim": 0.9792
+  },
+  "ours+AI": {
+   "similarity": 99.38,
+   "defects": 0.055,
+   "ssim": 0.9857
+  },
+  "vtracer": {
+   "similarity": 99.051,
+   "defects": 0.629,
+   "ssim": 0.9581
+  }
+ },
+ "E8:tux-flat|jpeg:50": {
+  "ours": {
+   "similarity": 99.25,
+   "defects": 0.975,
+   "ssim": 0.9599
+  },
+  "ours+AI": {
+   "similarity": 99.389,
+   "defects": 0.018,
+   "ssim": 0.989
+  },
+  "vtracer": {
+   "similarity": 98.725,
+   "defects": 1.245,
+   "ssim": 0.9503
+  }
+ },
+ "E8:tux-flat|jpeg:30": {
+  "ours": {
+   "similarity": 99.317,
+   "defects": 0.626,
+   "ssim": 0.9671
+  },
+  "ours+AI": {
+   "similarity": 99.311,
+   "defects": 0.016,
+   "ssim": 0.9853
+  },
+  "vtracer": {
+   "similarity": 98.788,
+   "defects": 1.29,
+   "ssim": 0.9473
+  }
+ },
+ "E8:tux-flat|scale:0.75": {
+  "ours": {
+   "similarity": 99.452,
+   "defects": 0.294,
+   "ssim": 0.9727
+  },
+  "ours+AI": {
+   "similarity": 99.317,
+   "defects": 0.29,
+   "ssim": 0.9832
+  },
+  "vtracer": {
+   "similarity": 98.785,
+   "defects": 0.22,
+   "ssim": 0.9301
+  }
+ },
+ "E8:tux-flat|scale:0.5": {
+  "ours": {
+   "similarity": 99.06,
+   "defects": 1.373,
+   "ssim": 0.9493
+  },
+  "ours+AI": {
+   "similarity": 99.198,
+   "defects": 0.726,
+   "ssim": 0.9693
+  },
+  "vtracer": {
+   "similarity": 98.3,
+   "defects": 1.091,
+   "ssim": 0.9075
+  }
+ },
+ "E8:tux-flat|scale:0.25": {
+  "ours": {
+   "similarity": 98.137,
+   "defects": 5.52,
+   "ssim": 0.9003
+  },
+  "ours+AI": {
+   "similarity": 98.499,
+   "defects": 2.58,
+   "ssim": 0.9285
+  },
+  "vtracer": {
+   "similarity": 97.168,
+   "defects": 3.085,
+   "ssim": 0.8674
+  }
+ },
+ "E8:tux-flat|noise:4": {
+  "ours": {
+   "similarity": 99.281,
+   "defects": 0.014,
+   "ssim": 0.9808
+  },
+  "ours+AI": {
+   "similarity": 99.365,
+   "defects": 0.058,
+   "ssim": 0.9882
+  },
+  "vtracer": {
+   "similarity": 98.633,
+   "defects": 0.245,
+   "ssim": 0.9539
+  }
+ },
+ "E8:tux-flat|noise:8": {
+  "ours": {
+   "similarity": 99.083,
+   "defects": 0.021,
+   "ssim": 0.9719
+  },
+  "ours+AI": {
+   "similarity": 99.314,
+   "defects": 0.01,
+   "ssim": 0.9901
+  },
+  "vtracer": {
+   "similarity": 98.352,
+   "defects": 0.552,
+   "ssim": 0.9489
+  }
+ },
+ "E8:tux-flat|noise:16": {
+  "ours": {
+   "similarity": 98.462,
+   "defects": 0.019,
+   "ssim": 0.9645
+  },
+  "ours+AI": {
+   "similarity": 98.932,
+   "defects": 0.01,
+   "ssim": 0.9895
+  },
+  "vtracer": {
+   "similarity": 97.445,
+   "defects": 8.498,
+   "ssim": 0.9187
+  }
+ },
+ "E8:ferris|clean:0": {
+  "ours": {
+   "similarity": 99.4,
+   "defects": 0.382,
+   "ssim": 0.9696
+  },
+  "ours+AI": {
+   "similarity": 99.3,
+   "defects": 0.013,
+   "ssim": 0.9924
+  },
+  "vtracer": {
+   "similarity": 98.945,
+   "defects": 0.48,
+   "ssim": 0.9672
+  }
+ },
+ "E8:ferris|jpeg:70": {
+  "ours": {
+   "similarity": 99.017,
+   "defects": 0.434,
+   "ssim": 0.9602
+  },
+  "ours+AI": {
+   "similarity": 99.309,
+   "defects": 0.017,
+   "ssim": 0.9931
+  },
+  "vtracer": {
+   "similarity": 98.598,
+   "defects": 3.777,
+   "ssim": 0.9548
+  }
+ },
+ "E8:ferris|jpeg:50": {
+  "ours": {
+   "similarity": 98.977,
+   "defects": 1.867,
+   "ssim": 0.9615
+  },
+  "ours+AI": {
+   "similarity": 99.336,
+   "defects": 0.008,
+   "ssim": 0.9915
+  },
+  "vtracer": {
+   "similarity": 98.346,
+   "defects": 5.73,
+   "ssim": 0.9533
+  }
+ },
+ "E8:ferris|jpeg:30": {
+  "ours": {
+   "similarity": 98.906,
+   "defects": 1.864,
+   "ssim": 0.96
+  },
+  "ours+AI": {
+   "similarity": 99.3,
+   "defects": 0.04,
+   "ssim": 0.989
+  },
+  "vtracer": {
+   "similarity": 98.242,
+   "defects": 6.862,
+   "ssim": 0.9445
+  }
+ },
+ "E8:ferris|scale:0.75": {
+  "ours": {
+   "similarity": 99.203,
+   "defects": 0.778,
+   "ssim": 0.9628
+  },
+  "ours+AI": {
+   "similarity": 99.086,
+   "defects": 0.297,
+   "ssim": 0.9795
+  },
+  "vtracer": {
+   "similarity": 98.539,
+   "defects": 0.821,
+   "ssim": 0.9263
+  }
+ },
+ "E8:ferris|scale:0.5": {
+  "ours": {
+   "similarity": 98.976,
+   "defects": 1.551,
+   "ssim": 0.9545
+  },
+  "ours+AI": {
+   "similarity": 98.73,
+   "defects": 0.557,
+   "ssim": 0.963
+  },
+  "vtracer": {
+   "similarity": 98.165,
+   "defects": 1.166,
+   "ssim": 0.9117
+  }
+ },
+ "E8:ferris|scale:0.25": {
+  "ours": {
+   "similarity": 98.045,
+   "defects": 7.075,
+   "ssim": 0.897
+  },
+  "ours+AI": {
+   "similarity": 98.383,
+   "defects": 1.806,
+   "ssim": 0.9484
+  },
+  "vtracer": {
+   "similarity": 96.778,
+   "defects": 4.744,
+   "ssim": 0.8599
+  }
+ },
+ "E8:ferris|noise:4": {
+  "ours": {
+   "similarity": 99.002,
+   "defects": 0.338,
+   "ssim": 0.97
+  },
+  "ours+AI": {
+   "similarity": 99.321,
+   "defects": 0.006,
+   "ssim": 0.9933
+  },
+  "vtracer": {
+   "similarity": 98.456,
+   "defects": 0.636,
+   "ssim": 0.9498
+  }
+ },
+ "E8:ferris|noise:8": {
+  "ours": {
+   "similarity": 98.603,
+   "defects": 0.428,
+   "ssim": 0.9636
+  },
+  "ours+AI": {
+   "similarity": 99.192,
+   "defects": 0.033,
+   "ssim": 0.9927
+  },
+  "vtracer": {
+   "similarity": 98.071,
+   "defects": 0.951,
+   "ssim": 0.9491
+  }
+ },
+ "E8:ferris|noise:16": {
+  "ours": {
+   "similarity": 97.923,
+   "defects": 0.283,
+   "ssim": 0.9608
+  },
+  "ours+AI": {
+   "similarity": 98.883,
+   "defects": 0.052,
+   "ssim": 0.9925
+  },
+  "vtracer": {
+   "similarity": 97.055,
+   "defects": 1.793,
+   "ssim": 0.9199
+  }
+ }
+}

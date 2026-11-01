@@ -195,7 +195,7 @@
   "ai_off": "Mati",
   "ai_auto": "Otomatis",
   "ai_always": "Selalu",
-  "aiAutoHint": "Otomatis: hanya untuk foto di bawah 1000 px atau JPEG.",
+  "aiAutoHint": "Otomatis: untuk gambar di bawah 1000 px atau JPEG; logo hanya dari JPEG, pixel art tidak pernah.",
   "aiModel": "Model AI",
   "aiModel_illustration": "Ilustrasi",
   "aiModel_general": "Umum",

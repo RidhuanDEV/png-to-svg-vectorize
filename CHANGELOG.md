@@ -2,6 +2,54 @@
 
 All notable changes. Benchmarks for every engine version are in [docs/bench.md](docs/bench.md).
 
+## 1.7.0 — 2026-11-02 — measured accuracy
+
+Found with a new benchmark of 45 license-free pictures and a visible-defect metric; every number below compares
+1.6.0 and this version on the same picture ([docs/research.md](docs/research.md) §7).
+
+- **Fix: the Logo style no longer punches holes into opaque pictures.** The background color was a candidate for
+  every pixel even when no background had been found, so art of the border's color turned transparent: a dark
+  1713×918 painting 80.2 % → 94.4 % similarity, visible defects 59.6 % → 33.0 %. A background guessed from the border
+  is kept when the picture turns out not to be flat (with a note). A flag's white band is a shape, not a hole.
+- **Logo style keeps every flat color**: the automatic palette also requires 99.8 % of the flat pixels to match (up
+  to 16 colors), so a color and its darker shade stay two colors. Flat shop icon: 97.99 % → 99.95 %, visible defects
+  18.33 % → 0.00 %.
+- **Fix: a flat color between two others** (grey between black and white) is no longer taken for anti-aliasing:
+  Tux icon 97.65 % → 99.77 %, visible defects 10.22 % → 0.01 %.
+- **Fix: thin straight bars** (4–12 px) keep their width instead of becoming zero-area slivers: 94.92 % → 100 %.
+- **Pixel art is exact**: every color (up to 64) and every single pixel, also in checkerboards. A sprite sheet:
+  97.58 % → 100.000 %, visible defects 16.26 % → 0 %.
+- Logo style keeps small details: pieces down to 0.003 % of the artwork (was 0.05 %), so a flag's stars and motto
+  stay (found by the vision judge, which scored the flag 4/10).
+- Logo style: light halos left by an older trace return to the background. The "not a flat logo" note is right more
+  often: line art no longer gets it; shading and gradients cut into bands do.
+- **Small pictures** (under 512 px) are segmented on a 2× grid by the Cartoon, Flat and Poster styles (`prescale`
+  option; coordinates and curve tolerances stay in source pixels): text and 1–2 px lines survive. A 235 px icon with
+  text: 98.45 % → 99.03 % without AI.
+- **Cartoon style: every ink stroke keeps its color** (up to three inks, so grey lines stay grey next to black
+  ones), and a dark area wider than a stroke with shading of its own (a reflection on a black screen) stays a fill
+  instead of turning black. On 32 Cartoon / Flat / Poster pictures: 6 better, none worse, median visible defects
+  0.49 % → 0.31 %; futuristic mascot 5.63 % → 0.03 %, fish mascot 1.66 % → 0.17 %, robot 1.24 % → 0.23 %.
+- **Logo style, from the literature** ([docs/research.md](docs/research.md) §8): rings and lines are no longer cut
+  into pieces at every thin spot (a line drawing: 31 → 9 paths, 6.7 → 2.2 KB, 98.90 % → 99.62 %); ellipses and circular arcs
+  become exact curves (direct least squares, Fitzgibbon et al. 1999); a run is a line only if its residual is not a
+  systematic bow.
+- **Logo style with the background kept** (an icon on an opaque page): the page no longer crowds the art's colors
+  out of the palette. Shop icon on white: 97.75 % → 99.96 %, visible defects 10.42 % → 0.00 %.
+- **Logo style on noisy pictures** (scans, photos of prints): the noise is estimated from the picture and smoothed
+  away with an edge-preserving filter first; clean pictures are untouched. A flag under strong noise: 83.0 % →
+  98.5 %, visible defects 36.7 % → 0.00 %.
+- Automatic AI mode: with the Logo style only for JPEGs (on small PNG logos it did not help; on JPEG logos it cuts the
+  visible defects from a median 0.53 % to 0.02 % on 12 compressed logos), never with Pixel art.
+- `pngsvg.compare`: `defect_area` / `defect_map` (visible defects, CIEDE2000 > 5 without anti-aliasing lines),
+  `psnr`, `ssim`, `edge_split`; `render` takes a background (a checkerboard shows holes).
+- Benchmark: `bench/readme.py` (both sets, the style per kind of picture, small-picture study with and without AI),
+  `bench/evidence.py` (pictures of the results), `bench/before_after.py` (1.6.0 vs now), `bench/judge.py` (optional
+  vision-model review via NVIDIA NIM). New set E8 of 18 pictures made as rasters (`fetch_sets.py --set real`).
+  `bench/compare_tools.py` (VTracer and Potrace on the same pictures), `bench/versions.py` + `bench/stats.py`
+  (paired statistics: Wilcoxon signed-rank, bootstrap confidence intervals, effect sizes) and
+  `bench/robustness.py` (JPEG, down-scaling and noise, scored against the clean picture).
+
 ## 1.6.0 — 2026-10-25 — logo engine
 
 - **Logo / icon** now uses a new flat engine ([docs/logo-engine.md](docs/logo-engine.md)): one `<path>` per shape

@@ -70,11 +70,17 @@ def test_providers_always_end_with_cpu():
 
 def test_automatic_rule():
     jpeg = b'\xff\xd8\xff\xe0rest'
-    assert wants_ai({'ai': 'illustration'}, b'png', 4000, 3000) is True
-    assert wants_ai({'ai': 'illustration', 'ai_auto': True}, b'png', 4000, 3000) is False
-    assert wants_ai({'ai': 'illustration', 'ai_auto': True}, b'png', 800, 600) is True
-    assert wants_ai({'ai': 'illustration', 'ai_auto': True}, jpeg, 4000, 3000) is True
-    assert wants_ai({}, jpeg, 10, 10) is False
+    assert wants_ai({'ai': 'illustration'}, b'png', 4000, 3000, 'cartoon') is True
+    assert wants_ai({'ai': 'illustration', 'ai_auto': True}, b'png', 4000, 3000, 'cartoon') is False
+    assert wants_ai({'ai': 'illustration', 'ai_auto': True}, b'png', 800, 600, 'cartoon') is True
+    assert wants_ai({'ai': 'illustration', 'ai_auto': True}, jpeg, 4000, 3000, 'cartoon') is True
+    assert wants_ai({}, jpeg, 10, 10, 'cartoon') is False
+    # logos: automatic mode uses the AI step for JPEGs only (it did not help small PNG logos); pixel art never;
+    # "always" still applies it
+    assert wants_ai({'ai': 'illustration', 'ai_auto': True}, b'png', 800, 600, 'logo') is False
+    assert wants_ai({'ai': 'illustration', 'ai_auto': True}, jpeg, 800, 600, 'logo') is True
+    assert wants_ai({'ai': 'illustration', 'ai_auto': True}, jpeg, 800, 600, 'pixel') is False
+    assert wants_ai({'ai': 'illustration'}, b'png', 800, 600, 'logo') is True
 
 
 @pytest.fixture()

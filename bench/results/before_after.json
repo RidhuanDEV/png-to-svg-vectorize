@@ -1,0 +1,146 @@
+[
+ {
+  "id": "icon-shop",
+  "title": "Flat icon, Logo style: a color and its darker shade",
+  "old": {
+   "similarity": 97.992,
+   "defects": 18.331,
+   "bytes": 5433,
+   "paths": 31
+  },
+  "new": {
+   "similarity": 99.951,
+   "defects": 0.002,
+   "bytes": 6390,
+   "paths": 49
+  }
+ },
+ {
+  "id": "flag-brazil",
+  "title": "Flag, Logo style (background kept): a color on 0.7 % of the picture",
+  "old": {
+   "similarity": 99.077,
+   "defects": 0.524,
+   "bytes": 1707,
+   "paths": 4
+  },
+  "new": {
+   "similarity": 99.886,
+   "defects": 0.014,
+   "bytes": 18625,
+   "paths": 53
+  }
+ },
+ {
+  "id": "tux-flat",
+  "title": "Flat icon, Logo style: a grey between black and white",
+  "old": {
+   "similarity": 97.652,
+   "defects": 10.218,
+   "bytes": 3814,
+   "paths": 9
+  },
+  "new": {
+   "similarity": 99.767,
+   "defects": 0.013,
+   "bytes": 4973,
+   "paths": 9
+  }
+ },
+ {
+  "id": "bird-pixel-art",
+  "title": "Pixel art (background kept): checkerboard and 1-pixel details",
+  "old": {
+   "similarity": 97.575,
+   "defects": 16.26,
+   "bytes": 3400,
+   "paths": 23
+  },
+  "new": {
+   "similarity": 100.0,
+   "defects": 0.0,
+   "bytes": 14818,
+   "paths": 165
+  }
+ },
+ {
+  "id": "evil-twin",
+  "title": "Line drawing, Logo style: a 3 px ring (1.6 cut it at every thin spot)",
+  "old": {
+   "similarity": 98.895,
+   "defects": 0.359,
+   "bytes": 6654,
+   "paths": 31
+  },
+  "new": {
+   "similarity": 99.621,
+   "defects": 0.0,
+   "bytes": 2220,
+   "paths": 9
+  }
+ },
+ {
+  "id": "futuristic-mascot",
+  "title": "Cartoon style: a grey reflection on a black screen (1.6: ink)",
+  "old": {
+   "similarity": 99.11,
+   "defects": 5.627,
+   "bytes": 19243,
+   "paths": 28
+  },
+  "new": {
+   "similarity": 99.614,
+   "defects": 0.031,
+   "bytes": 24536,
+   "paths": 41
+  }
+ },
+ {
+  "id": "night",
+  "title": "Opaque dark picture, Logo style",
+  "old": {
+   "similarity": 84.282,
+   "defects": 25.95,
+   "bytes": 167988,
+   "paths": 322
+  },
+  "new": {
+   "similarity": 98.126,
+   "defects": 0.94,
+   "bytes": 30068,
+   "paths": 45
+  }
+ },
+ {
+  "id": "thin-bars",
+  "title": "Thin bars (4-12 px), Logo style",
+  "old": {
+   "similarity": 94.923,
+   "defects": 6.832,
+   "bytes": 450,
+   "paths": 5
+  },
+  "new": {
+   "similarity": 100.0,
+   "defects": 0.0,
+   "bytes": 457,
+   "paths": 5
+  }
+ },
+ {
+  "id": "cow-256",
+  "title": "Small picture (256 px), Cartoon style",
+  "old": {
+   "similarity": 97.674,
+   "defects": 1.042,
+   "bytes": 17617,
+   "paths": 22
+  },
+  "new": {
+   "similarity": 98.161,
+   "defects": 0.792,
+   "bytes": 24451,
+   "paths": 29
+  }
+ }
+]

@@ -15,9 +15,22 @@ Thumbs.db
 out/
 *.tmp.svg
 bench/images/
-bench/results/
+bench/results/*
+# the published benchmark evidence (README, docs/research.md); renders and older runs stay local
+!bench/results/readme.json
+!bench/results/readme.md
+!bench/results/judge.json
+!bench/results/judge.md
+!bench/results/tools.json
+!bench/results/versions.json
+!bench/results/stats.json
+!bench/results/stats.md
+!bench/results/robustness.json
+!bench/results/robustness.md
+!bench/results/before_after.json
 # UI build output (built in CI / release) and Playwright artifacts
 src/pngsvg_app/static/
 app/ui/test-results/
 app/ui/playwright-report/
 bench/sets/images/
+bench/real/images/

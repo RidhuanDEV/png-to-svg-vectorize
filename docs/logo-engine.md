@@ -12,14 +12,14 @@ Every stage is a pure function on explicit types; the same picture and options g
 
 | Stage | Function | Input → output |
 |---|---|---|
-| 1. Load | `load` | PIL image → RGB float (composited on white), opacity or `None`, trace scale (2× under 256 px; never for pixel art) |
-| 2. Background | `background` | RGB, opacity → `Background(mask, color)`: transparent pixels (opacity < `alpha_threshold`), else the dominant border color within `bg_tolerance` (CIEDE2000). Never a `<rect>` or a path. |
-| 3. Quantize | `quantize` | RGB, foreground → `Palette(rgb, warnings)`: k-means in CIELAB (k-means++ start, seed 0) on flat (non-edge) pixels; automatic k = smallest with mean error < `quant_tolerance`, at most 8; clusters closer than `merge_tolerance` merged; or a fixed `palette`. Warns when the picture is shaded (not a flat logo). |
-| 4. Assign | `assign` | RGB, background, palette → label per pixel: the closest mix of two palette colors (anti-aliased edges are mixes) gives the color covering ≥ ½ of the pixel, so edges neither grow nor shrink. |
+| 1. Load | `load`, `denoise` | PIL image → RGB float (composited on white), opacity or `None`, trace scale (2× under 256 px; never for pixel art). A noisy picture (estimated noise ≥ `denoise` levels: Immerkær's kernel, median of its response, so a clean logo scores 0) is smoothed with a bilateral filter (radius 2 px, color scale 3σ), twice from σ ≥ 6; the noise left is passed on to the shading check. Never for pixel art. |
+| 2. Background | `background` | RGB, opacity → `Background(mask, color)`: transparent pixels (opacity < `alpha_threshold`), else the dominant border color within `bg_tolerance` (CIEDE2000), unless step 3 finds the picture is not flat (a painting or photo: that color is part of the art, removing it would punch holes). Never a `<rect>` or a path. With `remove_bg` off, the guessed background still steers step 3 (`palette_with_background`). |
+| 3. Quantize | `quantize` | RGB, foreground → `Palette(rgb, warnings)`: k-means in CIELAB (k-means++ start, seed 0) on flat (non-edge) pixels; automatic k = smallest with mean error < `quant_tolerance` and 99.8 % of the flat pixels within `tail_tolerance` (so two shades of one hue stay two colors), at most 16; clusters closer than `merge_tolerance` merged; or a fixed `palette`. Pixel art: the exact colors (up to 64). With the background kept, the art is quantized without the guessed background (which would crowd out its colors), then the background color is added, colors within `merge_tolerance` of it are merged into it (JPEG rims), and a light color within `bg_tolerance` of it is added when its flat pixels form a second peak in the distance to the background (`color_near_background`: #ECF0F1 on white). Warns when the picture is shaded: pixels that are neither a palette color nor a mix of two (`shading_tolerance`), or borders that cut through smooth color (a gradient). |
+| 4. Assign | `assign`, `absorb_halos` | RGB, background, palette → label per pixel: a pixel that is a palette color keeps it; otherwise the closest mix of two palette colors (anti-aliased edges are mixes) gives the color covering ≥ ½ of the pixel, so edges neither grow nor shrink. A color near the background that exists only as thin rims hugging other shapes (light halos of an older trace) becomes background. |
 | 5. Clean | `majority`, `remove_specks` | labels → labels: 3×3 majority filter; pieces smaller than `speckle` px (and `min_area_ratio` of the content) join their dominant neighbour. |
-| 6. Shapes | `shapes`, `split_necks` | labels → `Shapes(label, color, order)`: one shape per 4-connected piece; pieces joined only by a neck thinner than `neck_width` are split (e.g. the bar and the stem of a T touching at a corner). Order: top-left to bottom-right. |
+| 6. Shapes | `shapes`, `split_necks` | labels → `Shapes(label, color, order)`: one shape per 4-connected piece; pieces joined only by a neck thinner than `neck_width` are split (e.g. the bar and the stem of a T touching at a corner), but only between thick parts of at least 64 px: a piece that is mostly thin is a stroke (a ring, a line) and stays whole. Order: top-left to bottom-right. |
 | 7. Contours | `contours` | shapes → shared boundary chains (planar map, `planar.build_chains`) at their sub-pixel position from anti-aliasing (`planar.subpixel_offsets`). Neighbours share one boundary: no gaps, no overlap, no stroke tricks. |
-| 8. Fit | `analyse`, `unify_angles`, `emit` | chain → segments: Douglas-Peucker finds long straight runs (a total-least-squares line within `line_tolerance`; arcs are recognised by a circle fit through the neighbours); consecutive lines meet at their intersection (a slightly rounded corner becomes sharp); lines within 2° of horizontal/vertical snap, lines within 1.5° share one angle (`snap_angles`); the rest becomes cubic Béziers within `curve_tolerance`, split at corners sharper than `corner_angle`; optional `corner_radius` rounds line corners uniformly with a quadratic curve. |
+| 8. Fit | `analyse`, `unify_angles`, `emit` | chain → segments: a closed chain within `conic_tolerance` of an ellipse (direct least squares, Fitzgibbon et al. 1999), or an open chain within it of a circular arc through its two ends, becomes that exact curve; otherwise Douglas-Peucker finds long straight runs (a total-least-squares line within `line_tolerance` whose residual is not a systematic bow of more than `bow_tolerance`; arcs are also recognised by a circle fit through the neighbours); consecutive lines meet at their intersection (a slightly rounded corner becomes sharp); lines within 2° of horizontal/vertical snap, lines within 1.5° share one angle (`snap_angles`); the rest becomes cubic Béziers within `curve_tolerance`, split at corners sharper than `corner_angle`; optional `corner_radius` rounds line corners uniformly with a quadratic curve. |
 | 9. Serialize | `vectorize_logo`, `path_data` | segments → SVG: `viewBox` trimmed to the content (+ `padding`), coordinates from 0,0; one `<path id="shape-{color}-{order}" class="color-{color}" fill="#…">` per shape inside `<g id="logo">`; holes as sub-paths with `fill-rule="evenodd"`; per command the shorter of absolute/relative, `H`/`V` for axis-aligned lines; optional `<title>` and `<g id="color-{n}">` groups (`layers`). |
 
 `Result.crop` tells where the trimmed SVG sits on the picture (x, y, width, height); the app uses it to place the SVG
@@ -43,7 +43,7 @@ Shared options (app *Fine-tune*, CLI, profiles) and the logo-only ones (`Options
 | `split_shapes` | on | split pieces joined by a neck thinner than 3 px |
 | `corner_angle` | 35° | a sharper turn inside a curve stays a corner |
 | `corner_radius` | 0 | > 0: round every corner between two lines by this many px |
-| `LogoParams` (Python only) | | `alpha_threshold` 16, `bg_tolerance` 6, `quant_tolerance` 4, `merge_tolerance` 8, `min_area_ratio` 0.0005, `neck_width` 3, `line_tolerance` 1, `curve_tolerance` 0.8, `padding` 0, `name` "logo", `title` "" |
+| `LogoParams` (Python only) | | `alpha_threshold` 16, `bg_tolerance` 6, `quant_tolerance` 4, `tail_tolerance` 4, `merge_tolerance` 7, `max_auto_colors` 16, `shading_tolerance` 2, `denoise` 1.5, `halo_width` 5, `bow_tolerance` 0.25, `conic_tolerance` 0.8, `min_area_ratio` 0.00003, `neck_width` 3, `line_tolerance` 1, `curve_tolerance` 0.8, `padding` 0, `name` "logo", `title` "" |
 
 CLI: `png2svg logo.png -p logo [--corner-radius 8] [--corner-angle 35] [--no-trim] [--no-snap] [--no-split]
 [--max-colors N] [--palette "#01255B,#029AF8"] [--layers]`; `-p pixel` for pixel art.
@@ -80,7 +80,7 @@ service (crop reported, PDF export). `tests/test_app_api.py` and the end-to-end 
 
 ## Known limits
 
-- Meant for flat colors: gradients, photos and soft shadows are reduced to at most 8 flat colors (with a warning);
+- Meant for flat colors: gradients, photos and soft shadows are reduced to at most 16 flat colors (with a warning);
   use the Cartoon, Flat illustration or Poster style for those.
 - Slightly rounded corners (up to ~4× the corner window, about 25 px on a 1254 px logo) become sharp; set
   `corner_radius` to round them uniformly. Small text (< 12 px high) and lines thinner than ~2 px lose detail; thin
@@ -88,5 +88,8 @@ service (crop reported, PDF export). `tests/test_app_api.py` and the end-to-end 
 - Shapes that touch along a long edge with the same color stay one shape (only necks and corners are split).
 - Without transparency, the dominant border color is the background. For full-bleed artwork (a flag, a colored
   card or app icon whose color is part of the design) switch off *Transparent background* (`remove_bg`).
-- Very similar colors (ΔE < 8) merge unless a `palette` is given.
+- Very similar colors (ΔE < 7) merge unless a `palette` is given. Without transparency, colors within 6 ΔE of the
+  background (a #ECF0F1 shape on white) are background too, also inside the art.
+- Lines of 1–2 px in a color that appears nowhere else are lost on pictures over 256 px (none of their pixels is
+  flat enough to be sampled for the palette).
 - A line between two corners closer than ~12 px is fitted as a curve.

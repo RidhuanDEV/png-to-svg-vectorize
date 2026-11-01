@@ -1,12 +1,12 @@
 {
  "astronaut": {
-  "similarity": 99.435,
-  "within24": 98.41,
-  "bytes": 102670,
-  "segments": 4567,
-  "regions": 53,
+  "similarity": 99.595,
+  "within24": 98.7,
+  "bytes": 100076,
+  "segments": 4412,
+  "regions": 54,
   "gradients": 5,
-  "seconds": 7.1,
+  "seconds": 8.02,
   "size": [
    1280,
    1547
@@ -19,7 +19,7 @@
   "segments": 2957,
   "regions": 73,
   "gradients": 5,
-  "seconds": 6.58,
+  "seconds": 6.81,
   "size": [
    1280,
    1280
@@ -32,7 +32,7 @@
   "segments": 3469,
   "regions": 69,
   "gradients": 43,
-  "seconds": 6.59,
+  "seconds": 7.0,
   "size": [
    1280,
    1527
@@ -45,7 +45,7 @@
   "segments": 1363,
   "regions": 30,
   "gradients": 4,
-  "seconds": 6.13,
+  "seconds": 6.39,
   "size": [
    1280,
    1449
@@ -58,7 +58,7 @@
   "segments": 7115,
   "regions": 209,
   "gradients": 38,
-  "seconds": 10.7,
+  "seconds": 11.38,
   "size": [
    1280,
    2054
@@ -71,33 +71,33 @@
   "segments": 1856,
   "regions": 17,
   "gradients": 7,
-  "seconds": 6.31,
+  "seconds": 6.83,
   "size": [
    1280,
    1811
   ]
  },
  "earth-apollo17": {
-  "similarity": 94.436,
-  "within24": 80.37,
-  "bytes": 1198954,
-  "segments": 54803,
-  "regions": 1147,
-  "gradients": 137,
-  "seconds": 16.95,
+  "similarity": 94.939,
+  "within24": 82.02,
+  "bytes": 1200149,
+  "segments": 55107,
+  "regions": 1064,
+  "gradients": 125,
+  "seconds": 20.33,
   "size": [
    1280,
    1281
   ]
  },
  "fish-mascot": {
-  "similarity": 99.625,
-  "within24": 98.05,
-  "bytes": 58415,
-  "segments": 2425,
-  "regions": 58,
-  "gradients": 3,
-  "seconds": 10.64,
+  "similarity": 99.822,
+  "within24": 99.37,
+  "bytes": 59947,
+  "segments": 2451,
+  "regions": 60,
+  "gradients": 4,
+  "seconds": 13.5,
   "size": [
    1280,
    2846
@@ -110,7 +110,7 @@
   "segments": 1254,
   "regions": 59,
   "gradients": 2,
-  "seconds": 4.05,
+  "seconds": 4.29,
   "size": [
    1280,
    896
@@ -123,7 +123,7 @@
   "segments": 2499,
   "regions": 29,
   "gradients": 2,
-  "seconds": 2.99,
+  "seconds": 3.06,
   "size": [
    1280,
    640
@@ -136,7 +136,7 @@
   "segments": 334,
   "regions": 8,
   "gradients": 0,
-  "seconds": 5.98,
+  "seconds": 6.31,
   "size": [
    1280,
    1561
@@ -149,7 +149,7 @@
   "segments": 237,
   "regions": 9,
   "gradients": 0,
-  "seconds": 3.49,
+  "seconds": 3.7,
   "size": [
    1280,
    854
@@ -162,33 +162,33 @@
   "segments": 2444,
   "regions": 83,
   "gradients": 6,
-  "seconds": 5.2,
+  "seconds": 5.57,
   "size": [
    1280,
    1098
   ]
  },
  "futuristic-mascot": {
-  "similarity": 99.11,
-  "within24": 93.46,
-  "bytes": 20011,
-  "segments": 591,
-  "regions": 27,
-  "gradients": 16,
-  "seconds": 4.12,
+  "similarity": 99.614,
+  "within24": 99.08,
+  "bytes": 25256,
+  "segments": 811,
+  "regions": 40,
+  "gradients": 15,
+  "seconds": 4.68,
   "size": [
    1280,
    960
   ]
  },
  "great-wave": {
-  "similarity": 94.263,
-  "within24": 77.96,
-  "bytes": 639638,
-  "segments": 28930,
-  "regions": 398,
-  "gradients": 29,
-  "seconds": 9.81,
+  "similarity": 94.265,
+  "within24": 77.48,
+  "bytes": 634610,
+  "segments": 28686,
+  "regions": 389,
+  "gradients": 26,
+  "seconds": 12.4,
   "size": [
    1280,
    860
@@ -201,7 +201,7 @@
   "segments": 94,
   "regions": 1,
   "gradients": 0,
-  "seconds": 2.51,
+  "seconds": 2.72,
   "size": [
    960,
    960
@@ -214,7 +214,7 @@
   "segments": 120,
   "regions": 7,
   "gradients": 0,
-  "seconds": 1.62,
+  "seconds": 1.68,
   "size": [
    960,
    960
@@ -227,7 +227,7 @@
   "segments": 269,
   "regions": 11,
   "gradients": 1,
-  "seconds": 1.59,
+  "seconds": 1.65,
   "size": [
    960,
    960
@@ -240,7 +240,7 @@
   "segments": 1335,
   "regions": 79,
   "gradients": 8,
-  "seconds": 1.94,
+  "seconds": 1.91,
   "size": [
    960,
    960
@@ -253,33 +253,33 @@
   "segments": 442,
   "regions": 19,
   "gradients": 1,
-  "seconds": 4.99,
+  "seconds": 5.43,
   "size": [
    1280,
    1368
   ]
  },
  "mountain-landscape": {
-  "similarity": 99.75,
-  "within24": 99.61,
-  "bytes": 74089,
-  "segments": 2852,
-  "regions": 61,
-  "gradients": 31,
-  "seconds": 6.06,
+  "similarity": 99.762,
+  "within24": 99.66,
+  "bytes": 70825,
+  "segments": 2748,
+  "regions": 59,
+  "gradients": 28,
+  "seconds": 7.68,
   "size": [
    1280,
    1279
   ]
  },
  "penguin": {
-  "similarity": 99.075,
-  "within24": 98.95,
-  "bytes": 84868,
-  "segments": 2925,
-  "regions": 100,
-  "gradients": 53,
-  "seconds": 8.44,
+  "similarity": 99.287,
+  "within24": 99.11,
+  "bytes": 91286,
+  "segments": 3228,
+  "regions": 102,
+  "gradients": 50,
+  "seconds": 9.05,
   "size": [
    1280,
    1283
@@ -292,20 +292,20 @@
   "segments": 1298,
   "regions": 35,
   "gradients": 12,
-  "seconds": 5.03,
+  "seconds": 5.4,
   "size": [
    1200,
    1200
   ]
  },
  "robot": {
-  "similarity": 99.528,
-  "within24": 98.37,
-  "bytes": 70776,
-  "segments": 2876,
-  "regions": 64,
-  "gradients": 4,
-  "seconds": 6.61,
+  "similarity": 99.766,
+  "within24": 99.32,
+  "bytes": 70646,
+  "segments": 2874,
+  "regions": 54,
+  "gradients": 5,
+  "seconds": 8.81,
   "size": [
    1280,
    1509
@@ -318,33 +318,33 @@
   "segments": 3751,
   "regions": 97,
   "gradients": 15,
-  "seconds": 6.46,
+  "seconds": 6.93,
   "size": [
    1280,
    1477
   ]
  },
  "silver-hair-girl": {
-  "similarity": 99.143,
-  "within24": 98.65,
-  "bytes": 132938,
-  "segments": 5439,
-  "regions": 76,
-  "gradients": 38,
-  "seconds": 7.38,
+  "similarity": 99.343,
+  "within24": 98.74,
+  "bytes": 159767,
+  "segments": 6286,
+  "regions": 112,
+  "gradients": 60,
+  "seconds": 9.02,
   "size": [
    1280,
    1811
   ]
  },
  "starry-night": {
-  "similarity": 92.068,
-  "within24": 55.04,
-  "bytes": 1954044,
-  "segments": 90841,
-  "regions": 2035,
-  "gradients": 173,
-  "seconds": 22.33,
+  "similarity": 92.06,
+  "within24": 54.93,
+  "bytes": 1957010,
+  "segments": 90933,
+  "regions": 2041,
+  "gradients": 176,
+  "seconds": 25.46,
   "size": [
    1280,
    1014

@@ -81,3 +81,68 @@ def test_transparent_png_is_flattened_on_white():
     assert tuple(flat[0, 0]) == (255, 255, 255) and tuple(flat[20, 30]) == (37, 99, 235)
     res = vectorize(img)
     assert '#FFFFFF' in res.svg.upper()                                   # white background, not black
+
+
+def test_quality_metrics():
+    from pngsvg.compare import edge_split, psnr, ssim
+    a = Image.new('RGB', (64, 48), 'white')
+    ImageDraw.Draw(a).rectangle((10, 10, 40, 30), fill=(200, 40, 40))
+    assert psnr(a, a) == float('inf') and abs(ssim(a, a) - 1) < 1e-9
+    b = a.copy()
+    ImageDraw.Draw(b).rectangle((10, 10, 41, 30), fill=(200, 40, 40))        # one column off, on the edge
+    assert 20 < psnr(a, b) < 40 and 0.8 < ssim(a, b) < 1
+    flat, on_edges = edge_split(a, b)
+    assert flat == 100.0 and on_edges == 100.0
+
+
+def test_defect_area_counts_a_missing_shape_not_an_edge_shift():
+    from pngsvg.compare import defect_area, similarity
+    a = Image.new('RGB', (200, 200), 'white')
+    ImageDraw.Draw(a).rectangle((40, 40, 160, 160), fill=(200, 40, 40))
+    shifted = Image.new('RGB', (200, 200), 'white')
+    ImageDraw.Draw(shifted).rectangle((41, 40, 161, 160), fill=(200, 40, 40))   # one column off: anti-aliasing scale
+    assert defect_area(a, shifted) == 0.0
+    missing = a.copy()
+    ImageDraw.Draw(missing).rectangle((40, 40, 70, 70), fill='white')            # a 31x31 piece gone
+    assert abs(defect_area(a, missing) - 100 * 31 * 31 / 200 ** 2) < 0.01
+    assert similarity(a, missing)[0] > 98                                         # ...which the mean barely sees
+
+
+def _outline_fills(svg: str) -> list[str]:
+    import re
+    group = re.search(r'<g id="outline"( fill="(#[0-9A-F]{6})")?>(.*?)</g>', svg)
+    if group is None:
+        return []
+    return [group.group(2)] if group.group(2) else re.findall(r'fill="(#[0-9A-F]{6})"', group.group(3))
+
+
+def test_grey_lines_keep_their_own_ink():
+    # one ink color per picture turned thin grey lines into thinner black ones; each stroke now has its ink
+    img = Image.new('RGB', (480, 360), 'white')
+    d = ImageDraw.Draw(img)
+    d.ellipse((40, 40, 300, 300), fill=(250, 200, 160), outline=(15, 15, 15), width=6)
+    for i in range(4):
+        d.line((320, 60 + 60 * i, 460, 80 + 60 * i), fill=(128, 128, 128), width=3)
+    inks = _outline_fills(vectorize(img).svg)
+    assert len(inks) == 2
+    greys = [int(c[1:3], 16) for c in inks]
+    assert min(greys) < 40 and 100 < max(greys) < 160
+
+
+def test_a_shaded_dark_area_is_a_fill_but_a_flat_one_stays_ink():
+    from pngsvg.compare import defect_area
+    yy, xx = np.mgrid[0:300, 0:400]
+    screen = np.full((300, 400, 3), 255.0)
+    inside = (xx > 60) & (xx < 340) & (yy > 40) & (yy < 260)
+    screen[inside] = 8
+    glare = inside & (yy < 140 - 0.3 * (xx - 60))                   # a dark-grey reflection on the black screen
+    screen[glare] = 34
+    img = Image.fromarray(screen.astype(np.uint8))
+    from pngsvg.compare import render
+    out = render(vectorize(img).svg, 400, 300)
+    if out is None:
+        pytest.skip('no Chrome/Edge to render with')
+    assert defect_area(img, out) < 0.5                                # the reflection is kept
+    flat = Image.new('RGB', (400, 300), 'white')
+    ImageDraw.Draw(flat).rectangle((60, 40, 340, 260), fill=(8, 8, 8))
+    assert len(_outline_fills(vectorize(flat).svg)) == 1               # a flat black area is still drawn as ink

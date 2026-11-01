@@ -129,12 +129,17 @@ AI_TARGET = 2     # the AI result is traced at 2x the photo size (x4 model outpu
 AI_SMALL = 1000   # "automatic" AI: only photos smaller than this (longest side, px) or JPEGs, where it helps most
 
 
-def wants_ai(options: dict[str, Any], source: bytes, width: int, height: int) -> bool:
+def wants_ai(options: dict[str, Any], source: bytes, width: int, height: int, preset: str) -> bool:
     if not options.get('ai'):
         return False
     if not options.get('ai_auto'):
         return True
-    return max(width, height) < AI_SMALL or source[:3] == b'\xff\xd8\xff'
+    jpeg = source[:3] == b'\xff\xd8\xff'
+    if preset == 'pixel':                        # every pixel is meant: a model would smooth the art
+        return False
+    if options_for(preset).engine == 'flat':     # logos: no gain on small PNGs, but JPEG blocks become visible
+        return jpeg                              # defects (docs/research.md 3.3, 5.7)
+    return max(width, height) < AI_SMALL or jpeg
 
 
 def _work(job_id: str, source: bytes, preset: str, overrides: dict[str, Any], queue,
@@ -291,7 +296,7 @@ class JobManager:
             if job is None or job.status != 'queued':
                 continue
             ai = None
-            if wants_ai(job.options, job.source, job.width, job.height):
+            if wants_ai(job.options, job.source, job.width, job.height, job.preset):
                 model = self.models.path(job.options['ai']) if self.models else None
                 if model is None:                 # removed after the job was queued
                     job.status, job.error, job.position = 'error', 'AI model not installed', None

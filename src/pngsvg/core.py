@@ -4,7 +4,7 @@ from __future__ import annotations
 import re
 from concurrent.futures import Executor
 from typing import Callable
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 import numpy as np
 from PIL import Image
@@ -23,6 +23,8 @@ from .pathdata import compact_path
 @dataclass
 class Options:
     scale: int | None = None          # tracing upscale; None = auto (long side ~4500 px)
+    prescale: int | None = None       # segment small pictures enlarged: thin details and small text survive;
+                                      # None = auto (2x below 512 px), 1 = off. Coordinates stay in source pixels.
     outlines: bool = True             # separate ink outlines into their own crisp layer
     gradients: bool = True            # gradient fills (False = flat colors)
     radial: bool = True               # allow elliptical radial gradients for blob-shaded regions
@@ -189,6 +191,19 @@ def vectorize(image: Image.Image, opts: Options | None = None, executor: Executo
     if opts.engine == 'flat':
         return _flat(image, opts, stage)
     stage('ink', 0.05)
+    P = opts.prescale or (2 if max(image.size) < 512 else 1)
+    if P > 1:
+        # nearest keeps every anti-aliased value as it is (Lanczos rings, bilinear blurs): the finer grid alone lets
+        # segmentation and sub-pixel edges resolve strokes of 1-2 source pixels
+        image = image.convert('RGBA').resize((image.width * P, image.height * P), Image.Resampling.NEAREST)
+        r = opts.regions                   # sizes in source pixels keep their meaning on the finer grid
+        rp = replace(r, fit_area=r.fit_area * P * P,
+                     gradient_min_area=r.gradient_min_area * P * P, ring_dist=r.ring_dist * P)
+        o = opts.outline
+        op = replace(o, thin_size=o.thin_size * P + 1, band=o.band * P, ink_line_size=o.ink_line_size * P + 1,
+                     halo_px=o.halo_px * P)
+    else:
+        rp, op = opts.regions, opts.outline
     alpha = _alpha(image) if opts.remove_bg else None
     rgb = _tone(np.asarray(flatten(image)), opts.color_mode, opts.threshold)
     h, w = rgb.shape[:2]
@@ -198,20 +213,22 @@ def vectorize(image: Image.Image, opts: Options | None = None, executor: Executo
     pid = _safe_id(opts.id_prefix)
 
     if opts.outlines:
-        ol = separate(rgb, opts.outline)
+        ol = separate(rgb, op)
     else:
         ol = Outline(np.zeros((h, w), np.float32), np.zeros(3, np.float32), rgb.copy())
     has_ink = bool((ol.alpha > 0.5).any())
-    near = ndimage.distance_transform_edt(ol.alpha < 0.5) <= opts.regions.ring_dist if has_ink else np.zeros((h, w), bool)
+    near = ndimage.distance_transform_edt(ol.alpha < 0.5) <= rp.ring_dist if has_ink else np.zeros((h, w), bool)
 
     stage('regions', 0.3)
-    label = segment(ol.behind_rgb, near, opts.regions)
-    color_of, palette, ink_hex = None, [], to_hex(ol.ink_rgb)
+    label = segment(ol.behind_rgb, near, rp)
+    color_of, palette = None, []
+    inks = list(ol.inks) if has_ink and len(ol.inks) else [ol.ink_rgb]
+    ink_hexes = [to_hex(c) for c in inks]
     if quantized:
-        k = max(1, (opts.max_colors or 2) - (1 if has_ink else 0))
+        k = max(1, (opts.max_colors or 2) - (len(inks) if has_ink else 0))
         label, color_of, palette = _quantize(label, ol.behind_rgb, k, fixed)
-        if has_ink:
-            ink_hex = _nearest(ol.ink_rgb, fixed) if fixed else ink_hex
+        if has_ink and fixed:
+            ink_hexes = [_nearest(c, fixed) for c in inks]
     if opts.subpixel:
         label = refine_boundaries(label, ol.behind_rgb, ol.alpha >= 0.5 if has_ink else None)
     behind = ol.behind_rgb.astype(np.float64)
@@ -223,7 +240,7 @@ def vectorize(image: Image.Image, opts: Options | None = None, executor: Executo
     # shared boundaries: every chain is fitted once and used by both regions it separates
     stage('curves', 0.65)
     chains = build_chains(label)
-    tol = _corner_tolerance(ol.alpha, opts.tolerance, opts.hidden_tolerance) if has_ink else None
+    tol = _corner_tolerance(ol.alpha, opts.tolerance * P, opts.hidden_tolerance * P) if has_ink else None
     if opts.subpixel:
         flat = label.ravel()
         cnt = np.maximum(np.bincount(flat), 1)
@@ -232,10 +249,16 @@ def vectorize(image: Image.Image, opts: Options | None = None, executor: Executo
         offs = [subpixel_offsets(c, label, behind, mean_rgb, hidden) for c in chains]
     else:
         offs = [None] * len(chains)
-    jobs = [(c.points, c.closed, opts.smooth, opts.tolerance if tol is None else
+    jobs = [(c.points, c.closed, opts.smooth, opts.tolerance * P if tol is None else
              tol[c.points[:, 1].astype(int), c.points[:, 0].astype(int)], 4, 55.0, o) for c, o in zip(chains, offs)]
-    ochains = build_chains(outline_mask(ol.alpha, S).astype(np.int32)) if has_ink else []
-    jobs += [(c.points, c.closed, opts.outline_smooth * S, opts.outline_tolerance * S, 3 * S, 60.0) for c in ochains]
+    # one outline layer per ink color (most pictures: one), lighter inks below darker ones
+    ink_order = sorted(range(len(inks)), key=lambda i: -float(to_lab(np.asarray(inks[i], np.float32))[0]))
+    ochains_by_ink = []
+    for i in ink_order if has_ink else []:
+        a = ol.alpha if len(inks) == 1 or ol.which is None else ol.alpha * (ol.which == i)
+        ochains_by_ink.append((i, build_chains(outline_mask(a, S).astype(np.int32))))
+    ochains = [c for _, cs in ochains_by_ink for c in cs]
+    jobs += [(c.points, c.closed, opts.outline_smooth * S, opts.outline_tolerance * S * P, 3 * S, 60.0) for c in ochains]
     all_fit = _fit_all(jobs, executor)
     fitted, ofit = all_fit[:len(chains)], all_fit[len(chains):]
     shapes = {}
@@ -259,21 +282,21 @@ def vectorize(image: Image.Image, opts: Options | None = None, executor: Executo
         sl = objects[i - 1]
         sel = label[sl] == i
         ys, xs = np.nonzero(sel)
-        ys = ys + sl[0].start + 0.5
-        xs = xs + sl[1].start + 0.5
+        ys = (ys + sl[0].start + 0.5) / P
+        xs = (xs + sl[1].start + 0.5) / P
         colors = behind[sl][sel]
         if color_of is not None:
             fill, grad = palette[color_of[i]], ''
             used[fill] = used.get(fill, 0.0) + shapes[i][0]
         elif opts.gradients:
-            fill, grad = fit_fill(ys, xs, colors, f'{pid}-g{i}', opts.regions.flat_de, opts.regions.gradient_min_area,
+            fill, grad = fit_fill(ys, xs, colors, f'{pid}-g{i}', rp.flat_de, rp.gradient_min_area,
                                   opts.radial)
         else:
             fill, grad = to_hex(colors.mean(axis=0)), ''
         if grad:
             defs.append(grad)
             n_grad += 1
-        d = compact_path(loops_to_path(shapes[i][1], fitted), decimals=opts.decimals)
+        d = compact_path(loops_to_path(shapes[i][1], fitted), scale=P, decimals=opts.decimals)
         stroke = f' stroke="{fill}"' if opts.seam > 0 else ''
         fills.append(f'<path d="{d}" fill="{fill}"{rule}{stroke}/>')
         if opts.layers:
@@ -283,24 +306,33 @@ def vectorize(image: Image.Image, opts: Options | None = None, executor: Executo
         background = palette[color_of[order[0]]]
     else:
         background = to_hex(behind[label == order[0]].mean(axis=0)) if order else '#FFFFFF'
-    rect = '' if cut else f'<rect width="{w}" height="{h}" fill="{background}"/>'
+    rect = '' if cut else f'<rect width="{w // P}" height="{h // P}" fill="{background}"/>'
     seam = f' stroke-width="{opts.seam:g}" stroke-linejoin="round"' if opts.seam > 0 else ''
 
     outline_svg, n_out = '', 0
     if has_ink:
-        loops = region_loops(ochains).get(1, [])
-        n_out = len(loops)
-        outline_svg = (f'<g id="outline" fill="{ink_hex}">'
-                       f'<path d="{compact_path(loops_to_path(loops, ofit), 0, 0, S, opts.decimals)}"/></g>')
+        parts, start = [], 0
+        for i, cs in ochains_by_ink:
+            loops = region_loops(cs).get(1, [])
+            n_out += len(loops)
+            d = compact_path(loops_to_path(loops, ofit[start:start + len(cs)]), 0, 0, S * P, opts.decimals)
+            start += len(cs)
+            if d:
+                parts.append((ink_hexes[i], d))
+        if len(parts) == 1:                          # one ink: the layout every earlier version wrote
+            outline_svg = f'<g id="outline" fill="{parts[0][0]}"><path d="{parts[0][1]}"/></g>'
+        elif parts:
+            outline_svg = '<g id="outline">' + ''.join(f'<path fill="{c}" d="{d}"/>' for c, d in parts) + '</g>'
 
-    svg = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}">'
+    svg = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w // P} {h // P}">'
            + (f'<defs>{"".join(defs)}</defs>' if defs else '')
            + f'<g id="fill"{seam}>{rect}'
            + (''.join(f'<g id="{k}">{"".join(v)}</g>' for k, v in groups.items()) if opts.layers else ''.join(fills))
            + '</g>'
            + outline_svg + '</svg>\n')
     if quantized and has_ink:
-        used[ink_hex] = used.get(ink_hex, 0.0)
+        for ink_hex in ink_hexes:
+            used[ink_hex] = used.get(ink_hex, 0.0)
     return Result(svg, len(fills), n_grad, n_out,
                   sorted(used, key=lambda c: -used[c]) if quantized else [])
 

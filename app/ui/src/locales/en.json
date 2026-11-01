@@ -195,7 +195,7 @@
   "ai_off": "Off",
   "ai_auto": "Automatic",
   "ai_always": "Always",
-  "aiAutoHint": "Automatic: only for photos smaller than 1000 px or JPEGs.",
+  "aiAutoHint": "Automatic: for pictures smaller than 1000 px or JPEGs; logos only from a JPEG, never pixel art.",
   "aiModel": "AI model",
   "aiModel_illustration": "Illustrations",
   "aiModel_general": "General",

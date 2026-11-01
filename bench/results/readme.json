@@ -1,0 +1,1302 @@
+{
+ "machine": "Intel64 Family 6 Model 141 Stepping 1, GenuineIntel, Windows 11",
+ "version": "1.6.0",
+ "sets": {
+  "E7": {
+   "astronaut": {
+    "category": "cartoon",
+    "preset": "cartoon",
+    "background_kept": false,
+    "size": [
+     1280,
+     1547
+    ],
+    "format": "PNG",
+    "similarity": 99.595,
+    "defects": 0.148,
+    "psnr": 30.07,
+    "ssim": 0.9897,
+    "flat": 99.937,
+    "edge_error": 85.2,
+    "bytes": 99956,
+    "paths": 56,
+    "seconds": 9.8
+   },
+   "robot": {
+    "category": "cartoon",
+    "preset": "cartoon",
+    "background_kept": false,
+    "size": [
+     1280,
+     1509
+    ],
+    "format": "PNG",
+    "similarity": 99.766,
+    "defects": 0.234,
+    "psnr": 35.56,
+    "ssim": 0.9907,
+    "flat": 99.931,
+    "edge_error": 72.0,
+    "bytes": 70586,
+    "paths": 57,
+    "seconds": 9.52
+   },
+   "cow": {
+    "category": "cartoon",
+    "preset": "cartoon",
+    "background_kept": false,
+    "size": [
+     1280,
+     1449
+    ],
+    "format": "PNG",
+    "similarity": 99.818,
+    "defects": 0.058,
+    "psnr": 35.76,
+    "ssim": 0.9946,
+    "flat": 99.978,
+    "edge_error": 88.5,
+    "bytes": 35175,
+    "paths": 31,
+    "seconds": 7.26
+   },
+   "penguin": {
+    "category": "cartoon",
+    "preset": "cartoon",
+    "background_kept": false,
+    "size": [
+     1280,
+     1283
+    ],
+    "format": "PNG",
+    "similarity": 99.287,
+    "defects": 0.664,
+    "psnr": 33.65,
+    "ssim": 0.9496,
+    "flat": 99.421,
+    "edge_error": 21.3,
+    "bytes": 90386,
+    "paths": 103,
+    "seconds": 11.5
+   },
+   "donkey": {
+    "category": "cartoon",
+    "preset": "cartoon",
+    "background_kept": false,
+    "size": [
+     1280,
+     1811
+    ],
+    "format": "PNG",
+    "similarity": 99.834,
+    "defects": 0.039,
+    "psnr": 34.73,
+    "ssim": 0.9923,
+    "flat": 99.995,
+    "edge_error": 97.4,
+    "bytes": 45081,
+    "paths": 18,
+    "seconds": 8.1
+   },
+   "fish-mascot": {
+    "category": "cartoon",
+    "preset": "cartoon",
+    "background_kept": false,
+    "size": [
+     1280,
+     2846
+    ],
+    "format": "PNG",
+    "similarity": 99.822,
+    "defects": 0.171,
+    "psnr": 34.77,
+    "ssim": 0.9939,
+    "flat": 99.955,
+    "edge_error": 75.2,
+    "bytes": 59827,
+    "paths": 63,
+    "seconds": 15.41
+   },
+   "basketball-mascot": {
+    "category": "cartoon",
+    "preset": "cartoon",
+    "background_kept": false,
+    "size": [
+     1280,
+     1280
+    ],
+    "format": "PNG",
+    "similarity": 99.83,
+    "defects": 0.022,
+    "psnr": 38.92,
+    "ssim": 0.9952,
+    "flat": 99.92,
+    "edge_error": 53.8,
+    "bytes": 69936,
+    "paths": 74,
+    "seconds": 7.84
+   },
+   "cute-girl": {
+    "category": "cartoon",
+    "preset": "cartoon",
+    "background_kept": false,
+    "size": [
+     1280,
+     2054
+    ],
+    "format": "PNG",
+    "similarity": 99.519,
+    "defects": 0.598,
+    "psnr": 31.87,
+    "ssim": 0.9817,
+    "flat": 99.833,
+    "edge_error": 67.6,
+    "bytes": 178044,
+    "paths": 210,
+    "seconds": 13.96
+   },
+   "silver-hair-girl": {
+    "category": "cartoon",
+    "preset": "cartoon",
+    "background_kept": false,
+    "size": [
+     1280,
+     1811
+    ],
+    "format": "PNG",
+    "similarity": 99.343,
+    "defects": 0.885,
+    "psnr": 29.39,
+    "ssim": 0.9721,
+    "flat": 99.693,
+    "edge_error": 54.9,
+    "bytes": 157067,
+    "paths": 115,
+    "seconds": 11.53
+   },
+   "caticorn": {
+    "category": "cartoon",
+    "preset": "cartoon",
+    "background_kept": false,
+    "size": [
+     1280,
+     1527
+    ],
+    "format": "PNG",
+    "similarity": 99.81,
+    "defects": 0.062,
+    "psnr": 38.79,
+    "ssim": 0.9929,
+    "flat": 99.896,
+    "edge_error": 46.6,
+    "bytes": 94084,
+    "paths": 70,
+    "seconds": 8.23
+   },
+   "kazoo": {
+    "category": "cartoon-raster",
+    "preset": "cartoon",
+    "background_kept": false,
+    "size": [
+     1280,
+     1368
+    ],
+    "format": "PNG",
+    "similarity": 99.879,
+    "defects": 0.005,
+    "psnr": 38.87,
+    "ssim": 0.9969,
+    "flat": 99.972,
+    "edge_error": 77.0,
+    "bytes": 11901,
+    "paths": 20,
+    "seconds": 6.04
+   },
+   "popcorn": {
+    "category": "cartoon-raster",
+    "preset": "cartoon",
+    "background_kept": false,
+    "size": [
+     1200,
+     1200
+    ],
+    "format": "PNG",
+    "similarity": 99.571,
+    "defects": 0.132,
+    "psnr": 34.58,
+    "ssim": 0.9844,
+    "flat": 99.775,
+    "edge_error": 49.4,
+    "bytes": 33307,
+    "paths": 36,
+    "seconds": 5.99
+   },
+   "futuristic-mascot": {
+    "category": "cartoon-raster",
+    "preset": "cartoon",
+    "background_kept": false,
+    "size": [
+     1280,
+     960
+    ],
+    "format": "PNG",
+    "similarity": 99.614,
+    "defects": 0.031,
+    "psnr": 36.65,
+    "ssim": 0.9918,
+    "flat": 99.774,
+    "edge_error": 44.2,
+    "bytes": 24536,
+    "paths": 41,
+    "seconds": 4.72
+   },
+   "mountain-landscape": {
+    "category": "flat",
+    "preset": "flat",
+    "background_kept": false,
+    "size": [
+     1280,
+     1279
+    ],
+    "format": "PNG",
+    "similarity": 99.77,
+    "defects": 0.031,
+    "psnr": 39.95,
+    "ssim": 0.993,
+    "flat": 99.814,
+    "edge_error": 20.0,
+    "bytes": 41918,
+    "paths": 47,
+    "seconds": 7.93,
+    "cartoon": {
+     "similarity": 99.762,
+     "defects": 0.071,
+     "bytes": 69397
+    }
+   },
+   "shipment": {
+    "category": "flat",
+    "preset": "flat",
+    "background_kept": false,
+    "size": [
+     1280,
+     1477
+    ],
+    "format": "PNG",
+    "similarity": 99.667,
+    "defects": 0.37,
+    "psnr": 35.68,
+    "ssim": 0.9807,
+    "flat": 99.814,
+    "edge_error": 46.5,
+    "bytes": 87691,
+    "paths": 95,
+    "seconds": 7.73,
+    "cartoon": {
+     "similarity": 99.672,
+     "defects": 0.284,
+     "bytes": 93587
+    }
+   },
+   "flying-plane": {
+    "category": "flat",
+    "preset": "flat",
+    "background_kept": false,
+    "size": [
+     1280,
+     1098
+    ],
+    "format": "PNG",
+    "similarity": 99.247,
+    "defects": 0.165,
+    "psnr": 33.91,
+    "ssim": 0.9864,
+    "flat": 99.412,
+    "edge_error": 25.6,
+    "bytes": 57070,
+    "paths": 75,
+    "seconds": 6.37,
+    "cartoon": {
+     "similarity": 99.718,
+     "defects": 0.165,
+     "bytes": 62820
+    }
+   },
+   "flag-brazil": {
+    "category": "logo",
+    "preset": "logo",
+    "background_kept": true,
+    "size": [
+     1280,
+     896
+    ],
+    "format": "PNG",
+    "similarity": 99.886,
+    "defects": 0.014,
+    "psnr": 34.72,
+    "ssim": 0.9948,
+    "flat": 99.998,
+    "edge_error": 98.4,
+    "bytes": 18625,
+    "paths": 53,
+    "seconds": 3.13,
+    "cartoon": {
+     "similarity": 99.863,
+     "defects": 0.036,
+     "bytes": 32745
+    }
+   },
+   "flag-nepal": {
+    "category": "logo",
+    "preset": "logo",
+    "background_kept": true,
+    "size": [
+     1280,
+     1561
+    ],
+    "format": "PNG",
+    "similarity": 99.874,
+    "defects": 0.0,
+    "psnr": 34.43,
+    "ssim": 0.9879,
+    "flat": 99.971,
+    "edge_error": 77.5,
+    "bytes": 2486,
+    "paths": 6,
+    "seconds": 4.45,
+    "cartoon": {
+     "similarity": 99.918,
+     "defects": 0.0,
+     "bytes": 8959
+    }
+   },
+   "flag-kiribati": {
+    "category": "logo",
+    "preset": "logo",
+    "background_kept": true,
+    "size": [
+     1280,
+     640
+    ],
+    "format": "PNG",
+    "similarity": 99.491,
+    "defects": 0.257,
+    "psnr": 26.53,
+    "ssim": 0.9675,
+    "flat": 99.999,
+    "edge_error": 99.8,
+    "bytes": 18554,
+    "paths": 21,
+    "seconds": 2.0,
+    "cartoon": {
+     "similarity": 99.26,
+     "defects": 0.229,
+     "bytes": 56340
+    }
+   },
+   "flag-south-africa": {
+    "category": "logo",
+    "preset": "logo",
+    "background_kept": true,
+    "size": [
+     1280,
+     854
+    ],
+    "format": "PNG",
+    "similarity": 99.882,
+    "defects": 0.0,
+    "psnr": 34.84,
+    "ssim": 0.9954,
+    "flat": 99.993,
+    "edge_error": 94.1,
+    "bytes": 848,
+    "paths": 7,
+    "seconds": 3.38,
+    "cartoon": {
+     "similarity": 99.758,
+     "defects": 0.001,
+     "bytes": 6525
+    }
+   },
+   "icon-exclamation": {
+    "category": "icon",
+    "preset": "logo",
+    "background_kept": false,
+    "size": [
+     960,
+     960
+    ],
+    "format": "PNG",
+    "similarity": 99.973,
+    "defects": 0.0,
+    "psnr": 43.53,
+    "ssim": 0.9989,
+    "flat": 100.0,
+    "edge_error": 99.3,
+    "bytes": 800,
+    "paths": 3,
+    "seconds": 1.31,
+    "cartoon": {
+     "similarity": 99.921,
+     "defects": 0.0,
+     "bytes": 3421
+    }
+   },
+   "icon-shop": {
+    "category": "icon",
+    "preset": "logo",
+    "background_kept": false,
+    "size": [
+     960,
+     960
+    ],
+    "format": "PNG",
+    "similarity": 99.951,
+    "defects": 0.002,
+    "psnr": 40.63,
+    "ssim": 0.9953,
+    "flat": 99.999,
+    "edge_error": 98.8,
+    "bytes": 6390,
+    "paths": 49,
+    "seconds": 6.1,
+    "cartoon": {
+     "similarity": 99.812,
+     "defects": 0.018,
+     "bytes": 33955
+    }
+   },
+   "icon-flask": {
+    "category": "icon",
+    "preset": "logo",
+    "background_kept": false,
+    "size": [
+     960,
+     960
+    ],
+    "format": "PNG",
+    "similarity": 99.957,
+    "defects": 0.0,
+    "psnr": 39.49,
+    "ssim": 0.9958,
+    "flat": 99.988,
+    "edge_error": 73.5,
+    "bytes": 1384,
+    "paths": 6,
+    "seconds": 2.07,
+    "cartoon": {
+     "similarity": 99.957,
+     "defects": 0.012,
+     "bytes": 6998
+    }
+   },
+   "icon-cat": {
+    "category": "icon",
+    "preset": "logo",
+    "background_kept": false,
+    "size": [
+     960,
+     960
+    ],
+    "format": "PNG",
+    "similarity": 99.961,
+    "defects": 0.0,
+    "psnr": 39.79,
+    "ssim": 0.9988,
+    "flat": 100.0,
+    "edge_error": 100.0,
+    "bytes": 1491,
+    "paths": 1,
+    "seconds": 1.52,
+    "cartoon": {
+     "similarity": 99.974,
+     "defects": 0.0,
+     "bytes": 2552
+    }
+   },
+   "great-wave": {
+    "category": "poster",
+    "preset": "poster",
+    "background_kept": false,
+    "size": [
+     1280,
+     860
+    ],
+    "format": "JPG",
+    "similarity": 92.726,
+    "defects": 22.385,
+    "psnr": 17.73,
+    "ssim": 0.4718,
+    "flat": 96.209,
+    "edge_error": 65.5,
+    "bytes": 296405,
+    "paths": 319,
+    "seconds": 7.56,
+    "cartoon": {
+     "similarity": 94.265,
+     "defects": 22.339,
+     "bytes": 633908
+    }
+   },
+   "starry-night": {
+    "category": "poster",
+    "preset": "poster",
+    "background_kept": false,
+    "size": [
+     1280,
+     1014
+    ],
+    "format": "JPG",
+    "similarity": 92.17,
+    "defects": 49.219,
+    "psnr": 19.57,
+    "ssim": 0.2693,
+    "flat": 95.015,
+    "edge_error": 79.8,
+    "bytes": 831396,
+    "paths": 855,
+    "seconds": 16.42,
+    "cartoon": {
+     "similarity": 92.06,
+     "defects": 48.031,
+     "bytes": 1951202
+    }
+   },
+   "earth-apollo17": {
+    "category": "poster",
+    "preset": "poster",
+    "background_kept": false,
+    "size": [
+     1280,
+     1281
+    ],
+    "format": "JPG",
+    "similarity": 95.183,
+    "defects": 15.232,
+    "psnr": 21.59,
+    "ssim": 0.6155,
+    "flat": 97.248,
+    "edge_error": 57.2,
+    "bytes": 550568,
+    "paths": 476,
+    "seconds": 12.53,
+    "cartoon": {
+     "similarity": 94.939,
+     "defects": 15.361,
+     "bytes": 1195274
+    }
+   }
+  },
+  "E8": {
+   "apple-cartoon": {
+    "category": "cartoon",
+    "preset": "cartoon",
+    "background_kept": false,
+    "size": [
+     300,
+     300
+    ],
+    "format": "PNG",
+    "similarity": 99.34,
+    "defects": 0.356,
+    "psnr": 29.69,
+    "ssim": 0.9827,
+    "flat": 99.829,
+    "edge_error": 75.6,
+    "bytes": 23772,
+    "paths": 48,
+    "seconds": 2.1
+   },
+   "banana-icon": {
+    "category": "cartoon",
+    "preset": "cartoon",
+    "background_kept": false,
+    "size": [
+     512,
+     512
+    ],
+    "format": "PNG",
+    "similarity": 99.236,
+    "defects": 0.182,
+    "psnr": 33.83,
+    "ssim": 0.9681,
+    "flat": 99.412,
+    "edge_error": 26.6,
+    "bytes": 42816,
+    "paths": 65,
+    "seconds": 2.11
+   },
+   "red-apple-icon": {
+    "category": "cartoon",
+    "preset": "cartoon",
+    "background_kept": false,
+    "size": [
+     512,
+     512
+    ],
+    "format": "PNG",
+    "similarity": 98.969,
+    "defects": 0.538,
+    "psnr": 33.11,
+    "ssim": 0.9586,
+    "flat": 99.186,
+    "edge_error": 25.0,
+    "bytes": 30252,
+    "paths": 52,
+    "seconds": 1.42
+   },
+   "pickle": {
+    "category": "cartoon",
+    "preset": "cartoon",
+    "background_kept": false,
+    "size": [
+     500,
+     485
+    ],
+    "format": "PNG",
+    "similarity": 99.568,
+    "defects": 0.062,
+    "psnr": 34.46,
+    "ssim": 0.9844,
+    "flat": 99.741,
+    "edge_error": 42.4,
+    "bytes": 24912,
+    "paths": 39,
+    "seconds": 2.87
+   },
+   "smiley": {
+    "category": "cartoon",
+    "preset": "cartoon",
+    "background_kept": false,
+    "size": [
+     1178,
+     1157
+    ],
+    "format": "PNG",
+    "similarity": 99.339,
+    "defects": 0.291,
+    "psnr": 35.9,
+    "ssim": 0.9797,
+    "flat": 99.404,
+    "edge_error": 10.9,
+    "bytes": 98109,
+    "paths": 73,
+    "seconds": 6.72
+   },
+   "border-collie": {
+    "category": "cartoon",
+    "preset": "cartoon",
+    "background_kept": false,
+    "size": [
+     1000,
+     1033
+    ],
+    "format": "PNG",
+    "similarity": 99.142,
+    "defects": 1.052,
+    "psnr": 28.76,
+    "ssim": 0.9692,
+    "flat": 99.603,
+    "edge_error": 56.8,
+    "bytes": 130536,
+    "paths": 129,
+    "seconds": 6.65
+   },
+   "running-collie": {
+    "category": "cartoon",
+    "preset": "cartoon",
+    "background_kept": false,
+    "size": [
+     1550,
+     2254
+    ],
+    "format": "PNG",
+    "similarity": 99.511,
+    "defects": 0.98,
+    "psnr": 30.4,
+    "ssim": 0.9856,
+    "flat": 99.884,
+    "edge_error": 77.8,
+    "bytes": 243132,
+    "paths": 185,
+    "seconds": 17.33
+   },
+   "mustache-guy": {
+    "category": "cartoon",
+    "preset": "cartoon",
+    "background_kept": false,
+    "size": [
+     494,
+     573
+    ],
+    "format": "PNG",
+    "similarity": 99.567,
+    "defects": 0.949,
+    "psnr": 32.96,
+    "ssim": 0.987,
+    "flat": 99.916,
+    "edge_error": 82.3,
+    "bytes": 18747,
+    "paths": 17,
+    "seconds": 1.33
+   },
+   "grawlix-head": {
+    "category": "cartoon",
+    "preset": "cartoon",
+    "background_kept": false,
+    "size": [
+     1847,
+     1156
+    ],
+    "format": "JPG",
+    "similarity": 98.212,
+    "defects": 6.776,
+    "psnr": 28.05,
+    "ssim": 0.9056,
+    "flat": 98.723,
+    "edge_error": 34.3,
+    "bytes": 707331,
+    "paths": 1217,
+    "seconds": 21.78
+   },
+   "gray-cat": {
+    "category": "cartoon",
+    "preset": "cartoon",
+    "background_kept": false,
+    "size": [
+     1760,
+     1920
+    ],
+    "format": "JPG",
+    "similarity": 99.714,
+    "defects": 0.089,
+    "psnr": 36.3,
+    "ssim": 0.9898,
+    "flat": 99.837,
+    "edge_error": 44.1,
+    "bytes": 95303,
+    "paths": 36,
+    "seconds": 13.88
+   },
+   "eyes": {
+    "category": "cartoon",
+    "preset": "cartoon",
+    "background_kept": false,
+    "size": [
+     1919,
+     782
+    ],
+    "format": "JPG",
+    "similarity": 98.005,
+    "defects": 0.322,
+    "psnr": 21.92,
+    "ssim": 0.9157,
+    "flat": 99.439,
+    "edge_error": 74.6,
+    "bytes": 180050,
+    "paths": 39,
+    "seconds": 8.05
+   },
+   "tux-flat": {
+    "category": "icon",
+    "preset": "logo",
+    "background_kept": false,
+    "size": [
+     512,
+     512
+    ],
+    "format": "PNG",
+    "similarity": 99.767,
+    "defects": 0.013,
+    "psnr": 33.67,
+    "ssim": 0.9884,
+    "flat": 99.991,
+    "edge_error": 96.4,
+    "bytes": 4973,
+    "paths": 9,
+    "seconds": 1.47,
+    "cartoon": {
+     "similarity": 99.586,
+     "defects": 0.127,
+     "bytes": 9582
+    }
+   },
+   "ferris": {
+    "category": "icon",
+    "preset": "logo",
+    "background_kept": false,
+    "size": [
+     460,
+     307
+    ],
+    "format": "PNG",
+    "similarity": 99.451,
+    "defects": 0.418,
+    "psnr": 26.84,
+    "ssim": 0.9723,
+    "flat": 99.86,
+    "edge_error": 76.2,
+    "bytes": 4314,
+    "paths": 12,
+    "seconds": 0.66,
+    "cartoon": {
+     "similarity": 99.392,
+     "defects": 0.047,
+     "bytes": 13585
+    }
+   },
+   "kaskelix": {
+    "category": "icon",
+    "preset": "logo",
+    "background_kept": false,
+    "size": [
+     512,
+     512
+    ],
+    "format": "PNG",
+    "similarity": 97.908,
+    "defects": 11.459,
+    "psnr": 25.63,
+    "ssim": 0.962,
+    "flat": 98.372,
+    "edge_error": 26.2,
+    "bytes": 10483,
+    "paths": 16,
+    "seconds": 3.39,
+    "cartoon": {
+     "similarity": 99.317,
+     "defects": 0.007,
+     "bytes": 15359
+    }
+   },
+   "evil-twin": {
+    "category": "icon",
+    "preset": "logo",
+    "background_kept": true,
+    "size": [
+     330,
+     371
+    ],
+    "format": "PNG",
+    "similarity": 99.621,
+    "defects": 0.0,
+    "psnr": 29.68,
+    "ssim": 0.9923,
+    "flat": 99.998,
+    "edge_error": 99.4,
+    "bytes": 2220,
+    "paths": 9,
+    "seconds": 0.28,
+    "cartoon": {
+     "similarity": 99.576,
+     "defects": 0.0,
+     "bytes": 9682
+    }
+   },
+   "bird-pixel-art": {
+    "category": "pixel",
+    "preset": "pixel",
+    "background_kept": true,
+    "size": [
+     512,
+     512
+    ],
+    "format": "PNG",
+    "similarity": 100.0,
+    "defects": 0.0,
+    "psnr": Infinity,
+    "ssim": 1.0,
+    "flat": 100.0,
+    "edge_error": 0.0,
+    "bytes": 14818,
+    "paths": 165,
+    "seconds": 2.74,
+    "cartoon": {
+     "similarity": 99.688,
+     "defects": 0.095,
+     "bytes": 32729
+    }
+   },
+   "spot-cow": {
+    "category": "poster",
+    "preset": "poster",
+    "background_kept": false,
+    "size": [
+     600,
+     450
+    ],
+    "format": "PNG",
+    "similarity": 98.512,
+    "defects": 5.788,
+    "psnr": 30.47,
+    "ssim": 0.9409,
+    "flat": 98.678,
+    "edge_error": 13.4,
+    "bytes": 17876,
+    "paths": 28,
+    "seconds": 1.07,
+    "cartoon": {
+     "similarity": 98.79,
+     "defects": 1.01,
+     "bytes": 32720
+    }
+   },
+   "saxophone": {
+    "category": "poster",
+    "preset": "poster",
+    "background_kept": false,
+    "size": [
+     824,
+     721
+    ],
+    "format": "JPG",
+    "similarity": 95.65,
+    "defects": 9.369,
+    "psnr": 19.04,
+    "ssim": 0.8476,
+    "flat": 98.089,
+    "edge_error": 63.2,
+    "bytes": 120403,
+    "paths": 235,
+    "seconds": 3.15,
+    "cartoon": {
+     "similarity": 97.777,
+     "defects": 5.406,
+     "bytes": 270184
+    }
+   }
+  }
+ },
+ "small": {
+  "astronaut": {
+   "preset": "cartoon",
+   "grid1": {
+    "similarity": 97.053,
+    "defects": 0.717,
+    "psnr": 23.83,
+    "ssim": 0.8168,
+    "flat": 98.572,
+    "edge_error": 61.0,
+    "bytes": 11242,
+    "seconds": 1.27
+   },
+   "grid2": {
+    "similarity": 97.517,
+    "defects": 0.803,
+    "psnr": 25.23,
+    "ssim": 0.859,
+    "flat": 98.883,
+    "edge_error": 63.8,
+    "bytes": 25468,
+    "seconds": 2.66
+   },
+   "ai": {
+    "similarity": 97.68,
+    "defects": 0.153,
+    "psnr": 25.17,
+    "ssim": 0.856,
+    "flat": 98.909,
+    "edge_error": 62.2,
+    "bytes": 15393,
+    "seconds": 4.87
+   }
+  },
+  "cow": {
+   "preset": "cartoon",
+   "grid1": {
+    "similarity": 97.674,
+    "defects": 1.042,
+    "psnr": 24.12,
+    "ssim": 0.9543,
+    "flat": 99.014,
+    "edge_error": 66.6,
+    "bytes": 17617,
+    "seconds": 1.48
+   },
+   "grid2": {
+    "similarity": 98.161,
+    "defects": 0.792,
+    "psnr": 25.17,
+    "ssim": 0.9651,
+    "flat": 99.347,
+    "edge_error": 72.0,
+    "bytes": 24451,
+    "seconds": 2.33
+   },
+   "ai": {
+    "similarity": 98.76,
+    "defects": 0.105,
+    "psnr": 28.61,
+    "ssim": 0.9845,
+    "flat": 99.553,
+    "edge_error": 71.6,
+    "bytes": 14719,
+    "seconds": 2.72
+   }
+  },
+  "penguin": {
+   "preset": "cartoon",
+   "grid1": {
+    "similarity": 97.644,
+    "defects": 1.469,
+    "psnr": 25.88,
+    "ssim": 0.8926,
+    "flat": 98.405,
+    "edge_error": 41.9,
+    "bytes": 33811,
+    "seconds": 1.7
+   },
+   "grid2": {
+    "similarity": 97.991,
+    "defects": 1.19,
+    "psnr": 26.31,
+    "ssim": 0.9062,
+    "flat": 98.755,
+    "edge_error": 46.8,
+    "bytes": 47180,
+    "seconds": 2.9
+   },
+   "ai": {
+    "similarity": 98.382,
+    "defects": 0.892,
+    "psnr": 29.43,
+    "ssim": 0.9255,
+    "flat": 98.864,
+    "edge_error": 39.7,
+    "bytes": 40309,
+    "seconds": 3.83
+   }
+  },
+  "fish-mascot": {
+   "preset": "cartoon",
+   "grid1": {
+    "similarity": 97.493,
+    "defects": 4.147,
+    "psnr": 23.08,
+    "ssim": 0.8752,
+    "flat": 99.115,
+    "edge_error": 69.6,
+    "bytes": 5565,
+    "seconds": 1.07
+   },
+   "grid2": {
+    "similarity": 98.453,
+    "defects": 1.59,
+    "psnr": 26.3,
+    "ssim": 0.9501,
+    "flat": 99.56,
+    "edge_error": 75.5,
+    "bytes": 12525,
+    "seconds": 1.57
+   },
+   "ai": {
+    "similarity": 98.231,
+    "defects": 0.754,
+    "psnr": 24.49,
+    "ssim": 0.8896,
+    "flat": 99.554,
+    "edge_error": 78.3,
+    "bytes": 7421,
+    "seconds": 1.94
+   }
+  },
+  "shipment": {
+   "preset": "flat",
+   "grid1": {
+    "similarity": 97.519,
+    "defects": 5.375,
+    "psnr": 23.35,
+    "ssim": 0.885,
+    "flat": 99.118,
+    "edge_error": 70.4,
+    "bytes": 18157,
+    "seconds": 1.4
+   },
+   "grid2": {
+    "similarity": 98.073,
+    "defects": 3.795,
+    "psnr": 24.74,
+    "ssim": 0.9178,
+    "flat": 99.462,
+    "edge_error": 76.8,
+    "bytes": 35726,
+    "seconds": 2.52
+   },
+   "ai": {
+    "similarity": 98.567,
+    "defects": 1.362,
+    "psnr": 27.33,
+    "ssim": 0.9582,
+    "flat": 99.587,
+    "edge_error": 76.0,
+    "bytes": 25871,
+    "seconds": 3.28
+   }
+  },
+  "flag-nepal": {
+   "preset": "logo",
+   "grid1": {
+    "similarity": 99.008,
+    "defects": 0.0,
+    "psnr": 25.71,
+    "ssim": 0.9189,
+    "flat": 99.724,
+    "edge_error": 75.1,
+    "bytes": 2014,
+    "seconds": 1.04
+   },
+   "grid2": {
+    "similarity": 99.008,
+    "defects": 0.0,
+    "psnr": 25.71,
+    "ssim": 0.9189,
+    "flat": 99.724,
+    "edge_error": 75.1,
+    "bytes": 2014,
+    "seconds": 1.05
+   },
+   "ai": {
+    "similarity": 98.683,
+    "defects": 0.0,
+    "psnr": 28.52,
+    "ssim": 0.9582,
+    "flat": 99.046,
+    "edge_error": 35.0,
+    "bytes": 1994,
+    "seconds": 10.03
+   }
+  },
+  "flag-south-africa": {
+   "preset": "logo",
+   "grid1": {
+    "similarity": 99.237,
+    "defects": 0.0,
+    "psnr": 27.19,
+    "ssim": 0.9616,
+    "flat": 99.949,
+    "edge_error": 93.9,
+    "bytes": 779,
+    "seconds": 1.17
+   },
+   "grid2": {
+    "similarity": 99.237,
+    "defects": 0.0,
+    "psnr": 27.19,
+    "ssim": 0.9616,
+    "flat": 99.949,
+    "edge_error": 93.9,
+    "bytes": 779,
+    "seconds": 1.16
+   },
+   "ai": {
+    "similarity": 99.214,
+    "defects": 0.0,
+    "psnr": 31.83,
+    "ssim": 0.9796,
+    "flat": 99.605,
+    "edge_error": 54.4,
+    "bytes": 781,
+    "seconds": 3.29
+   }
+  },
+  "icon-shop": {
+   "preset": "logo",
+   "grid1": {
+    "similarity": 98.254,
+    "defects": 4.013,
+    "psnr": 28.17,
+    "ssim": 0.9522,
+    "flat": 98.85,
+    "edge_error": 45.1,
+    "bytes": 5868,
+    "seconds": 1.69
+   },
+   "grid2": {
+    "similarity": 98.254,
+    "defects": 4.013,
+    "psnr": 28.17,
+    "ssim": 0.9522,
+    "flat": 98.85,
+    "edge_error": 45.1,
+    "bytes": 5868,
+    "seconds": 1.68
+   },
+   "ai": {
+    "similarity": 97.91,
+    "defects": 0.461,
+    "psnr": 27.76,
+    "ssim": 0.9631,
+    "flat": 98.424,
+    "edge_error": 37.2,
+    "bytes": 11014,
+    "seconds": 5.94
+   }
+  },
+  "icon-flask": {
+   "preset": "logo",
+   "grid1": {
+    "similarity": 99.77,
+    "defects": 0.06,
+    "psnr": 34.15,
+    "ssim": 0.9856,
+    "flat": 99.931,
+    "edge_error": 71.2,
+    "bytes": 1090,
+    "seconds": 1.09
+   },
+   "grid2": {
+    "similarity": 99.77,
+    "defects": 0.06,
+    "psnr": 34.15,
+    "ssim": 0.9856,
+    "flat": 99.931,
+    "edge_error": 71.2,
+    "bytes": 1090,
+    "seconds": 1.17
+   },
+   "ai": {
+    "similarity": 99.47,
+    "defects": 1.056,
+    "psnr": 36.32,
+    "ssim": 0.9843,
+    "flat": 99.637,
+    "edge_error": 34.3,
+    "bytes": 3357,
+    "seconds": 3.31
+   }
+  },
+  "icon-cat": {
+   "preset": "logo",
+   "grid1": {
+    "similarity": 99.634,
+    "defects": 0.09,
+    "psnr": 28.18,
+    "ssim": 0.9865,
+    "flat": 99.912,
+    "edge_error": 77.0,
+    "bytes": 641,
+    "seconds": 1.01
+   },
+   "grid2": {
+    "similarity": 99.634,
+    "defects": 0.09,
+    "psnr": 28.18,
+    "ssim": 0.9865,
+    "flat": 99.912,
+    "edge_error": 77.0,
+    "bytes": 641,
+    "seconds": 1.03
+   },
+   "ai": {
+    "similarity": 99.553,
+    "defects": 0.0,
+    "psnr": 32.17,
+    "ssim": 0.9465,
+    "flat": 99.833,
+    "edge_error": 64.3,
+    "bytes": 811,
+    "seconds": 2.03
+   }
+  }
+ }
+}

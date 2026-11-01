@@ -145,7 +145,7 @@ gambar kecil, buram, atau JPEG; prosesnya menjadi lebih lambat (sekitar 3–4×)
    kartun, dan ilustrasi datar) atau *Umum* (5 MB; foto dan gambar campuran). Berkas diambil sekali dari rilis GitHub
    proyek ini, diperiksa keasliannya, lalu disimpan di komputer — setelah itu bekerja tanpa internet. **Hapus**
    menghapusnya.
-2. Di panel gaya, **Perhalus dengan AI**: *Mati*, *Otomatis* (bawaan — hanya foto di bawah 1000 px atau JPEG), atau
+2. Di panel gaya, **Perhalus dengan AI**: *Mati*, *Otomatis* (bawaan — gambar di bawah 1000 px atau JPEG; untuk gaya Logo hanya JPEG, yang blok kompresinya dihilangkan; tidak pernah untuk Pixel art), atau
    *Selalu*. Panel hasil menunjukkan apakah AI dipakai.
 3. **Jalankan AI di**: *Otomatis* memakai kartu grafis bila didukung (DirectML di Windows, Core ML di Mac Apple
    Silicon) dan beralih ke prosesor bila tidak; pilih *Prosesor saja* bila kartu grafis bermasalah.

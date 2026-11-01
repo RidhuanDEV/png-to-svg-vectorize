@@ -13,10 +13,31 @@ the CLI and the app.
   clipart, 3 raster illustrations), 3 flat illustrations, 4 flags (logo-like geometry), 4 icons, 2 paintings and a
   photo. Not stored in git: `python bench/fetch_sets.py` downloads them and checks SHA-256; sources and licenses in
   [bench/sets/SOURCES.md](../bench/sets/SOURCES.md). CI checks it against `bench/baseline-sets.json`.
+- **Real-world set (E8, 1.7+)**: 18 CC0 pictures that were made as rasters (PNGs from 300 px, JPEG clipart, pixel art,
+  glossy icons, a 3D render). `python bench/fetch_sets.py --set real`; sources in
+  [bench/real/SOURCES.md](../bench/real/SOURCES.md).
 - **Private set**: 15 cartoon illustrations from the Turion app (image-generator art, 1536×1024 / 1774×887). Not
   published; numbers reported for reference.
 
 Machine: Windows 11 laptop, Python 3.13, single process.
+
+## v1.7 — visible defects, a second set, fixes from the literature (2026-11-02)
+
+The README benchmark is `bench/readme.py` (both sets, the style per kind of picture, visible-defect area, PSNR, SSIM,
+small-picture study with and without AI), with `bench/evidence.py`, `bench/before_after.py` and the optional
+vision-model review `bench/judge.py`. Method, results and every change: [research.md](research.md) §4–§8.
+
+- E7 flat art (24 pictures), from the first run of this benchmark to now: median similarity 99.71 % → **99.81 %**,
+  median visible defects 0.15 % → **0.05 %**,
+  worst 5.63 % → 0.89 %. E8 flat art (16): 99.40 %, 0.34 %.
+- `bench/baseline-sets.json` (the Cartoon preset on E7, checked by CI) was updated: similarity is up on 6 pictures
+  (robot +0.24, penguin +0.21, silver-hair-girl +0.20) and down on none; two files grew because dark shaded areas
+  are now fills with gradients instead of flat ink: futuristic-mascot +26 % (visible defects 5.63 % → 0.03 %) and
+  silver-hair-girl +20 % (1.77 % → 0.89 %). The synthetic baseline is unchanged.
+- Other tracers (`bench/compare_tools.py`, VTracer 0.6.15 and Potrace, benchmark-only installs), paired statistics
+  (`bench/versions.py`, `bench/stats.py`) and damaged input (`bench/robustness.py`: JPEG, down-scaling, noise):
+  research.md §5.5–§5.7. The Logo style under noise σ 16, median of four logos: 90.55 % / 32.4 % visible defects →
+  98.29 % / 0.15 %.
 
 ## v1.6 — logo engine (2026-10-25)
 
