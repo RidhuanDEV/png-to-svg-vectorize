@@ -70,7 +70,7 @@ jobs:
           python-version: "3.13"
       - run: pip install -e .
       - name: Download comparison set (verified by SHA-256)
-        run: python bench/fetch_sets.py
+        run: python bench/fetch_sets.py --skip-changed
       - name: Comparison set
         run: python bench/run.py --images bench/sets/images --name ci-sets --jobs 4 --baseline bench/baseline-sets.json
       - name: Synthetic set

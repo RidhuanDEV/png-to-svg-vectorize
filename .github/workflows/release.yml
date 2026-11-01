@@ -17,7 +17,7 @@ jobs:
       matrix:
         include:
           - { os: windows-latest, arch: x64, optional: false }
-          - { os: macos-14, arch: arm64, optional: false }
+          - { os: macos-15, arch: arm64, optional: false }   # macos-14 images retired 2026-11-02
           - { os: macos-15-intel, arch: x64, optional: true }   # Intel runners are being phased out
     runs-on: ${{ matrix.os }}
     continue-on-error: ${{ matrix.optional }}

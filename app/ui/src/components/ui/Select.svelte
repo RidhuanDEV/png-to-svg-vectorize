@@ -93,7 +93,7 @@
           role="option"
           aria-selected={o.value === value}
           class:active={i === active}
-          onpointerenter={() => (active = i)}
+          onpointermove={() => (active = i)}
           onclick={() => choose(i)}
           data-testid={testid ? `${testid}-${o.value}` : undefined}
         >

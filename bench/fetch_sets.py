@@ -3,6 +3,7 @@
     python bench/fetch_sets.py                 # E7: renders of CC0 vector art (bench/sets)
     python bench/fetch_sets.py --set real      # E8: pictures that were made as rasters (PNG / JPEG, bench/real)
     python bench/fetch_sets.py --update        # (maintainers) record hashes of freshly downloaded files
+    python bench/fetch_sets.py --skip-changed  # (CI) leave out pictures Wikimedia now renders differently
     python bench/fetch_sets.py --sources-md    # regenerate bench/sets/SOURCES.md from the manifest
 
 Every file is CC0 or public domain on Wikimedia Commons; title, author, license and page are in the manifest.
@@ -51,7 +52,7 @@ def pixels_sha256(data: bytes) -> str:
         return hashlib.sha256(head + im.tobytes()).hexdigest()
 
 
-def fetch(update: bool) -> int:
+def fetch(update: bool, skip_changed: bool = False) -> int:
     rows = json.loads(MANIFEST.read_text(encoding='utf-8'))
     IMAGES.mkdir(parents=True, exist_ok=True)
     bad = 0
@@ -79,6 +80,12 @@ def fetch(update: bool) -> int:
         print(f'{row["file"]:28s} {len(data) / 1024:7.0f} KB  {row["license"]}')
     if update:
         MANIFEST.write_text(json.dumps(rows, indent=1, ensure_ascii=False) + '\n', encoding='utf-8')
+    if bad and skip_changed and bad * 4 <= len(rows):
+        # Wikimedia's thumbnail servers do not all render a file the same way: a picture whose render changed is left
+        # out (the regression check compares only the pictures it has) rather than measured against a baseline made
+        # from other pixels. Many changes at once are a real problem and still fail.
+        print(f'{bad} picture(s) skipped: rendered differently upstream', file=sys.stderr)
+        return 0
     return 1 if bad else 0
 
 
@@ -101,6 +108,8 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--update', action='store_true', help='re-download everything and record new hashes')
     ap.add_argument('--sources-md', action='store_true', help='regenerate SOURCES.md')
+    ap.add_argument('--skip-changed', action='store_true',
+                    help='leave out pictures whose upstream render changed (fails if more than a quarter did)')
     ap.add_argument('--set', default='sets', choices=['sets', 'real'], help='which set (default: sets = E7)')
     a = ap.parse_args(argv)
     global ROOT, MANIFEST, IMAGES
@@ -109,7 +118,7 @@ def main(argv=None) -> int:
     if a.sources_md:
         sources_md()
         return 0
-    return fetch(a.update)
+    return fetch(a.update, a.skip_changed)
 
 
 if __name__ == '__main__':

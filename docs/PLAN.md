@@ -85,7 +85,7 @@ Web app (versi berikutnya) = FastAPI yang sama di server + UI yang sama di brows
 | OS | Artefak | Catatan |
 |---|---|---|
 | Windows 10/11 x64 | `PNG-to-SVG-Vectorize-Setup-x.y.z.exe` (Inno Setup) + `.zip` portable | WebView2 runtime sudah ada di Win 10/11; installer memeriksa & menautkan unduhannya bila tidak ada |
-| macOS 12+ | `PNG-to-SVG-Vectorize-x.y.z-arm64.dmg` dan `-x64.dmg` | Dibangun di runner `macos-14` (arm64) dan runner Intel |
+| macOS 12+ | `PNG-to-SVG-Vectorize-x.y.z-arm64.dmg` dan `-x64.dmg` | Dibangun di runner `macos-15` (arm64) dan runner Intel |
 
 - Build otomatis saat tag `v*` di GitHub Actions → GitHub Releases.
 - **Penandatanganan kode (keputusan pemilik, §9):** tanpa sertifikat, Windows menampilkan peringatan SmartScreen dan
